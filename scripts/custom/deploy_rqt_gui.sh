@@ -1,5 +1,7 @@
 #!/bin/bash
 
+xhost +
+
 # Determine platform architecture
 PLATFORM="$(uname -m)"
 USER_ID=$(id -u)
@@ -22,23 +24,24 @@ else
     exit 1
 fi
 
-DOCKER_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-rosbag_recorder
+DOCKER_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-ros2_humble
 echo "Running: $DOCKER_IMAGE_NAME with user $DOCKER_USER"
 
-docker_name="rosbag_recorder"
+docker_name=rqt_gui
 
 docker run --rm -it --gpus all --runtime=nvidia \
-    --name $docker_name \
+    --name rqt_gui \
     --privileged \
     --network host \
+    -e DISPLAY \
     -e ROS_ROOT=/opt/ros/humble \
     -e ROS_DOMAIN_ID=1 \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
     -e CYCLONEDDS_URI=/home/"$DOCKER_USER"/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/"$DOCKER_USER"/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/data:/home/"$DOCKER_USER"/data \
-    -v /mnt/ntap_poc/orx_experiment_landing:/home/"$DOCKER_USER"/orx_experiment_landing \
-    -v /home/"$USER"/dev/orx/rosbag_recorder_config:/home/"$DOCKER_USER"/config \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
     --user $DOCKER_USER \
     --workdir /home/"$DOCKER_USER" \
     $DOCKER_IMAGE_NAME \
+    bash -c "ros2 run rqt_gui rqt_gui --perspective-file /home/admin/data/experiment_config/rqt_config/orx_demo.perspective"

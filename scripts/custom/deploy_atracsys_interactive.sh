@@ -1,5 +1,5 @@
 #!/bin/bash
-
+xhost +
 # Determine platform architecture
 PLATFORM="$(uname -m)"
 if [[ $PLATFORM == "aarch64" ]]; then
@@ -30,9 +30,11 @@ docker run --rm -it --gpus all --runtime=nvidia \
     --privileged \
     --network host \
     -it \
+    -e DISPLAY \
     -e ROS_DOMAIN_ID=1 \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v "$config_path":/home/admin/atracsys_fusion_500_config/ \
     vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-atracsys bash
