@@ -1,18 +1,14 @@
 # run_dev.sh config
-CONFIG_IMAGE_KEY=ros2_humble.user.us_kuka
-CONFIG_DOCKER_SEARCH_DIRS=/home/fred/orx_middleware/isaac_ros_common/docker
+CONFIG_IMAGE_KEY=ros2_humble.user.kinect
+CONFIG_DOCKER_SEARCH_DIRS=/home/${USER}/dev/orx/orx_middleware/isaac_ros_common/docker
 BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/isaac/ros")
 ISAAC_ROS_WS=/home/fred/orx_middleware/ros2_ws
 
 # docker_deply.sh config
 # BASE_IMAGE_KEY=aarch64.ros2_humble.user
 # BASE_IMAGE_KEY=x86_64.ros2_humble.dgx_user.orx_data_processing
-# BASE_IMAGE_KEY=x86_64.ros2_humble.user.us_kuka
-# DEPLOY_IMAGE_NAME=girf/orx-middleware-isaac-ros-desktop-us_kuka
-
-AGE_KEY=x86_64.ros2_humble.user.us_kuka
-DEPLOY_IMAGE_NAME=girf/orx-middleware-isaac-ros-desktop-us_kuka
-# ROS_WS=/home/fred/orx_middleware/ros2_ws
-# LAUNCH_PACKAGE=us_aixplorer
-# LAUNCH_FILE=aixplorer.launch.py
-
+BASE_IMAGE_KEY=x86_64.ros2_humble.user.kinect
+DEPLOY_IMAGE_NAME=girf/orx-middleware-isaac-ros-desktop-kinect
+ROS_WS=/home/${USER}/dev/orx/orx_middleware/ros2_ws
+LAUNCH_PACKAGE=azure_kinect_ros_driver
+LAUNCH_FILE=driver.launch.py
