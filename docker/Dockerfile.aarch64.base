@@ -1,0 +1,107 @@
+# Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# Dockder file to aarch64 based Jetson device
+ARG BASE_IMAGE=dustynv/ros:foxy-ros-base-l4t-r32.6.1
+FROM ${BASE_IMAGE}
+
+# Disable terminal interaction for apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Fundamentals
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    curl \
+    git \
+    sudo \
+    unzip \
+    vim \
+    wget \
+    software-properties-common \
+&& rm -rf /var/lib/apt/lists/*
+
+# Install OpenCV dependencies
+RUN apt-get update && apt-get install -y \
+    libavformat-dev \
+    libjpeg-dev \
+    libopenjp2-7-dev \
+    libpng-dev \
+    libpq-dev \
+    libswscale-dev \
+    libtbb2 \
+    libtbb-dev \
+    libtiff-dev \
+    pkg-config \
+    yasm \
+&& rm -rf /var/lib/apt/lists/*
+
+# Install additional packages needed for ROS2 dependencies
+RUN apt-get update && apt-get install -y \
+    python3-distutils \
+    libboost-all-dev \
+    libboost-dev \
+&& rm -rf /var/lib/apt/lists/*
+
+# sklearn dependencies
+RUN apt-get update && apt-get install -y \
+    gfortran \
+    libatlas-base-dev \
+    python3-scipy \
+&& rm -rf /var/lib/apt/lists/*
+
+# sklearn Python dependencies
+RUN python3 -m pip install -U \
+    Cython \
+    wheel
+
+# Install sklearn
+RUN python3 -m pip install -U \
+    scikit-learn
+
+# Install Git-LFS
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+        apt-get update && apt-get install -y \
+        git-lfs \
+&& rm -rf /var/lib/apt/lists/*
+
+# Install Realsense
+RUN apt update \
+    && apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE \
+    && add-apt-repository -y "deb https://librealsense.intel.com/Debian/apt-repo bionic main" -u \
+    && apt-get install -y librealsense2-utils librealsense2-dev
+
+
+# Update environment
+ENV LD_LIBRARY_PATH="/opt/nvidia/vpi1/lib64:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu/tegra:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="/usr/local/cuda-10.2/targets/aarch64-linux/lib:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu/tegra-egl:${LD_LIBRARY_PATH}"
+
+RUN echo "source /opt/ros/foxy/install/setup.bash" > /opt/ros/foxy/setup.bash
+
+# Restore using the default Foxy DDS middleware: FastRTPS 
+ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+
+### -----------------------------
+
+# Setup non-root admin user
+ARG USERNAME=admin
+ARG USER_UID=1000
+ARG USER_GID=1001
+
+# Create the 'admin' user
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME \
+    && adduser admin video && adduser admin sudo
+
+COPY scripts/workspace-entrypoint.sh /home/$USERNAME/workspace-entrypoint.sh
+RUN chmod +x /home/$USERNAME/workspace-entrypoint.sh
+

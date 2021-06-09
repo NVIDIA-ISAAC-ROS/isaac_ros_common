@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<!--
+Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.
+
+NVIDIA CORPORATION and its licensors retain all intellectual property
+and proprietary rights in and to this software, related documentation
+and any modifications thereto.  Any use, reproduction, disclosure or
+distribution of this software and related documentation without an express
+license agreement from NVIDIA CORPORATION is strictly prohibited.
+-->
+
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>isaac_ros_test</name>
+  <version>0.9.0</version>
+  <description>Isaac ROS testing utilities</description>
+ 
+  <maintainer email="hemals@nvidia.com">Hemal Shah</maintainer>
+  <license>JetPack EULA</license>
+  <url type="website">https://developer.nvidia.com/blog/accelerating-ai-modules-for-ros-and-ros-2-on-jetson/</url>
+  <author>Ethan Yu</author>
+  <author>Isaac Chang</author>
+  <author>Jaiveer Singh</author>
+
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
