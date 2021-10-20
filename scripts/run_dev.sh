@@ -16,9 +16,20 @@ function usage() {
     print_into "Copyright (c) 2021, NVIDIA CORPORATION."
 }
 
+# Get the entry in the dpkg status file corresponding to the provied package name
+# Prepend two newlines so it can be safely added to the end of any existing
+# dpkg/status file.
+function get_dpkg_status() {
+    echo -e "\n"
+    awk '/Package: '"$1"'/,/^$/' /var/lib/dpkg/status
+}
+
 ISAAC_ROS_DEV_DIR="$1"
 if [[ -z "$ISAAC_ROS_DEV_DIR" ]]; then
     ISAAC_ROS_DEV_DIR="$HOME/workspaces/isaac_ros-dev"
+    if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
+        ISAAC_ROS_DEV_DIR=$(pwd)
+    fi
     print_warning "isaac_ros_dev not specified, assuming $ISAAC_ROS_DEV_DIR"
 else
     shift 1
@@ -42,18 +53,46 @@ PLATFORM="$(uname -m)"
 BASE_NAME="isaac_ros_dev-$PLATFORM"
 CONTAINER_NAME="$BASE_NAME-container"
 
+# Remove any exited containers.
+if [ "$(docker ps -a --quiet --filter status=exited --filter name=$CONTAINER_NAME)" ]; then
+    docker rm $CONTAINER_NAME > /dev/null
+fi
+
+# Re-use existing container.
+if [ "$(docker ps -a --quiet --filter status=running --filter name=$CONTAINER_NAME)" ]; then
+    print_info "Attaching to running container: $CONTAINER_NAME"
+    docker exec -i -t -u admin --workdir /workspaces/isaac_ros-dev $CONTAINER_NAME /bin/bash $@
+    exit 0
+fi
+
 # Arguments for docker build
-BUILD_ARGS+=("--build-arg USERNAME="admin"")
-BUILD_ARGS+=("--build-arg USER_UID=`id -u`")
-BUILD_ARGS+=("--build-arg USED_GID=`id -g`")
+BUILD_ARGS+=("--build-arg" "USERNAME="admin"")
+BUILD_ARGS+=("--build-arg" "USER_UID=`id -u`")
+BUILD_ARGS+=("--build-arg" "USER_GID=`id -g`")
 
 # Check if GPU is installed
 if [[ $PLATFORM == "x86_64" ]]; then
     if type nvidia-smi &>/dev/null; then
         GPU_ATTACHED=(`nvidia-smi -a | grep "Attached GPUs"`)
         if [ ! -z $GPU_ATTACHED ]; then
-            BUILD_ARGS+=("--build-arg HAS_GPU="true"")
+            BUILD_ARGS+=("--build-arg" "HAS_GPU="true"")
         fi
+    fi
+fi
+
+if [[ "$PLATFORM" == "aarch64" ]]; then
+    # Get information about the user's installed cuda packages
+    BUILD_ARGS+=("--build-arg" "DPKG_STATUS=$(get_dpkg_status cuda-cudart-10-2)$(get_dpkg_status libcufft-10-2)")
+
+    # Make sure the nvidia docker runtime will be used for builds
+    DEFAULT_RUNTIME=$(docker info | grep "Default Runtime: nvidia" ; true)
+    if [[ -z "$DEFAULT_RUNTIME" ]]; then
+        print_error "Default docker runtime is not nvidia!, please make sure the following line is"
+        print_error "present in /etc/docker/daemon.json"
+        print_error '"default-runtime": "nvidia",'
+        print_error ""
+        print_error "And then restart the docker daemon"
+        exit 1
     fi
 fi
 
@@ -61,7 +100,7 @@ fi
 print_info "Building $PLATFORM base as image: $BASE_NAME"
 docker build -f $ROOT/../docker/Dockerfile.$PLATFORM.base \
     -t $BASE_NAME \
-    ${BUILD_ARGS[@]} \
+    "${BUILD_ARGS[@]}" \
     $ROOT/../docker
 
 # Map host's display socket to docker
@@ -71,14 +110,20 @@ DOCKER_ARGS+=("-e NVIDIA_VISIBLE_DEVICES=all")
 DOCKER_ARGS+=("-e NVIDIA_DRIVER_CAPABILITIES=all")
 
 if [[ $PLATFORM == "aarch64" ]]; then
-    DOCKER_ARGS+=("-v /opt/nvidia:/opt/nvidia")
     DOCKER_ARGS+=("-v /usr/bin/tegrastats:/usr/bin/tegrastats")
-    DOCKER_ARGS+=("-v /usr/share/vpi1:/usr/share/vpi1")
+    DOCKER_ARGS+=("-v /tmp/argus_socket:/tmp/argus_socket")
     DOCKER_ARGS+=("-v /usr/lib/aarch64-linux-gnu/tegra:/usr/lib/aarch64-linux-gnu/tegra")
-    DOCKER_ARGS+=("-v /usr/local/cuda-10.2/targets/aarch64-linux/lib:/usr/local/cuda-10.2/targets/aarch64-linux/lib")
-    DOCKER_ARGS+=("-v /usr/lib/aarch64-linux-gnu/tegra-egl:/usr/lib/aarch64-linux-gnu/tegra-egl")
-    DOCKER_ARGS+=("-v /usr/lib/aarch64-linux-gnu/libcudnn.so.8.2.1:/usr/lib/aarch64-linux-gnu/libcudnn.so.8.2.1")
-    DOCKER_ARGS+=("-v /dev/video*:/dev/video*")
+    DOCKER_ARGS+=("-v /usr/src/jetson_multimedia_api:/usr/src/jetson_multimedia_api")
+fi
+
+# Optionally load custom docker arguments from file
+DOCKER_ARGS_FILE="$ROOT/.isaac_ros_dev-dockerargs"
+if [[ -f "$DOCKER_ARGS_FILE" ]]; then
+    print_info "Using additional Docker run arguments from $DOCKER_ARGS_FILE"
+    readarray -t DOCKER_ARGS_FILE_LINES < $DOCKER_ARGS_FILE
+    for arg in "${DOCKER_ARGS_FILE_LINES[@]}"; do
+        DOCKER_ARGS+=($(eval "echo $arg | envsubst"))
+    done
 fi
 
 # Run container from image
@@ -88,11 +133,10 @@ docker run -it --rm \
     ${DOCKER_ARGS[@]} \
     -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
     --name "$CONTAINER_NAME" \
-    --gpus all \
+    --runtime nvidia \
     --user="admin" \
-    --entrypoint /home/admin/workspace-entrypoint.sh \
+    --entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh \
+    --workdir /workspaces/isaac_ros-dev \
     $@ \
     $BASE_NAME \
     /bin/bash
-
-

@@ -10,7 +10,7 @@
 
 import json
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 import cv2
 from cv_bridge import CvBridge
@@ -195,3 +195,27 @@ class JSONConversion:
         # Return the loaded image along with the dimensions
         return JSONConversion.load_image_from_json(json_filepath), \
             chessboard_dimensions
+
+    @staticmethod
+    def load_ground_truth_pose_list_from_json(json_filepath: Path) -> List[float]:
+        """
+        Load a ground truth list from a JSON filepath.
+
+        Parameters
+        ----------
+        json_filepath : Path
+            The path to a JSON file to read from
+
+        Returns
+        -------
+        List
+            The ground truth pose of the object location.
+            Note: the expected format is [x_p, y_p, z_p, x_o, y_o, z_o, w_o]
+            where the subscript p represents position and the subscript o represents orientation
+
+        """
+        pose_json = JSONConversion.load_from_json(json_filepath)
+        position = pose_json['ground_truth']['position']
+        orientation = pose_json['ground_truth']['orientation']
+        ground_truth = position + orientation
+        return ground_truth

@@ -22,7 +22,7 @@
       char buffer[VPI_MAX_STATUS_MESSAGE_LENGTH]; \
       vpiGetLastStatusMessage(buffer, sizeof(buffer)); \
       std::ostringstream ss; \
-      ss << vpiStatusGetName(status) << ": " << buffer; \
+      ss << __FILE__ << ":" << __LINE__ << ": " << vpiStatusGetName(status) << ": " << buffer; \
       throw std::runtime_error(ss.str()); \
     } \
   } while (0);
