@@ -7,7 +7,8 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 #
 # Docker file to build on x86_64
-ARG BASE_IMAGE=nvidia/cuda:11.2.0-devel-ubuntu20.04
+# https://docs.nvidia.com/deeplearning/frameworks/user-guide/index.html
+ARG BASE_IMAGE=nvcr.io/nvidia/tritonserver:21.08-py3
 FROM ${BASE_IMAGE}
 
 # disable terminal interaction for apt
@@ -28,6 +29,7 @@ RUN apt-get update && apt-get install -y \
         software-properties-common \
         wget \
         vim \
+        unzip \
         mlocate \
 && rm -rf /var/lib/apt/lists/*
 
@@ -56,6 +58,15 @@ RUN apt-get update && apt-get install -y \
         libcunit1-dev \
 && rm -rf /var/lib/apt/lists/*
 
+# TensorRT 8
+RUN apt-get update && apt-get install -y \
+       libnvinfer8 \
+       libnvonnxparsers8 \
+       libnvparsers8 \
+       libnvinfer-plugin8 \
+       python3-libnvinfer \
+&& rm -rf /var/lib/apt/lists/*
+
 # Python3 (PIP)
 RUN python3 -m pip install -U \
         argcomplete \
@@ -69,11 +80,14 @@ RUN python3 -m pip install -U \
         flake8-docstrings \
         flake8-import-order \
         flake8-quotes \
+        onnx \
         pytest-repeat \
         pytest-rerunfailures \
         pytest \
         pydocstyle \
-        scikit-learn
+        scikit-learn \
+        torch \
+        torchvision
 
 # Install Git-LFS
 RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
@@ -110,6 +124,10 @@ RUN apt-get update && apt-get install -y \
         ros-foxy-turtlesim \
         ros-foxy-v4l2-camera \
         ros-foxy-realsense2-camera \
+        ros-foxy-vision-msgs \
+        ros-foxy-pcl-conversions \
+        ros-foxy-sensor-msgs-py \
+        ros-foxy-stereo-image-proc \
 && rm -rf /var/lib/apt/lists/*
 
 RUN rosdep init
@@ -121,21 +139,45 @@ RUN apt update \
     && add-apt-repository -y "deb https://librealsense.intel.com/Debian/apt-repo bionic main" -u \
     && apt-get install -y librealsense2-utils librealsense2-dev
 
-# Restore using the default Foxy DDS middleware: FastRTPS 
+# Install Tao converter
+RUN mkdir -p /opt/nvidia/tao && \
+    cd /opt/nvidia/tao && \
+    wget https://developer.nvidia.com/tao-converter-80 && \
+    unzip tao-converter-80 && \
+    chmod 755 /opt/nvidia/tao/cuda11.3-trt8.0/tao-converter && \
+    ln -sf /opt/nvidia/tao/cuda11.3-trt8.0/tao-converter /opt/nvidia/tao/tao-converter && \
+    rm tao-converter-80
+
+ENV PATH="${PATH}:/opt/nvidia/tao"
+    
+# Install prebuilt trtexec
+COPY tensor_rt/trtexec_x86_64 /usr/src/tensorrt/bin/trtexec
+
+# Update environment
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/tritonserver/lib"
+
+# Restore using the default Foxy DDS middleware: FastRTPS
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 
 # Setup non-root admin user
 ARG USERNAME=admin
 ARG USER_UID=1000
-ARG USER_GID=1001
+ARG USER_GID=1000
 
 # Create the 'admin' user
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME \
-    && adduser admin video && adduser admin sudo
+RUN groupmod --gid ${USER_GID} -n ${USERNAME} triton-server \
+    && usermod -l ${USERNAME} -m -d /home/${USERNAME} triton-server \
+    && mkdir -p /home/${USERNAME} \
+    && sudo chown ${USERNAME}:${USERNAME} /home/${USERNAME} \
+    && echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
+    && chmod 0440 /etc/sudoers.d/${USERNAME} \
+    && adduser ${USERNAME} video && adduser ${USERNAME} sudo
 
-COPY scripts/workspace-entrypoint.sh /home/$USERNAME/workspace-entrypoint.sh
-RUN chmod +x /home/$USERNAME/workspace-entrypoint.sh
+# Copy scripts
+RUN mkdir -p /usr/local/bin/scripts
+COPY scripts/*entrypoint.sh /usr/local/bin/scripts/
+RUN  chmod +x /usr/local/bin/scripts/*.sh
 
+ENV USERNAME=${USERNAME}
+ENV USER_GID=${USER_GID}
+ENV USER_UID=${USER_UID}

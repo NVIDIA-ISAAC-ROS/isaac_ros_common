@@ -6,8 +6,8 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
-# Dockder file to aarch64 based Jetson device
-ARG BASE_IMAGE=dustynv/ros:foxy-ros-base-l4t-r32.6.1
+# Docker file for aarch64 based Jetson device
+ARG BASE_IMAGE="dustynv/ros:foxy-ros-base-l4t-r32.6.1"
 FROM ${BASE_IMAGE}
 
 # Disable terminal interaction for apt
@@ -19,7 +19,9 @@ RUN apt-get update && apt-get install -y \
     cmake \
     curl \
     git \
+    lsb-release \
     sudo \
+    tar \
     unzip \
     vim \
     wget \
@@ -46,6 +48,7 @@ RUN apt-get update && apt-get install -y \
     python3-distutils \
     libboost-all-dev \
     libboost-dev \
+    libpcl-dev \
 && rm -rf /var/lib/apt/lists/*
 
 # sklearn dependencies
@@ -70,12 +73,42 @@ RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.d
         git-lfs \
 && rm -rf /var/lib/apt/lists/*
 
+# Nvidia container runtime mounts cuda libraries from the host into the container, but dpkg still
+# thinks that they are not installed. Tell dpkg that these libraries are installed so VPI's
+# dependencies will be satisfied.
+ARG DPKG_STATUS
+RUN echo "$DPKG_STATUS" >> /var/lib/dpkg/status
+
+# Add nvidia repo/public key and install VPI libraries
+RUN curl https://repo.download.nvidia.com/jetson/jetson-ota-public.asc > /etc/apt/trusted.gpg.d/jetson-ota-public.asc \
+    && echo "deb https://repo.download.nvidia.com/jetson/common r32.6 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list \
+    && echo "deb https://repo.download.nvidia.com/jetson/t194 r32.6 main" >> /etc/apt/sources.list.d/nvidia-l4t-apt-source.list \
+    && apt-get update \
+    && apt-get install -y \
+        libnvvpi1 \
+        vpi1-dev
+
 # Install Realsense
 RUN apt update \
-    && apt-key adv --keyserver keys.gnupg.net --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE \
-    && add-apt-repository -y "deb https://librealsense.intel.com/Debian/apt-repo bionic main" -u \
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-key \
+            F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE || \
+       apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-key \
+            F6E65AC044F831AC80A06380C8B3A55A6F3EFCDE \
+    && add-apt-repository -y \
+            "deb https://librealsense.intel.com/Debian/apt-repo $(lsb_release -cs) main" -u \
     && apt-get install -y rsync librealsense2-utils librealsense2-dev \
 && rm -rf /var/lib/apt/lists/*
+
+# Install Tao converter
+RUN mkdir -p /opt/nvidia/tao && \
+    cd /opt/nvidia/tao && \
+    wget https://developer.nvidia.com/jp46-20210820t231431z-001zip && \
+    unzip jp46-20210820t231431z-001zip && \
+    chmod 755 /opt/nvidia/tao/jp4.6/tao-converter && \
+    ln -sf /opt/nvidia/tao/jp4.6/tao-converter  /opt/nvidia/tao/tao-converter && \
+    rm jp46-20210820t231431z-001zip
+
+ENV PATH="${PATH}:/opt/nvidia/tao"
 
 # Update environment
 ENV LD_LIBRARY_PATH="/opt/nvidia/vpi1/lib64:${LD_LIBRARY_PATH}"
@@ -85,23 +118,84 @@ ENV LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu/tegra-egl:${LD_LIBRARY_PATH}"
 
 RUN echo "source /opt/ros/foxy/install/setup.bash" > /opt/ros/foxy/setup.bash
 
-# Restore using the default Foxy DDS middleware: FastRTPS 
+# Restore using the default Foxy DDS middleware: FastRTPS
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+
+# Install Triton server 2.13 from https://github.com/triton-inference-server/server/releases/tag/v2.13.0
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    autoconf \
+    automake \
+    libb64-dev \
+    libcurl4-openssl-dev \
+    libopenblas-dev \
+    libre2-dev \
+    libssl-dev \
+    libtool \
+    patchelf \
+    rapidjson-dev \
+    zlib1g-dev \
+&& rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /opt/tritonserver && cd /opt/tritonserver \
+    && wget https://github.com/triton-inference-server/server/releases/download/v2.13.0/tritonserver2.13.0-jetpack4.6.tgz \
+    && tar -xzvf tritonserver2.13.0-jetpack4.6.tgz \
+    && rm tritonserver2.13.0-jetpack4.6.tgz
+
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/tritonserver/lib"
+
+# Install perception_pcl
+RUN mkdir -p /opt/ros/foxy/src && cd /opt/ros/foxy/src \
+    && git clone https://github.com/ros-perception/pcl_msgs.git && cd pcl_msgs && git checkout ros2 && cd .. \
+    && git clone https://github.com/ros-perception/perception_pcl.git \
+    && source /opt/ros/foxy/setup.bash \
+    && cd /opt/ros/foxy \
+    && rosdep install -y --ignore-src --from-paths src --rosdistro foxy \
+    && colcon build --merge-install --packages-up-to pcl_conversions \
+    && rm -Rf src logs build
+
+# Install sensor_msgs_py
+RUN mkdir -p /opt/ros/foxy/src && cd /opt/ros/foxy/src \
+    && git clone https://github.com/ros2/common_interfaces.git && cd common_interfaces && git checkout 2.2.3 && cd .. \
+    && source /opt/ros/foxy/setup.bash \
+    && cd /opt/ros/foxy \
+    && rosdep install -y --ignore-src --from-paths src --rosdistro foxy \
+    && colcon build --merge-install --packages-up-to sensor_msgs_py \
+    && rm -Rf src logs build
+
+# Install gcc8 for cross-compiled binaries from Ubuntu 20.04
+RUN apt-get update -y && add-apt-repository -y ppa:ubuntu-toolchain-r/test && apt-get install -y \
+    gcc-8 \
+    g++-8 \
+    libstdc++6 \
+&& update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 8 \
+&& update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 8 \
+&& rm -rf /usr/bin/aarch64-linux-gnu-gcc /usr/bin/aarch64-linux-gnu-g++ \
+    /usr/bin/aarch64-linux-gnu-g++-7 /usr/bin/aarch64-linux-gnu-gcc-7 \
+&& update-alternatives --install /usr/bin/aarch64-linux-gnu-gcc aarch64-linux-gnu-gcc \
+    /usr/bin/gcc-8 8 \
+&& update-alternatives --install /usr/bin/aarch64-linux-gnu-g++ aarch64-linux-gnu-g++ \
+    /usr/bin/g++-8 8 \
+&& rm -rf /var/lib/apt/lists/*
 
 ### -----------------------------
 
 # Setup non-root admin user
 ARG USERNAME=admin
 ARG USER_UID=1000
-ARG USER_GID=1001
+ARG USER_GID=1000
 
 # Create the 'admin' user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
-    && adduser admin video && adduser admin sudo
+    && adduser ${USERNAME} video && adduser ${USERNAME} sudo
 
-COPY scripts/workspace-entrypoint.sh /home/$USERNAME/workspace-entrypoint.sh
-RUN chmod +x /home/$USERNAME/workspace-entrypoint.sh
+# Copy scripts
+RUN mkdir -p /usr/local/bin/scripts
+COPY scripts/*entrypoint.sh /usr/local/bin/scripts/
+RUN  chmod +x /usr/local/bin/scripts/*.sh
 
+ENV USERNAME=${USERNAME}
+ENV USER_GID=${USER_GID}
+ENV USER_UID=${USER_UID}

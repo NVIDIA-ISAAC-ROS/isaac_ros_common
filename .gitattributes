@@ -14,3 +14,10 @@
 *.npy filter=lfs diff=lfs merge=lfs -text
 # Debian package
 *.deb filter=lfs diff=lfs merge=lfs -text
+# Shared libraries
+*.so.* filter=lfs diff=lfs merge=lfs -text
+*.so filter=lfs diff=lfs merge=lfs -text
+
+# trtexec
+trtexec_x86_64 filter=lfs diff=lfs merge=lfs -text
+
