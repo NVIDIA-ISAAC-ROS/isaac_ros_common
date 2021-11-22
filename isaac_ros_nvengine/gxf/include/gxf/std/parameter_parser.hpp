@@ -173,17 +173,28 @@ struct ParameterParser<Handle<S>> {
       }
       component_name = tag;
     } else {
-      // Split the tag into entity and component name
-      const std::string entity_name = prefix.empty() ?
-                                      tag.substr(0, pos) : (prefix + tag.substr(0, pos));
       component_name = tag.substr(pos + 1);
 
-      // Search for the entity
-      const gxf_result_t result_1 = GxfEntityFind(context, entity_name.c_str(), &eid);
-      if (result_1 != GXF_SUCCESS) {
-        GXF_LOG_ERROR("Could not find entity '%s' while parsing parameter '%s' of component %zu",
-                      entity_name.c_str(), key, component_uid);
-        return Unexpected{result_1};
+      // Get the entity
+      gxf_result_t result_1_with_prefix = GXF_FAILURE;
+      // Try using entity name with prefix
+      if (!prefix.empty()) {
+        const std::string entity_name = prefix + tag.substr(0, pos);
+        result_1_with_prefix = GxfEntityFind(context, entity_name.c_str(), &eid);
+        if (result_1_with_prefix != GXF_SUCCESS) {
+          GXF_LOG_WARNING("Could not find entity (with prefix) '%s' while parsing parameter '%s' "
+                          "of component %zu", entity_name.c_str(), key, component_uid);
+        }
+      }
+      // Try using entity name without prefix, if lookup with prefix failed
+      if (result_1_with_prefix != GXF_SUCCESS) {
+        const std::string entity_name = tag.substr(0, pos);
+        const gxf_result_t result_1_no_prefix  = GxfEntityFind(context, entity_name.c_str(), &eid);
+        if (result_1_no_prefix != GXF_SUCCESS) {
+          GXF_LOG_ERROR("Could not find entity '%s' while parsing parameter '%s' of component %zu",
+                        entity_name.c_str(), key, component_uid);
+          return Unexpected{result_1_no_prefix};
+        }
       }
     }
 

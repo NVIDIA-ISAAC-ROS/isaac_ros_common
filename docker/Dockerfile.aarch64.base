@@ -73,6 +73,11 @@ RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.d
         git-lfs \
 && rm -rf /var/lib/apt/lists/*
 
+# Install Pytorch and ONNX
+RUN wget https://nvidia.box.com/shared/static/p57jwntv436lfrd78inwl7iml6p13fzh.whl -O torch-1.8.0-cp36-cp36m-linux_aarch64.whl && \
+        apt-get update && apt-get install -y libopenblas-base libopenmpi-dev && \
+        python3 -m pip install -U numpy torch-1.8.0-cp36-cp36m-linux_aarch64.whl onnx
+
 # Nvidia container runtime mounts cuda libraries from the host into the container, but dpkg still
 # thinks that they are not installed. Tell dpkg that these libraries are installed so VPI's
 # dependencies will be satisfied.

@@ -17,8 +17,8 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
   <description>Utilities for performing common functions in Isaac ROS packages</description>
 
   <maintainer email="hemals@nvidia.com">Hemal Shah</maintainer>
-  <license>JetPack EULA</license>
-  <url type="website">https://developer.nvidia.com/blog/accelerating-ai-modules-for-ros-and-ros-2-on-jetson/</url>
+  <license>NVIDIA Isaac ROS Software License</license>
+  <url type="website">https://developer.nvidia.com/isaac-ros-gems/</url>
   <author>Jaiveer Singh</author>
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>

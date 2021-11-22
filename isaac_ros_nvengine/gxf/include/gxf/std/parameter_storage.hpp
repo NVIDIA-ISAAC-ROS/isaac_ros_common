@@ -88,7 +88,7 @@ class ParameterStorage {
   // This function fails if a parameter already exists, but with the wrong type.
   template <typename T>
   Expected<void> set(gxf_uid_t uid, const char* key, T value) {
-    std::shared_lock<std::shared_timed_mutex> lock(mutex_);
+    std::unique_lock<std::shared_timed_mutex> lock(mutex_);
 
     auto it = parameters_.find(uid);
     if (it == parameters_.end()) {

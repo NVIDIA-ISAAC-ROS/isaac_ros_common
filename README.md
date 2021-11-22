@@ -51,6 +51,20 @@ Errors were encountered while processing:
 #### Solution
 Run `git lfs pull` in each Isaac ROS repository you have checked out, especially `isaac_ros_common`, to ensure all of the large binary files have been downloaded.
 
+### Nodes crashed on initial launch or failed to build, reporting shared libraries have a file format not recognized
+Many dependent shared library binary files are stored in `git-lfs`. These files need to be fetched in order for Isaac ROS nodes to function correctly.
+
+#### Symptoms
+```
+/usr/bin/ld:/workspaces/isaac_ros-dev/ros_ws/src/isaac_ros_common/isaac_ros_nvengine/gxf/lib/gxf_jetpack46/core/libgxf_core.so: file format not recognized; treating as linker script
+/usr/bin/ld:/workspaces/isaac_ros-dev/ros_ws/src/isaac_ros_common/isaac_ros_nvengine/gxf/lib/gxf_jetpack46/core/libgxf_core.so:1: syntax error
+collect2: error: ld returned 1 exit status
+make[2]: *** [libgxe_node.so] Error 1
+make[1]: *** [CMakeFiles/gxe_node.dir/all] Error 2
+make: *** [all] Error 2
+```
+#### Solution
+Run `git lfs pull` in each Isaac ROS repository you have checked out, especially `isaac_ros_common`, to ensure all of the large binary files have been downloaded.
 
 # Updates
 

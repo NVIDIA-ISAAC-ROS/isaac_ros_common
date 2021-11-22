@@ -1,13 +1,15 @@
 <?xml version="1.0"?>
+
 <!--
-# Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.
-#
-# NVIDIA CORPORATION and its licensors retain all intellectual property
-# and proprietary rights in and to this software, related documentation
-# and any modifications thereto.  Any use, reproduction, disclosure or
-# distribution of this software and related documentation without an express
-# license agreement from NVIDIA CORPORATION is strictly prohibited.
+Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.
+
+NVIDIA CORPORATION and its licensors retain all intellectual property
+and proprietary rights in and to this software, related documentation
+and any modifications thereto.  Any use, reproduction, disclosure or
+distribution of this software and related documentation without an express
+license agreement from NVIDIA CORPORATION is strictly prohibited.
 -->
+
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>isaac_ros_nvengine_interfaces</name>
@@ -15,8 +17,8 @@
   <description>Interfaces for general Isaac ROS messages</description>
 
   <maintainer email="ethany@nvidia.com">Ethan Yu</maintainer>
-  <license>JetPack EULA</license>
-  <url type="website">https://developer.nvidia.com/blog/accelerating-ai-modules-for-ros-and-ros-2-on-jetson/</url>
+  <license>NVIDIA Isaac ROS Software License</license>
+  <url type="website">https://developer.nvidia.com/isaac-ros-gems/</url>
   <author>Hemal Shah</author>
 
   <exec_depend>rosidl_default_runtime</exec_depend>

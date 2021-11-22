@@ -39,7 +39,7 @@ install(TARGETS ${PROJECT_NAME}
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
 
-  # Ignore copyright notices since we use custom JetPack EULA
+  # Ignore copyright notices since we use custom NVIDIA Isaac ROS Software License
   set(ament_cmake_copyright_FOUND TRUE)
 
   ament_lint_auto_find_test_dependencies()
