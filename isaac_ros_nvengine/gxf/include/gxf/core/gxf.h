@@ -153,7 +153,7 @@ typedef void* gxf_context_t;
 #define kNullContext nullptr
 
 /// @brief GXF Core Version
-#define kGxfCoreVersion "2.3.1"
+#define kGxfCoreVersion "2.3.2"
 
 /// @brief Creates a new GXF context
 ///
@@ -677,6 +677,9 @@ gxf_result_t GxfParameterGet2DInt32Vector(gxf_context_t context, gxf_uid_t uid, 
 
 // Loads a list of entities from a YAML file.
 gxf_result_t GxfGraphLoadFile(gxf_context_t context, const char* filename);
+
+// Set the root folder for searching YAML files during loading
+gxf_result_t GxfGraphSetRootPath(gxf_context_t context, const char* path);
 
 // Loads a list of entities from a YAML file.
 gxf_result_t GxfGraphParseString(gxf_context_t context, const char* text);
