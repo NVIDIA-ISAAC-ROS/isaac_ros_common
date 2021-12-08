@@ -109,6 +109,7 @@ RUN mkdir -p /opt/nvidia/tao && \
     cd /opt/nvidia/tao && \
     wget https://developer.nvidia.com/jp46-20210820t231431z-001zip && \
     unzip jp46-20210820t231431z-001zip && \
+    mv tao-converter-jp46-trt8.0.1.6 jp4.6 && \
     chmod 755 /opt/nvidia/tao/jp4.6/tao-converter && \
     ln -sf /opt/nvidia/tao/jp4.6/tao-converter  /opt/nvidia/tao/tao-converter && \
     rm jp46-20210820t231431z-001zip
