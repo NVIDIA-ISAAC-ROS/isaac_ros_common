@@ -144,8 +144,8 @@ RUN mkdir -p /opt/nvidia/tao && \
     cd /opt/nvidia/tao && \
     wget https://developer.nvidia.com/tao-converter-80 && \
     unzip tao-converter-80 && \
-    chmod 755 /opt/nvidia/tao/cuda11.3-trt8.0/tao-converter && \
-    ln -sf /opt/nvidia/tao/cuda11.3-trt8.0/tao-converter /opt/nvidia/tao/tao-converter && \
+    chmod 755 $(find /opt/nvidia/tao -name "tao-converter") && \
+    ln -sf $(find /opt/nvidia/tao -name "tao-converter") /opt/nvidia/tao/tao-converter && \
     rm tao-converter-80
 
 ENV PATH="${PATH}:/opt/nvidia/tao"
