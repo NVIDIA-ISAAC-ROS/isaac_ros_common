@@ -108,9 +108,9 @@ RUN apt update \
 RUN mkdir -p /opt/nvidia/tao && \
     cd /opt/nvidia/tao && \
     wget https://developer.nvidia.com/jp46-20210820t231431z-001zip && \
-    unzip jp46-20210820t231431z-001zip && \
-    chmod 755 /opt/nvidia/tao/jp4.6/tao-converter && \
-    ln -sf /opt/nvidia/tao/jp4.6/tao-converter  /opt/nvidia/tao/tao-converter && \
+    unzip -j jp46-20210820t231431z-001zip -d /opt/nvidia/tao/jp4.6 && \
+    chmod 755 $(find /opt/nvidia/tao -name "tao-converter") && \
+    ln -sf $(find /opt/nvidia/tao -name "tao-converter")  /opt/nvidia/tao/tao-converter && \
     rm jp46-20210820t231431z-001zip
 
 ENV PATH="${PATH}:/opt/nvidia/tao"
