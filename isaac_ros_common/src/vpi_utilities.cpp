@@ -69,7 +69,7 @@ uint32_t DeclareVPIBackendParameter(rclcpp::Node * node, uint32_t default_backen
           os << entry.first << std::endl;
         });
 
-      RCLCPP_ERROR(node->get_logger(), os.str());
+      RCLCPP_ERROR(node->get_logger(), os.str().c_str());
 
       // Return default backends due to error
       return default_backends;
