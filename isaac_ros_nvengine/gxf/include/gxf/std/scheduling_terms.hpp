@@ -38,6 +38,9 @@ class PeriodicSchedulingTerm : public SchedulingTerm {
   // Minimum time which needs to elapse between two executions (in nano seconds).
   int64_t recess_period_ns() const { return recess_period_ns_; }
 
+  // Get the last run time stamp
+  Expected<int64_t> last_run_timestamp() const { return last_run_timestamp_; }
+
  private:
   // Parses given text to return the desired period in nanoseconds.
   Expected<int64_t> parseRecessPeriodString(std::string text);
@@ -167,16 +170,39 @@ class ExpiringMessageAvailableSchedulingTerm : public SchedulingTerm {
 class BooleanSchedulingTerm : public SchedulingTerm {
  public:
   // Enable entity execution
-  void enable_tick();
+  Expected<void> enable_tick();
   // Disable entity execution
-  void disable_tick();
+  Expected<void> disable_tick();
+  // Returns true if the tick is enabled.
+  bool checkTickEnabled() const;
+
+  gxf_result_t registerInterface(Registrar* registrar) override;
 
   gxf_result_t check_abi(int64_t timestamp, SchedulingConditionType* type,
                          int64_t* target_timestamp) const override;
   gxf_result_t onExecute_abi(int64_t dt) override;
 
  private:
-  bool enable_tick_ = true;
+  Parameter<bool> enable_tick_;
+};
+
+// A Behavior Tree (BT) scheduling term which is referenced by the BT entity
+// itself and the entity's parent (if any) used to schedule the entity itself or
+// its child entities (if any) in BT
+class BTSchedulingTerm : public SchedulingTerm {
+ public:
+  gxf_result_t registerInterface(Registrar* registrar) override;
+  gxf_result_t initialize() override;
+  gxf_result_t check_abi(int64_t timestamp, SchedulingConditionType* type,
+                         int64_t* target_timestamp) const override;
+  gxf_result_t onExecute_abi(int64_t dt) override;
+  // called by the entity's codelet (start/stop the entity itself) or the parent
+  // entity's codelet (start/stop the child) in BT
+  gxf_result_t set_condition(SchedulingConditionType type);
+
+ private:
+  Parameter<bool> is_root_;
+  SchedulingConditionType scheduling_condition_type_{SchedulingConditionType::READY};
 };
 
 enum class AsynchronousEventState {

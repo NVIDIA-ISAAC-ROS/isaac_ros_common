@@ -8,17 +8,19 @@ Isaac ROS common utilities and scripts for use in conjunction with the Isaac ROS
 scripts/run_dev.sh <path to workspace>
 ```
 
+For solutions to known issues, please visit the [Troubleshooting](#troubleshooting) section below.
+
 ## System Requirements
 This script is designed and tested to be compatible with ROS2 Foxy on Jetson hardware in addition to on x86 systems with an Nvidia GPU. 
 
 ### Jetson
-- AGX Xavier or Xavier NX
-- JetPack 4.6
+- [Jetson AGX Xavier or Xavier NX](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/)
+- [JetPack 4.6.1](https://developer.nvidia.com/embedded/jetpack)
 
 ### x86_64
-- CUDA 11.1+ supported discrete GPU
-- VPI 1.1.11
 - Ubuntu 20.04+
+- CUDA 11.4 supported discrete GPU
+- VPI 1.1.11
 
 You must first install the [Nvidia Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) to make use of the Docker container development/runtime environment.
 

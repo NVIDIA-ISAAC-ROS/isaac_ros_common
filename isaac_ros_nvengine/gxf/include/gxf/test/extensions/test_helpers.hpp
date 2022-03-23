@@ -19,7 +19,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 #include <thread>
 #include <utility>
 
-#include "core/logger.hpp"
+#include "common/logger.hpp"
 #include "gxf/core/component.hpp"
 #include "gxf/core/entity.hpp"
 #include "gxf/std/allocator.hpp"
@@ -131,7 +131,7 @@ class StepCount : public Codelet {
     result &= registrar->parameter(use_assert_, "use_assert", "Use ASSERT",
                                    "If enabled the codelet "
                                    "will assert when test conditions are not true",
-                                   true);
+                                   false);
     result &= registrar->parameter(expected_start_count_, "expected_start_count", "", "", 1UL);
     result &= registrar->parameter(expected_count_, "expected_count");
     return ToResultCode(result);
@@ -995,6 +995,24 @@ class TestLogger : public Codelet {
   }
 
   gxf_result_t stop() override { return GXF_SUCCESS; }
+};
+
+class PeriodicSchedulingTermWithDelay : public PeriodicSchedulingTerm {
+ public:
+  gxf_result_t check_abi(int64_t timestamp, SchedulingConditionType* type,
+                         int64_t* target_timestamp) const final {
+    auto seed = static_cast<unsigned int>(timestamp);
+    if (!last_run_timestamp()) {
+      *type = SchedulingConditionType::READY;
+      return GXF_SUCCESS;
+    }
+    // Adding a random delay to the target timestamp and the scheduling condition type to be ready
+    *target_timestamp =
+        recess_period_ns() + *last_run_timestamp() + rand_r(&seed) % 100;
+    *type = timestamp - rand_r(&seed) % 10> *target_timestamp ? SchedulingConditionType::READY
+                                          : SchedulingConditionType::WAIT_TIME;
+    return GXF_SUCCESS;
+  }
 };
 
 }  // namespace test

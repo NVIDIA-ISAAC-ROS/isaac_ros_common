@@ -11,12 +11,11 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 #define NVIDIA_GXF_SERIALIZATION_ENTITY_REPLAYER_HPP_
 
 #include <string>
-#include <vector>
 
-#include "gxf/serialization/component_serializer.hpp"
 #include "gxf/serialization/entity_serializer.hpp"
 #include "gxf/serialization/file_stream.hpp"
 #include "gxf/std/codelet.hpp"
+#include "gxf/std/scheduling_terms.hpp"
 #include "gxf/std/transmitter.hpp"
 
 namespace nvidia {
@@ -36,23 +35,20 @@ class EntityReplayer : public Codelet {
 
  private:
   Parameter<Handle<Transmitter>> transmitter_;
-  Parameter<std::vector<Handle<ComponentSerializer>>> serializers_;
+  Parameter<Handle<EntitySerializer>> entity_serializer_;
+  Parameter<Handle<gxf::BooleanSchedulingTerm>> boolean_scheduling_term_;
   Parameter<std::string> directory_;
   Parameter<std::string> basename_;
   Parameter<size_t> batch_size_;
   Parameter<bool> ignore_corrupted_entities_;
 
-  // Entity serializer
-  EntitySerializer entity_serializer_;
   // File stream for entities
   FileStream entity_file_stream_;
   // File stream for index
   FileStream index_file_stream_;
-  // Set to true once the whole log was read
-  bool end_of_file_;
 };
 
 }  // namespace gxf
 }  // namespace nvidia
 
-#endif
+#endif  // NVIDIA_GXF_SERIALIZATION_ENTITY_REPLAYER_HPP_

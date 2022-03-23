@@ -7,7 +7,7 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 # Docker file for aarch64 based Jetson device
-ARG BASE_IMAGE="dustynv/ros:foxy-ros-base-l4t-r32.6.1"
+ARG BASE_IMAGE="dustynv/ros:foxy-ros-base-l4t-r32.7.1"
 FROM ${BASE_IMAGE}
 
 # Disable terminal interaction for apt
@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     vim \
     wget \
+    libgoogle-glog-dev \
     software-properties-common \
 && rm -rf /var/lib/apt/lists/*
 
@@ -49,6 +50,18 @@ RUN apt-get update && apt-get install -y \
     libboost-all-dev \
     libboost-dev \
     libpcl-dev \
+    libode-dev \
+    lcov \
+    python3-zmq \
+    libxaw7-dev \
+    libgraphicsmagick++1-dev \
+    graphicsmagick-libmagick-dev-compat \
+    libceres-dev \
+    libsuitesparse-dev \
+    libncurses5-dev \
+    libassimp-dev \
+    libyaml-cpp-dev \
+    libpcap-dev \
 && rm -rf /var/lib/apt/lists/*
 
 # sklearn dependencies
@@ -121,6 +134,9 @@ ENV LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu/tegra:${LD_LIBRARY_PATH}"
 ENV LD_LIBRARY_PATH="/usr/local/cuda-10.2/targets/aarch64-linux/lib:${LD_LIBRARY_PATH}"
 ENV LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu/tegra-egl:${LD_LIBRARY_PATH}"
 
+# https://forums.developer.nvidia.com/t/error-importerror-usr-lib-aarch64-linux-gnu-libgomp-so-1-cannot-allocate-memory-in-static-tls-block-i-looked-through-available-threads-already/166494/3
+ENV LD_PRELOAD="/usr/lib/aarch64-linux-gnu/libgomp.so.1"
+
 RUN echo "source /opt/ros/foxy/install/setup.bash" > /opt/ros/foxy/setup.bash
 
 # Restore using the default Foxy DDS middleware: FastRTPS
@@ -166,6 +182,67 @@ RUN mkdir -p /opt/ros/foxy/src && cd /opt/ros/foxy/src \
     && rosdep install -y --ignore-src --from-paths src --rosdistro foxy \
     && colcon build --merge-install --packages-up-to sensor_msgs_py \
     && rm -Rf src logs build
+
+# Install nav2
+RUN mkdir -p /opt/ros/foxy/src && cd /opt/ros/foxy/src \
+    && git clone https://github.com/ros-planning/navigation2.git && cd navigation2 && git checkout foxy-devel && cd .. \
+    && git clone https://github.com/BehaviorTree/BehaviorTree.CPP.git && cd BehaviorTree.CPP && git checkout tags/3.6.0 && cd .. \
+    && git clone https://github.com/ros/angles.git && cd angles && git checkout ros2 && cd .. \
+    && git clone https://github.com/ros2/rviz.git && cd rviz && git checkout foxy && cd .. \
+    && git clone https://github.com/SteveMacenski/slam_toolbox.git && cd slam_toolbox && git checkout foxy-devel && cd .. \
+    && git clone https://github.com/ros-planning/navigation_msgs.git && cd navigation_msgs && git checkout foxy && cd .. \
+    #&& git clone https://github.com/ros-simulation/gazebo_ros_pkgs.git && cd gazebo_ros_pkgs && git checkout foxy && cd .. \
+    && git clone https://github.com/ompl/ompl.git && cd ompl && cd .. \
+    && git clone https://github.com/ros/resource_retriever.git && cd resource_retriever && git checkout foxy && cd .. \
+    && git clone https://github.com/ros-visualization/interactive_markers.git && cd interactive_markers && git checkout foxy && cd .. \
+    && git clone https://github.com/ros-perception/laser_geometry.git && cd laser_geometry && git checkout foxy && cd ..
+    
+# Upgrade cmake to latest
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
+    && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ bionic main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null \
+    && apt-get update \
+    && rm /usr/share/keyrings/kitware-archive-keyring.gpg \
+    && apt-get install -y kitware-archive-keyring \
+    && apt-get install -y cmake \
+    && cmake --version
+
+RUN source /opt/ros/foxy/setup.bash \
+    && cd /opt/ros/foxy \
+    && rosdep install -y -r --ignore-src --from-paths src --rosdistro foxy \
+    && colcon build --merge-install --packages-up-to-regex nav2* --packages-ignore nav2_system_tests \
+    && rm -Rf src logs build
+
+# install velodyne dependencies
+RUN mkdir -p /opt/ros/foxy/src && cd /opt/ros/foxy/src \
+    && git clone https://github.com/ros/diagnostics.git && cd diagnostics && git checkout foxy && cd .. \
+    && source /opt/ros/foxy/setup.bash \
+    && cd /opt/ros/foxy \
+    && rosdep install -y --ignore-src --from-paths src --rosdistro foxy \
+    && colcon build --merge-install --packages-up-to-regex diagnostics* \
+    && rm -Rf src logs build
+
+# Add MQTT binaries and libraries
+# Note: VPN cannot be on for pymongo download
+RUN python3 -m pip install -U \
+  pymongo paho-mqtt
+
+RUN mkdir -p /opt/ros/foxy/src && cd /opt/ros/foxy/src \
+    && git clone https://github.com/ipa320/vda5050_msgs.git vda5050_root && cd vda5050_root && git checkout ros2 \
+    && cd .. && mv vda5050_root/vda5050_msgs/ vda5050_msgs \
+    && rm -rf vda5050_root \
+    && source /opt/ros/foxy/setup.bash \
+    && cd /opt/ros/foxy/ && colcon build --merge-install --packages-up-to vda5050_msgs \
+    && rm -Rf logs build
+
+RUN mkdir -p /opt/ros/foxy/src && cd /opt/ros/foxy/src \
+    && git clone https://github.com/RobotWebTools/rosbridge_suite.git && cd rosbridge_suite && git checkout ros2 \
+    && cd .. \
+    && source /opt/ros/foxy/setup.bash \
+    && cd /opt/ros/foxy/ && colcon build --merge-install --packages-up-to rosbridge_library \
+    && rm -Rf logs build
+
+# Build googletest
+RUN cd /usr/src/googletest && cmake . && cmake --build . --target install
 
 # Install gcc8 for cross-compiled binaries from Ubuntu 20.04
 RUN apt-get update -y && add-apt-repository -y ppa:ubuntu-toolchain-r/test && apt-get install -y \

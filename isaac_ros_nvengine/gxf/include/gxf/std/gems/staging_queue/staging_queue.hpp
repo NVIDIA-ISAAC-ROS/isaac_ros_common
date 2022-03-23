@@ -14,7 +14,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 #include <utility>
 #include <vector>
 
-#include "core/assert.hpp"
+#include "common/assert.hpp"
 #include "gxf/std/gems/staging_queue/staging_queue_iterator.hpp"
 
 namespace gxf {

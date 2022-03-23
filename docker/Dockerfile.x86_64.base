@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y \
         vim \
         unzip \
         mlocate \
+	libgoogle-glog-dev \
 && rm -rf /var/lib/apt/lists/*
 
 # Python basics
@@ -128,6 +129,7 @@ RUN apt-get update && apt-get install -y \
         ros-foxy-pcl-conversions \
         ros-foxy-sensor-msgs-py \
         ros-foxy-stereo-image-proc \
+        ros-foxy-pcl-ros \
 && rm -rf /var/lib/apt/lists/*
 
 RUN rosdep init
@@ -149,7 +151,15 @@ RUN mkdir -p /opt/nvidia/tao && \
     rm tao-converter-80
 
 ENV PATH="${PATH}:/opt/nvidia/tao"
-    
+
+# Add MQTT binaries and libraries
+RUN apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
+    && apt-get update \
+    && apt-get install -y mosquitto mosquitto-clients ros-foxy-rosbridge-library
+
+RUN python3 -m pip install -U \
+        paho-mqtt
+
 # Install prebuilt trtexec
 COPY tensor_rt/trtexec_x86_64 /usr/src/tensorrt/bin/trtexec
 

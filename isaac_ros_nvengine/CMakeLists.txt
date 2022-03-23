@@ -18,7 +18,15 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-execute_process(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE)
+# Default to Release build
+if(NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+endif()
+message( STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}" )
+
+execute_process(COMMAND uname -m COMMAND tr -d '\n'
+  OUTPUT_VARIABLE ARCHITECTURE
+)
 message( STATUS "Architecture: ${ARCHITECTURE}" )
 
 find_package(ament_cmake_auto REQUIRED)
@@ -30,7 +38,7 @@ add_library(gxf SHARED IMPORTED)
 if( ${ARCHITECTURE} STREQUAL "x86_64" )
   set_property(TARGET gxf PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/gxf/lib/gxf_x86_64_cuda_11_4/core/libgxf_core.so)
 elseif( ${ARCHITECTURE} STREQUAL "aarch64" )
-  set_property(TARGET gxf PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/gxf/lib/gxf_jetpack46/core/libgxf_core.so)
+  set_property(TARGET gxf PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/gxf/lib/gxf_jetpack46_1/core/libgxf_core.so)
 endif()
 
 # gxe_node
@@ -75,7 +83,7 @@ install(
 if( ${ARCHITECTURE} STREQUAL "x86_64" )
   install(DIRECTORY gxf/lib/gxf_x86_64_cuda_11_4/ DESTINATION share/${PROJECT_NAME}/gxf)
 elseif( ${ARCHITECTURE} STREQUAL "aarch64" )
-  install(DIRECTORY gxf/lib/gxf_jetpack46/ DESTINATION share/${PROJECT_NAME}/gxf)
+  install(DIRECTORY gxf/lib/gxf_jetpack46_1/ DESTINATION share/${PROJECT_NAME}/gxf)
 endif()
 set_target_properties(gxe_node PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 set_target_properties(gxe_node PROPERTIES INSTALL_RPATH "$ORIGIN/../share/${PROJECT_NAME}/gxf/core")

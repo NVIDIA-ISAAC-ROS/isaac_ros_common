@@ -21,8 +21,8 @@ limitations under the License.
 #include <type_traits>
 #include <utility>
 
-#include "core/assert.hpp"
-#include "core/fixed_vector.hpp"
+#include "common/assert.hpp"
+#include "common/fixed_vector.hpp"
 #include "gxf/core/expected.hpp"
 #include "gxf/core/gxf.h"
 #include "gxf/core/handle.hpp"

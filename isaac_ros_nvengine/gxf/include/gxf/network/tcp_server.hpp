@@ -37,7 +37,7 @@ class TcpServer : public Codelet {
  private:
   Parameter<std::vector<Handle<Receiver>>> receivers_;
   Parameter<std::vector<Handle<Transmitter>>> transmitters_;
-  Parameter<std::vector<Handle<ComponentSerializer>>> serializers_;
+  Parameter<Handle<EntitySerializer>> entity_serializer_;
   Parameter<std::string> address_;
   Parameter<int> port_;
   Parameter<uint64_t> timeout_ms_;
@@ -45,8 +45,6 @@ class TcpServer : public Codelet {
 
   // Maps channel IDs to transmitters
   std::unordered_map<uint64_t, Handle<Transmitter>> channel_map_;
-  // Entity serializer
-  EntitySerializer entity_serializer_;
   // TCP server socket
   TcpServerSocket server_socket_;
   // TCP client socket
