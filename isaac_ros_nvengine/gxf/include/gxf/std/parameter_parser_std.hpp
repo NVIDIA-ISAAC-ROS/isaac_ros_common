@@ -18,7 +18,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 #include "yaml-cpp/yaml.h"
 
-#include "core/assert.hpp"
+#include "common/assert.hpp"
 #include "gxf/core/expected.hpp"
 #include "gxf/core/gxf.h"
 #include "gxf/core/handle.hpp"

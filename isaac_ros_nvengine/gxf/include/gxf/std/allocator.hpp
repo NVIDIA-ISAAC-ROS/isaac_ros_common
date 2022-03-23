@@ -16,7 +16,7 @@ limitations under the License.
 #ifndef NVIDIA_GXF_STD_ALLOCATOR_HPP
 #define NVIDIA_GXF_STD_ALLOCATOR_HPP
 
-#include "core/byte.hpp"
+#include "common/byte.hpp"
 #include "gxf/core/component.hpp"
 
 namespace nvidia {

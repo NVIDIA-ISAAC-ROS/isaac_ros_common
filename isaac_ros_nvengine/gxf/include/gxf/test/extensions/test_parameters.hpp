@@ -16,7 +16,6 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 #include <utility>
 #include <vector>
 
-#include "core/logger.hpp"
 #include "gxf/core/component.hpp"
 #include "gxf/core/entity.hpp"
 #include "gxf/std/allocator.hpp"

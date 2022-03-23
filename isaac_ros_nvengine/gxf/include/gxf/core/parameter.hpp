@@ -20,8 +20,8 @@ limitations under the License.
 #include <string>
 #include <utility>
 
-#include "core/assert.hpp"
-#include "core/optional.hpp"
+#include "common/assert.hpp"
+#include "common/optional.hpp"
 #include "gxf/core/expected.hpp"
 #include "gxf/core/gxf.h"
 #include "gxf/core/handle.hpp"
@@ -152,7 +152,9 @@ class ParameterBackend<Handle<T>> : public HandleParameterBackend {
 
   // Gets the component ID of the handle.
   Expected<gxf_uid_t> get() const override {
-    if (!value_) {return gxf::Expected<gxf_uid_t>{gxf::Unexpected{GXF_FAILURE}}; }
+    if (!value_ || value_ == Handle<T>::Unspecified()) {
+      return gxf::Expected<gxf_uid_t>{gxf::Unexpected{GXF_FAILURE}};
+    }
     return value_->cid();
   }
 
@@ -163,10 +165,15 @@ class ParameterBackend<Handle<T>> : public HandleParameterBackend {
     return Success;
   }
 
-  // Gets the current value of the parameter.
-  const std::optional<Handle<T>>& try_get() const { return value_; }
+  // Gets the current value of the parameter, return nullopt if not
+  // set or if it's set to Handle<T>::Unspecified()
+  const std::optional<Handle<T>>& try_get() const {
+    if (value_ == Handle<T>::Unspecified()) { return unspecified_handle_; }
+    return value_;
+  }
 
   // FIXME(v1) make private
+  const std::optional<Handle<T>> unspecified_handle_{std::nullopt};
   nvidia::gxf::Parameter<Handle<T>>* frontend_ = nullptr;
   std::optional<Handle<T>> value_;
 };
@@ -245,6 +252,8 @@ class Parameter<Handle<S>> : public ParameterBase {
     GXF_ASSERT(backend_->isMandatory(), "Only mandatory parameters can be accessed with get(). "
                "'%s' is not marked as mandatory", backend_->key());
     GXF_ASSERT(value_, "Mandatory parameter '%s' was not set.", backend_->key());
+    GXF_ASSERT(value_ != Handle<S>::Unspecified(), "Handle was created but not assigned."
+               "Unspecified handles cannot be accessed.");
     return *value_;
   }
 
@@ -253,8 +262,12 @@ class Parameter<Handle<S>> : public ParameterBase {
     return get();
   }
 
-  // Tries to get the parameter value. If the parameter is not set std::nullopt is returned.
-  const std::optional<Handle<S>>& try_get() const { return value_; }
+  // Tries to get the parameter value. If the parameter is not set or set to
+  // Handle<S>::Unspecified() std::nullopt is returned.
+  const std::optional<Handle<S>>& try_get() const {
+    if (value_ == Handle<S>::Unspecified()) { return unspecified_handle_; }
+    return value_;
+  }
 
   // Only if T = Handle<S>
   S* operator->() const {
@@ -288,6 +301,8 @@ class Parameter<Handle<S>> : public ParameterBase {
   }
 
  private:
+  // Used to return an std::nullopt when the handle in specified
+  const std::optional<Handle<S>> unspecified_handle_{std::nullopt};
   std::optional<Handle<S>> value_;
   ParameterBackend<Handle<S>>* backend_ = nullptr;
 };

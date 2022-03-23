@@ -21,8 +21,8 @@ limitations under the License.
 #include <string>
 #include <type_traits>
 
-#include "core/fixed_vector.hpp"
-#include "core/type_name.hpp"
+#include "common/fixed_vector.hpp"
+#include "common/type_name.hpp"
 #include "gxf/core/expected.hpp"
 #include "gxf/std/codelet.hpp"
 #include "gxf/std/component_allocator.hpp"

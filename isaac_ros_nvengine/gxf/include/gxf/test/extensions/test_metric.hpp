@@ -10,7 +10,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 #ifndef NVIDIA_GXF_TEST_EXTENSIONS_TEST_METRIC_HPP
 #define NVIDIA_GXF_TEST_EXTENSIONS_TEST_METRIC_HPP
 
-#include "core/assert.hpp"
+#include "common/assert.hpp"
 #include "gtest/gtest.h"
 #include "gxf/std/codelet.hpp"
 #include "gxf/std/metric.hpp"

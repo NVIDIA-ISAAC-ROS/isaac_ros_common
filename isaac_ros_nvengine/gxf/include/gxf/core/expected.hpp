@@ -19,7 +19,7 @@ limitations under the License.
 #include <type_traits>
 #include <utility>
 
-#include "core/expected.hpp"
+#include "common/expected.hpp"
 #include "gxf/core/gxf.h"
 
 namespace nvidia {

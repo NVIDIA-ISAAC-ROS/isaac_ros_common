@@ -21,7 +21,7 @@ limitations under the License.
 #include <utility>
 #include <vector>
 
-#include "core/byte.hpp"
+#include "common/byte.hpp"
 #include "gxf/core/component.hpp"
 #include "gxf/core/expected.hpp"
 #include "gxf/std/allocator.hpp"
@@ -248,7 +248,7 @@ class Tensor {
 
   // Type of the callback function to release memory passed to the tensor using the
   // wrapMemory method
-  using release_function_t = std::function<Expected<void> (void* pointer)>;
+  using release_function_t = MemoryBuffer::release_function_t;
 
   // Wrap existing memory inside the tensor. A callback function of type release_function_t
   // may be passed that will be called when the Tensor wants to release the memory.
@@ -257,6 +257,12 @@ class Tensor {
                             Expected<stride_array_t> strides,
                             MemoryStorageType storage_type, void* pointer,
                             release_function_t release_func);
+
+  // Wraps an existing memory buffer element into the current tensor
+  Expected<void> wrapMemoryBuffer(const Shape& shape,
+                                        PrimitiveType element_type, uint64_t bytes_per_element,
+                                        Expected<stride_array_t> strides,
+                                        MemoryBuffer memory_buffer);
 
   // The size of data in bytes
   uint64_t bytes_size() { return shape_.dimension(0) * strides_[0]; }

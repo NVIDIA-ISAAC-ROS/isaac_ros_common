@@ -11,9 +11,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 #define NVIDIA_GXF_SERIALIZATION_ENTITY_RECORDER_HPP_
 
 #include <string>
-#include <vector>
 
-#include "gxf/serialization/component_serializer.hpp"
 #include "gxf/serialization/entity_serializer.hpp"
 #include "gxf/serialization/file_stream.hpp"
 #include "gxf/std/codelet.hpp"
@@ -36,13 +34,11 @@ class EntityRecorder : public Codelet {
 
  private:
   Parameter<Handle<Receiver>> receiver_;
-  Parameter<std::vector<Handle<ComponentSerializer>>> serializers_;
+  Parameter<Handle<EntitySerializer>> entity_serializer_;
   Parameter<std::string> directory_;
   Parameter<std::string> basename_;
   Parameter<bool> flush_on_tick_;
 
-  // Entity serializer
-  EntitySerializer entity_serializer_;
   // File stream for data index
   FileStream index_file_stream_;
   // File stream for binary data
@@ -54,4 +50,4 @@ class EntityRecorder : public Codelet {
 }  // namespace gxf
 }  // namespace nvidia
 
-#endif
+#endif  // NVIDIA_GXF_SERIALIZATION_ENTITY_RECORDER_HPP_

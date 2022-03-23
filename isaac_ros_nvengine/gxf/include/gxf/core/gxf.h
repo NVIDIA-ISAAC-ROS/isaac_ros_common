@@ -91,6 +91,8 @@ typedef enum {
   GXF_QUERY_NOT_ENOUGH_CAPACITY,
   GXF_QUERY_NOT_APPLICABLE,
   GXF_QUERY_NOT_FOUND,
+
+  GXF_NOT_FINISHED
 } gxf_result_t;
 
 /// @brief Gets a string describing an GXF error code.
@@ -153,7 +155,7 @@ typedef void* gxf_context_t;
 #define kNullContext nullptr
 
 /// @brief GXF Core Version
-#define kGxfCoreVersion "2.3.2"
+#define kGxfCoreVersion "2.4.1"
 
 /// @brief Creates a new GXF context
 ///
@@ -220,6 +222,25 @@ typedef enum {
   GXF_ENTITY_STATUS_TICK_PENDING = 3,
   GXF_ENTITY_STATUS_STOP_PENDING = 4,
 } gxf_entity_status_t;
+
+/// @brief Used by behavior parent codelet in Behavior Tree denoting the result
+/// of codelet::tick()
+/// - GXF_BEHAVIOR_INIT is for codelet that have not yet started running.
+/// - GXF_BEHAVIOR_SUCCESS is for codelet that terminates with success after
+/// ticking
+/// - GXF_BEHAVIOR_RUNNING is for codelet that needs multiple ticks to complete
+/// - GXF_BEHAVIOR_FAILURE is for codelet that terminates with failure after
+/// ticking
+/// - GXF_BEHAVIOR_UNKNOWN is for non-behavior-tree codelet because we don't
+/// care about the behavior status returned by controller if it is not a BT
+/// codelet
+typedef enum {
+  GXF_BEHAVIOR_INIT = 0,
+  GXF_BEHAVIOR_SUCCESS = 1,
+  GXF_BEHAVIOR_RUNNING = 2,
+  GXF_BEHAVIOR_FAILURE = 3,
+  GXF_BEHAVIOR_UNKNOWN = 4,
+} entity_state_t;
 
 /// @deprecated Use 'GxfCreateEntity' instead
 gxf_result_t GxfEntityCreate(gxf_context_t context, gxf_uid_t* eid);
@@ -325,17 +346,32 @@ gxf_result_t GxfEntityRefCountDec(gxf_context_t context, gxf_uid_t eid);
 gxf_result_t GxfEntityGetStatus(gxf_context_t context, gxf_uid_t eid,
                               gxf_entity_status_t* entity_status);
 
-/// @brief Notifies the occurrence of an event and inform the scheduler to check the status of the
-/// entity
+/// @brief Gets the state of the entity.
 ///
-/// The entity must have an 'AsynchronousSchedulingTerm' scheduling term component and it must be in
-/// "EVENT_WAITING" state for the notification to be acknowledged.
+/// See 'entity_state_t' for the various status.
+///
+/// @param context A valid GXF context
+/// @param eid The UID of a valid entity
+/// @param entity_state output; behavior status of an entity eid used by the
+/// behavior tree parent codelet
+/// @return GXF_SUCCESS if the operation was successful, or otherwise one of the
+/// GXF error codes
+gxf_result_t GxfEntityGetState(gxf_context_t context, gxf_uid_t eid,
+                               entity_state_t* entity_state);
+
+/// @brief Notifies the occurrence of an event and inform the scheduler to check
+/// the status of the entity
+///
+/// The entity must have an 'AsynchronousSchedulingTerm' scheduling term
+/// component and it must be in "EVENT_WAITING" state for the notification to be
+/// acknowledged.
 ///
 ///  See 'AsynchronousEventState' for various states
 ///
 /// @param context A valid GXF context
 /// @param eid The UID of a valid entity
-/// @return GXF_SUCCESS if the operation was successful, or otherwise one of the GXF error codes.
+/// @return GXF_SUCCESS if the operation was successful, or otherwise one of the
+/// GXF error codes.
 
 gxf_result_t GxfEntityEventNotify(gxf_context_t context, gxf_uid_t eid);
 
@@ -459,6 +495,9 @@ gxf_result_t GxfComponentPointer(gxf_context_t context, gxf_uid_t uid, gxf_tid_t
                                  void** pointer);
 
 // --  Parameter  ----------------------------------------------------------------------------------
+
+/// @brief Maximum number of parameters in a component
+#define kMaxParameters 1024
 
 /// @brief [experimental] The name of the parameter which stores the name of a component
 #define kInternalNameParameterKey "__name"
@@ -676,13 +715,17 @@ gxf_result_t GxfParameterGet2DInt32Vector(gxf_context_t context, gxf_uid_t uid, 
 // --  Graph execution  ----------------------------------------------------------------------------
 
 // Loads a list of entities from a YAML file.
-gxf_result_t GxfGraphLoadFile(gxf_context_t context, const char* filename);
+gxf_result_t GxfGraphLoadFile(gxf_context_t context, const char* filename,
+                              const char* parameters_override[] = nullptr,
+                              const uint32_t num_overrides = 0);
 
 // Set the root folder for searching YAML files during loading
 gxf_result_t GxfGraphSetRootPath(gxf_context_t context, const char* path);
 
 // Loads a list of entities from a YAML file.
-gxf_result_t GxfGraphParseString(gxf_context_t context, const char* text);
+gxf_result_t GxfGraphParseString(gxf_context_t context, const char* text,
+                                 const char* parameters_override[] = nullptr,
+                                 const uint32_t num_overrides = 0);
 
 // Activate all System components
 gxf_result_t GxfGraphActivate(gxf_context_t context);

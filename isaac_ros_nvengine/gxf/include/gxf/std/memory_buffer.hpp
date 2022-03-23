@@ -13,7 +13,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 #include <utility>
 
-#include "core/byte.hpp"
+#include "common/byte.hpp"
 #include "gxf/core/expected.hpp"
 #include "gxf/core/handle.hpp"
 #include "gxf/std/allocator.hpp"

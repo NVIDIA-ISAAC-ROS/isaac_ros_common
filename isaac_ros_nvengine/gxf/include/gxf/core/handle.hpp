@@ -16,8 +16,8 @@ limitations under the License.
 #ifndef NVIDIA_GXF_CORE_HANDLE_HPP
 #define NVIDIA_GXF_CORE_HANDLE_HPP
 
-#include "core/assert.hpp"
-#include "core/type_name.hpp"
+#include "common/assert.hpp"
+#include "common/type_name.hpp"
 #include "gxf/core/expected.hpp"
 #include "gxf/core/gxf.h"
 

@@ -23,7 +23,7 @@ limitations under the License.
 #include <tuple>
 #include <utility>
 
-#include "core/optional.hpp"
+#include "common/optional.hpp"
 #include "gxf/core/parameter.hpp"
 #include "gxf/std/parameter_registrar.hpp"
 #include "gxf/std/parameter_storage.hpp"
