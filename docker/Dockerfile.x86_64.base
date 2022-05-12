@@ -14,6 +14,13 @@ FROM ${BASE_IMAGE}
 # disable terminal interaction for apt
 ENV DEBIAN_FRONTEND=noninteractive
 
+# NVIDIA repository keys: https://developer.nvidia.com/blog/updating-the-cuda-linux-gpg-repository-key/
+RUN apt-key del 7fa2af80 && mkdir -p /tmp && cd /tmp \
+        && wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb \
+        && dpkg -i cuda-keyring_1.0-1_all.deb \
+        && rm cuda-keyring_1.0-1_all.deb \
+        && add-apt-repository --remove 'deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /'
+
 # Fundamentals
 RUN apt-get update && apt-get install -y \
         bash-completion \
