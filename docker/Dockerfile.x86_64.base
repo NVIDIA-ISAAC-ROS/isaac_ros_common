@@ -183,7 +183,7 @@ ARG USER_GID=1000
 
 # Create the 'admin' user
 RUN groupmod --gid ${USER_GID} -n ${USERNAME} triton-server \
-    && usermod -l ${USERNAME} -m -d /home/${USERNAME} triton-server \
+    && usermod -l ${USERNAME} -u ${USER_UID} -m -d /home/${USERNAME} triton-server \
     && mkdir -p /home/${USERNAME} \
     && sudo chown ${USERNAME}:${USERNAME} /home/${USERNAME} \
     && echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
