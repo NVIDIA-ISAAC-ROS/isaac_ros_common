@@ -1,0 +1,179 @@
+# Copyright (c) 2021-2022, NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+#
+# Docker file to build on x86_64
+# https://docs.nvidia.com/deeplearning/frameworks/user-guide/index.html
+ARG BASE_IMAGE=nvcr.io/nvidia/tritonserver:22.03-py3
+FROM ${BASE_IMAGE}
+
+# disable terminal interaction for apt
+ENV DEBIAN_FRONTEND=noninteractive
+ENV SHELL /bin/bash
+SHELL ["/bin/bash", "-c"] 
+
+# NVIDIA repository keys: https://developer.nvidia.com/blog/updating-the-cuda-linux-gpg-repository-key/
+RUN apt-key del 7fa2af80 && mkdir -p /tmp && cd /tmp \
+        && wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb \
+        && dpkg -i cuda-keyring_1.0-1_all.deb \
+        && rm cuda-keyring_1.0-1_all.deb \
+        && add-apt-repository --remove 'deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /'
+
+# Fundamentals
+RUN apt-get update && apt-get install -y \
+        apt-transport-https \
+        bash-completion \
+        build-essential \
+        ca-certificates \
+        clang-format \
+        cmake \
+        curl \
+        git \
+        gnupg2 \
+        locales \
+        lsb-release \
+        rsync \
+        software-properties-common \
+        wget \
+        vim \
+        unzip \
+        mlocate \
+	libgoogle-glog-dev \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Set Python3 as default
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+
+# Python basics
+RUN apt-get update && apt-get install -y \
+        python3-flake8 \        
+        python3-pip \
+        python3-pybind11 \
+        python3-pytest-cov \
+        python3-setuptools \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Video utilities
+RUN apt-get update && apt-get install -y \
+        v4l-utils \
+        mesa-utils \
+        libcanberra-gtk-module \
+        libcanberra-gtk3-module \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Core dev libraries
+RUN apt-get update && apt-get install -y \
+        libasio-dev \
+        libbullet-dev \
+        libtinyxml2-dev \
+        libcunit1-dev \
+        libopencv-dev \
+        python3-opencv \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Pytorch
+RUN python3 -m pip install -U --extra-index-url https://download.pytorch.org/whl/cu113 \
+        torch \
+        torchvision \
+        torchaudio
+        
+# Python3 (PIP)
+RUN python3 -m pip install -U \
+        argcomplete \
+        autopep8 \
+        flake8 \
+        flake8-blind-except \
+        flake8-builtins \
+        flake8-class-newline \
+        flake8-comprehensions \
+        flake8-deprecated \
+        flake8-docstrings \
+        flake8-import-order \
+        flake8-quotes \
+        onnx \
+        pytest-repeat \
+        pytest-rerunfailures \
+        pytest \
+        pydocstyle \
+        scikit-learn
+
+# Install Git-LFS
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+        apt-get update && apt-get install -y \
+        git-lfs \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# CMake
+RUN wget -qO - https://apt.kitware.com/keys/kitware-archive-latest.asc | apt-key add - && \
+    apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends --only-upgrade \
+            cmake \
+    && cmake --version \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean 
+
+# TensorRT 8
+RUN apt-get update && apt-get install -y \
+       libnvinfer8 \
+       libnvonnxparsers8 \
+       libnvparsers8 \
+       libnvinfer-plugin8 \
+       libnvinfer-bin \
+       python3-libnvinfer \       
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Install VPI packages
+ARG HAS_GPU="true"
+RUN if [ "$HAS_GPU" = "true" ]; then \
+	set -e ; \
+        apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc ; \
+        add-apt-repository 'deb http://repo.download.nvidia.com/jetson/x86_64/focal r34.1 main' ; \
+        apt-get update ; \
+        apt-get install libnvvpi2 vpi2-dev ; \
+        rm -rf /var/lib/apt/lists/* ; \
+    fi
+
+# Install Tao converter
+RUN mkdir -p /opt/nvidia/tao && \
+    cd /opt/nvidia/tao && \
+    wget https://developer.nvidia.com/tao-converter-80 && \
+    unzip tao-converter-80 && \
+    chmod 755 $(find /opt/nvidia/tao -name "tao-converter") && \
+    ln -sf $(find /opt/nvidia/tao -name "tao-converter") /opt/nvidia/tao/tao-converter && \
+    rm tao-converter-80
+
+ENV PATH="${PATH}:/opt/nvidia/tao"
+
+# Update environment
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/tritonserver/lib"
+
+# Add MQTT binaries and libraries
+RUN apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
+    && apt-get update \
+    && apt-get install -y mosquitto mosquitto-clients \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+RUN python3 -m pip install -U \
+        paho-mqtt
+
+# Upgrade libc to resolve vulnerabilities including CVE-2019-11477
+RUN apt-get update && apt-get install -y --only-upgrade \
+       linux-libc-dev \      
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Downgrade protobuf
+RUN python3 -m pip install \
+        protobuf==3.20.1

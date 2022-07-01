@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2021-2022, NVIDIA CORPORATION.  All rights reserved.
 #
 # NVIDIA CORPORATION and its licensors retain all intellectual property
 # and proprietary rights in and to this software, related documentation
@@ -13,16 +13,16 @@ source $ROOT/utils/print_color.sh
 
 function usage() {
     print_info "Usage: run_dev.sh" {isaac_ros_dev directory path OPTIONAL}
-    print_into "Copyright (c) 2021, NVIDIA CORPORATION."
+    print_info "Copyright (c) 2021-2022, NVIDIA CORPORATION."
 }
 
-# Get the entry in the dpkg status file corresponding to the provied package name
-# Prepend two newlines so it can be safely added to the end of any existing
-# dpkg/status file.
-function get_dpkg_status() {
-    echo -e "\n"
-    awk '/Package: '"$1"'/,/^$/' /var/lib/dpkg/status
-}
+# Read and parse config file if exists
+#
+# CONFIG_IMAGE_KEY (string, can be empty)
+
+if [[ -f "${ROOT}/.isaac_ros_common-config" ]]; then
+    . "${ROOT}/.isaac_ros_common-config"
+fi
 
 ISAAC_ROS_DEV_DIR="$1"
 if [[ -z "$ISAAC_ROS_DEV_DIR" ]]; then
@@ -70,7 +70,23 @@ if [[ -z "$(docker ps)" ]] ;  then
     print_error "Otherwise, please check your Docker installation."
     exit 1
 fi    
-    
+
+# Check if git-lfs is installed.
+if [[ -z "$(git lfs)" ]] ; then
+    print_error "git-lfs is not insalled. Please make sure git-lfs is installed before you clone the repo."
+    exit 1
+fi
+
+# Check if all LFS files are in place
+LFS_FILES_STATUS=$(cd $ISAAC_ROS_DEV_DIR && git lfs ls-files | cut -d ' ' -f2)
+for (( i=0; i<${#LFS_FILES_STATUS}; i++ )); do
+  f="${LFS_FILES_STATUS:$i:1}"
+  if [[ "$f" == "-" ]]; then
+      print_error "LFS files are missing. Please re-clone the repo after you installing git-lfs."
+      exit 1
+  fi  
+done
+
 PLATFORM="$(uname -m)"
 
 BASE_NAME="isaac_ros_dev-$PLATFORM"
@@ -88,43 +104,24 @@ if [ "$(docker ps -a --quiet --filter status=running --filter name=$CONTAINER_NA
     exit 0
 fi
 
-# Arguments for docker build
-BUILD_ARGS+=("--build-arg" "USERNAME="admin"")
-BUILD_ARGS+=("--build-arg" "USER_UID=`id -u`")
-BUILD_ARGS+=("--build-arg" "USER_GID=`id -g`")
-
-# Check if GPU is installed
-if [[ $PLATFORM == "x86_64" ]]; then
-    if type nvidia-smi &>/dev/null; then
-        GPU_ATTACHED=(`nvidia-smi -a | grep "Attached GPUs"`)
-        if [ ! -z $GPU_ATTACHED ]; then
-            BUILD_ARGS+=("--build-arg" "HAS_GPU="true"")
-        fi
-    fi
-fi
-
-if [[ "$PLATFORM" == "aarch64" ]]; then
-    # Get information about the user's installed cuda packages
-    BUILD_ARGS+=("--build-arg" "DPKG_STATUS=$(get_dpkg_status cuda-cudart-10-2)$(get_dpkg_status libcufft-10-2)")
-
-    # Make sure the nvidia docker runtime will be used for builds
-    DEFAULT_RUNTIME=$(docker info | grep "Default Runtime: nvidia" ; true)
-    if [[ -z "$DEFAULT_RUNTIME" ]]; then
-        print_error "Default docker runtime is not nvidia!, please make sure the following line is"
-        print_error "present in /etc/docker/daemon.json"
-        print_error '"default-runtime": "nvidia",'
-        print_error ""
-        print_error "And then restart the docker daemon"
-        exit 1
-    fi
-fi
-
 # Build image
-print_info "Building $PLATFORM base as image: $BASE_NAME"
-docker build -f $ROOT/../docker/Dockerfile.$PLATFORM.base \
-    -t $BASE_NAME \
-    "${BUILD_ARGS[@]}" \
-    $ROOT/../docker
+IMAGE_KEY=humble.nav2
+if [[ ! -z "${CONFIG_IMAGE_KEY}" ]]; then
+    IMAGE_KEY=$CONFIG_IMAGE_KEY
+fi
+
+BASE_IMAGE_KEY=$PLATFORM.user
+if [[ ! -z "${IMAGE_KEY}" ]]; then
+    BASE_IMAGE_KEY=$PLATFORM.$IMAGE_KEY.user
+fi
+
+print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME using key $BASE_IMAGE_KEY"
+$ROOT/build_base_image.sh $BASE_IMAGE_KEY $BASE_NAME '' ''
+
+if [ $? -ne 0 ]; then
+    print_error "Failed to build base image: $BASE_NAME, aborting."
+    exit 1
+fi
 
 # Map host's display socket to docker
 DOCKER_ARGS+=("-v /tmp/.X11-unix:/tmp/.X11-unix")
@@ -135,10 +132,17 @@ DOCKER_ARGS+=("-e NVIDIA_DRIVER_CAPABILITIES=all")
 if [[ $PLATFORM == "aarch64" ]]; then
     DOCKER_ARGS+=("-v /usr/bin/tegrastats:/usr/bin/tegrastats")
     DOCKER_ARGS+=("-v /tmp/argus_socket:/tmp/argus_socket")
+    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusolver.so.11:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusolver.so.11")
+    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusparse.so.11:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusparse.so.11")
+    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcurand.so.10:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcurand.so.10")
+    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/lib/libnvToolsExt.so:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libnvToolsExt.so")
+    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/include:/usr/local/cuda-11.4/targets/aarch64-linux/include")
     DOCKER_ARGS+=("-v /usr/lib/aarch64-linux-gnu/tegra:/usr/lib/aarch64-linux-gnu/tegra")
     DOCKER_ARGS+=("-v /usr/src/jetson_multimedia_api:/usr/src/jetson_multimedia_api")
     DOCKER_ARGS+=("-v /opt/nvidia/nsight-systems-cli:/opt/nvidia/nsight-systems-cli")
     DOCKER_ARGS+=("--pid=host")
+    DOCKER_ARGS+=("-v /opt/nvidia/vpi2:/opt/nvidia/vpi2")
+    DOCKER_ARGS+=("-v /usr/share/vpi2:/usr/share/vpi2")
 fi
 
 # Optionally load custom docker arguments from file
@@ -154,10 +158,12 @@ fi
 # Run container from image
 print_info "Running $CONTAINER_NAME"
 docker run -it --rm \
-    --privileged --network host \
+    --privileged \
+    --network host \
     ${DOCKER_ARGS[@]} \
     -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
     -v /dev/shm:/dev/shm \
+    -v /dev/*:/dev/* \
     --name "$CONTAINER_NAME" \
     --runtime nvidia \
     --user="admin" \

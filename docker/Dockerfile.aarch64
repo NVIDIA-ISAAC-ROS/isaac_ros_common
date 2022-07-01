@@ -1,0 +1,212 @@
+# Copyright (c) 2021-2022, NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# Docker file for aarch64 based Jetson device
+ARG BASE_IMAGE="nvcr.io/nvidia/l4t-base:r34.1"
+FROM ${BASE_IMAGE}
+
+# Disable terminal interaction for apt
+ENV DEBIAN_FRONTEND=noninteractive
+ENV SHELL /bin/bash
+SHELL ["/bin/bash", "-c"] 
+
+# Fundamentals
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    curl \
+    git \
+    lsb-release \
+    sudo \
+    tar \
+    unzip \
+    vim \
+    wget \
+    libgoogle-glog-dev \
+    software-properties-common \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Set Python3 as default
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+
+# Python basics
+RUN apt-get update && apt-get install -y \
+        python3-flake8 \        
+        python3-pip \
+        python3-pytest-cov \
+        python3-setuptools \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Install OpenCV dependencies
+RUN apt-get update && apt-get install -y \
+    libavformat-dev \
+    libjpeg-dev \
+    libopenjp2-7-dev \
+    libpng-dev \
+    libpq-dev \
+    libswscale-dev \
+    libtbb2 \
+    libtbb-dev \
+    libtiff-dev \
+    pkg-config \
+    yasm \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Install additional packages needed for ROS2 dependencies
+RUN apt-get update && apt-get install -y \
+    python3-distutils \
+    libboost-all-dev \
+    libboost-dev \
+    libpcl-dev \
+    libode-dev \
+    lcov \
+    python3-zmq \
+    libxaw7-dev \
+    libgraphicsmagick++1-dev \
+    graphicsmagick-libmagick-dev-compat \
+    libceres-dev \
+    libsuitesparse-dev \
+    libncurses5-dev \
+    libassimp-dev \
+    libyaml-cpp-dev \
+    libpcap-dev \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# sklearn dependencies
+RUN apt-get update && apt-get install -y \
+    gfortran \
+    libatlas-base-dev \
+    python3-scipy \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# sklearn Python dependencies
+RUN python3 -m pip install -U \
+    Cython \
+    wheel
+
+# Install sklearn
+RUN python3 -m pip install -U \
+    scikit-learn
+
+# Install Git-LFS
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
+        apt-get update && apt-get install -y \
+        git-lfs \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Upgrade cmake to latest
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
+    && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ bionic main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null \
+    && apt-get update \
+    && rm /usr/share/keyrings/kitware-archive-keyring.gpg \
+    && apt-get install -y kitware-archive-keyring \
+    && apt-get install -y cmake \
+    && cmake --version \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean 
+
+# Install TensorRT and VPI
+RUN apt-get update && apt-get install -y \
+    tensorrt \
+    vpi2-dev \
+&& rm -rf /var/lib/apt/lists/* && apt-get clean
+
+# Install tao-converter
+COPY tao/tao-converter-aarch64-tensorrt8.4.zip /opt/nvidia/tao/tao-converter-aarch64-tensorrt8.4.zip
+RUN mkdir -p /opt/nvidia/tao && \
+    cd /opt/nvidia/tao && \    
+    unzip -j tao-converter-aarch64-tensorrt8.4.zip -d /opt/nvidia/tao/jp5 && \
+    chmod 755 $(find /opt/nvidia/tao -name "tao-converter") && \
+    ln -sf $(find /opt/nvidia/tao -name "tao-converter")  /opt/nvidia/tao/tao-converter && \
+    rm tao-converter-aarch64-tensorrt8.4.zip
+
+ENV PATH="${PATH}:/opt/nvidia/tao"
+
+# Update environment
+ENV LD_LIBRARY_PATH="/opt/nvidia/vpi2/lib64:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu/tegra:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="/usr/local/cuda-11.4/targets/aarch64-linux/lib:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="/usr/lib/aarch64-linux-gnu/tegra-egl:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/aarch64-linux-gnu-host"
+ENV PATH="${PATH}:/usr/local/cuda/bin"
+
+# https://forums.developer.nvidia.com/t/error-importerror-usr-lib-aarch64-linux-gnu-libgomp-so-1-cannot-allocate-memory-in-static-tls-block-i-looked-through-available-threads-already/166494/3
+ENV LD_PRELOAD="/usr/lib/aarch64-linux-gnu/libgomp.so.1"
+
+# Restore using the default Foxy DDS middleware: FastRTPS
+ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+
+# Pytorch
+RUN python3 -m pip install -U --extra-index-url https://download.pytorch.org/whl/cu113 \
+    torch \
+    torchvision \
+    torchaudio
+
+# Install Triton server 2.13 from https://github.com/triton-inference-server/server/releases/tag/v2.13.0
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    autoconf \
+    automake \
+    libb64-dev \
+    libcurl4-openssl-dev \
+    libopenblas-dev \
+    libre2-dev \
+    libssl-dev \
+    libtool \
+    patchelf \
+    rapidjson-dev \
+    zlib1g-dev \
+&& rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /opt/tritonserver && cd /opt/tritonserver \
+    && wget https://github.com/triton-inference-server/server/releases/download/v2.20.0/tritonserver2.20.0-jetpack5.0.tgz \
+    && tar -xzvf tritonserver2.20.0-jetpack5.0.tgz \
+    && rm tritonserver2.20.0-jetpack5.0.tgz
+
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/tritonserver/lib"
+
+# Add MQTT binaries and libraries
+RUN apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
+    && apt-get update \
+    && apt-get install -y mosquitto mosquitto-clients
+
+# Note: VPN cannot be on for pymongo download
+RUN python3 -m pip install -U \
+  pymongo paho-mqtt
+  
+# Core dev libraries
+RUN apt-get update && apt-get install -y \
+        libasio-dev \
+        libbullet-dev \
+        libtinyxml2-dev \
+        libcunit1-dev \
+        libopencv-dev \
+        python3-opencv \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# NPP library
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libnpp-dev-11-4 \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Upgrade libc to resolve vulnerabilities including CVE-2019-11477
+RUN apt-get update && apt-get install -y --only-upgrade \
+       linux-libc-dev \      
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Downgrade protobuf
+RUN python3 -m pip install \
+        protobuf==3.20.1

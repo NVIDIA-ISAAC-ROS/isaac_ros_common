@@ -1,4 +1,4 @@
-# Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2021-2022, NVIDIA CORPORATION.  All rights reserved.
 #
 # NVIDIA CORPORATION and its licensors retain all intellectual property
 # and proprietary rights in and to this software, related documentation
@@ -14,11 +14,13 @@ import time
 from typing import Any, Callable, Dict, Iterable, Tuple
 import unittest
 
+import cv2  # noqa: F401
 from cv_bridge import CvBridge
 import launch
 import launch_testing.actions
 import numpy as np
 import rclpy
+from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from rclpy.subscription import Subscription
 from sensor_msgs.msg import CameraInfo, Image
 
@@ -28,6 +30,10 @@ class IsaacROSBaseTest(unittest.TestCase):
 
     DEFAULT_NAMESPACE = 'isaac_ros_test'
     DEFAULT_QOS = 10
+    DEFAULT_BUFFER_QOS = QoSProfile(
+        depth=100,
+        reliability=QoSReliabilityPolicy.RELIABLE,
+        durability=QoSDurabilityPolicy.TRANSIENT_LOCAL)
 
     def for_each_test_case(subfolder: Path = '') -> Callable:
         """
@@ -188,7 +194,8 @@ class IsaacROSBaseTest(unittest.TestCase):
         received_messages: Dict[str, Iterable],
         use_namespace_lookup: bool = True,
         accept_multiple_messages: bool = False,
-        add_received_message_timestamps: bool = False
+        add_received_message_timestamps: bool = False,
+        qos_profile: QoSProfile = DEFAULT_QOS
     ) -> Iterable[Subscription]:
         """
         Create subscribers that log any messages received to the passed-in dictionary.
@@ -212,6 +219,9 @@ class IsaacROSBaseTest(unittest.TestCase):
         add_received_message_timestamps : bool
             Whether the generated subscription callbacks should add a timestamp to the messages,
             by default False
+
+        qos_profile : QoSProfile
+            What Quality of Service policy to use for all subscribers
 
         Returns
         -------
@@ -242,7 +252,7 @@ class IsaacROSBaseTest(unittest.TestCase):
             msg_type,
             self.namespaces[topic] if use_namespace_lookup else topic,
             make_callback(topic),
-            self.DEFAULT_QOS,
+            qos_profile,
         ) for topic, msg_type in subscription_requests]
 
         return subscriptions
