@@ -14,6 +14,7 @@ from typing import Dict, List, Tuple
 
 import cv2
 from cv_bridge import CvBridge
+from isaac_ros_apriltag_interfaces.msg import AprilTagDetection, AprilTagDetectionArray
 from sensor_msgs.msg import CameraInfo, Image
 
 
@@ -57,7 +58,58 @@ class JSONConversion:
             json.dump(obj, json_file, indent=2)
 
     @staticmethod
-    def load_camera_info_from_json(json_filepath: Path) -> CameraInfo:
+    def load_april_tag_detection_array_from_json(json_filepath: Path) -> AprilTagDetectionArray:
+        """
+        Load a AprilTagDetectionArray message from a JSON filepath.
+
+        Parameters
+        ----------
+        json_filepath : Path
+            The path to a JSON file containing the AprilTagDetectionArray fields
+
+        Returns
+        -------
+        AprilTagDetectionArray
+            Generated AprilTagDetectionArray message
+
+        """
+        apriltag_detection_array_json = JSONConversion.load_from_json(
+            json_filepath)
+
+        apriltag_detection_array = AprilTagDetectionArray()
+        apriltag_detection_array.header.frame_id = apriltag_detection_array_json[
+            'header']['frame_id']
+        for detection in apriltag_detection_array_json['detections']:
+            apriltag_detection = AprilTagDetection()
+            apriltag_detection.id = detection['id']
+            apriltag_detection.family = detection['family']
+            apriltag_detection.center.x = detection['center']['x']
+            apriltag_detection.center.y = detection['center']['y']
+            for corner_index, corner in enumerate(detection['corners']):
+                apriltag_detection.corners[corner_index].x = corner['x']
+                apriltag_detection.corners[corner_index].y = corner['y']
+            apriltag_detection.pose.header.frame_id = detection['pose']['header']['frame_id']
+            apriltag_detection.pose.pose.pose.position.x = detection[
+                'pose']['pose']['pose']['position']['x']
+            apriltag_detection.pose.pose.pose.position.y = detection[
+                'pose']['pose']['pose']['position']['y']
+            apriltag_detection.pose.pose.pose.position.z = detection[
+                'pose']['pose']['pose']['position']['z']
+            apriltag_detection.pose.pose.pose.orientation.x = detection[
+                'pose']['pose']['pose']['orientation']['x']
+            apriltag_detection.pose.pose.pose.orientation.y = detection[
+                'pose']['pose']['pose']['orientation']['y']
+            apriltag_detection.pose.pose.pose.orientation.z = detection[
+                'pose']['pose']['pose']['orientation']['z']
+            apriltag_detection.pose.pose.pose.orientation.w = detection[
+                'pose']['pose']['pose']['orientation']['w']
+            apriltag_detection_array.detections.append(apriltag_detection)
+
+        return apriltag_detection_array
+
+    @staticmethod
+    def load_camera_info_from_json(json_filepath: Path,
+                                   desired_size: Tuple[int] = None) -> CameraInfo:
         """
         Load a CameraInfo message from a JSON filepath.
 
@@ -65,6 +117,8 @@ class JSONConversion:
         ----------
         json_filepath : Path
             The path to a JSON file containing the CameraInfo fields
+        desired_size: Tuple[int]
+            The desired dimension of the CameraInfo
 
         Returns
         -------
@@ -84,6 +138,9 @@ class JSONConversion:
         camera_info.r = camera_info_json['R']
         camera_info.p = camera_info_json['P']
 
+        if(desired_size):
+            camera_info.width = desired_size[0]
+            camera_info.height = desired_size[1]
         return camera_info
 
     @staticmethod

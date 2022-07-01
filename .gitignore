@@ -1,7 +1,5 @@
 # Ignore all pycache files
 **/__pycache__/**
-# Ignore ROS build  files
-**/build/**
-**/install/**
-**/cc_internals/**
-**/log/**
+
+# Ignore config files
+.isaac_ros_common-config

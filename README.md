@@ -1,76 +1,101 @@
 # Isaac ROS Common
 
-Isaac ROS common utilities and scripts for use in conjunction with the Isaac ROS suite of packages.
+## Overview
+The [Isaac ROS Common](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common) repository contains a number of scripts and Dockerfiles to help streamline development and testing with the Isaac ROS suite. 
 
-## Docker Scripts
-`run_dev.sh` creates a dev environment with ROS2 installed and key versions of NVIDIA frameworks prepared for both x86_64 and Jetson. By default, the directory `/workspaces/isaac_ros-dev` in the container is mapped from `~/workspaces/isaac_ros-dev` on the host machine if it exists OR the current working directory from where the script was invoked otherwise. The host directory the container maps to can be explicitly set by running the script with the desired path as the first argument:
-```
+The Docker images included in this package provide pre-compiled binaries for ROS2 Humble on Ubuntu 20.04 Focal.  
+
+Additionally, on x86_64 platforms, Docker containers allow us to quickly setup a sensitive set of frameworks and dependencies to ensure a smooth experience with Isaac ROS packages. The Dockerfiles for this platform are based on the version 22.03 image from [Deep Learning Frameworks Containers](https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html). On Jetson platforms, JetPack manages all of these dependencies for you.
+
+For solutions to known issues, please visit the [Troubleshooting](./docs/troubleshooting.md) section.
+
+### Docker Development Scripts
+`run_dev.sh` sets up a development environment with ROS2 installed and key versions of NVIDIA frameworks prepared for both x86_64 and Jetson. Running this script will prepare a Docker image with supported configuration for the
+host machine and deliver you into a bash prompt running inside the container. From here, you are ready to execute ROS2 build/run commands with your host workspace files mounted into the container, available to edit both on the host and in the container as appropriate. If you run this script again while it is running, it will attach a new shell to the same container.
+
+
+By default, the directory `/workspaces/isaac_ros-dev` in the container is mapped from `~/workspaces/isaac_ros-dev` on the host machine if it exists, **or** the current working directory from where the script was invoked otherwise. The host directory the container maps to can be explicitly set by running the script with the desired path as the first argument:
+
+```bash
 scripts/run_dev.sh <path to workspace>
 ```
 
-For solutions to known issues, please visit the [Troubleshooting](#troubleshooting) section below.
+### Configuring run_dev.sh
+`run_dev.sh` prepares a base Docker image and mounts your target workspace into the running container. The Docker image is assembled by parsing a period-delimited image key into matching Dockerfiles and building each one in a sequence. For example, an image key of `first.second.third` could match {`Dockerfile.first`, `Dockerfile.second`, `Dockerfile.third`} where `run_dev.sh` will build the image for `Dockerfile.first`, then feed that image as the base image while building `Dockerfile.second` and so on. The file matching looks for the largest subsequence, so `first.second.third` could also match {`Dockerfile.first.second`, `Dockerfile.third`} depending on which files exist in the search paths. Using this pattern, you can add your own layers on top of the base images provided in Isaac ROS to setup your environment your way, such as installing additional packages to use.
 
-## System Requirements
-This script is designed and tested to be compatible with ROS2 Foxy on Jetson hardware in addition to on x86 systems with an Nvidia GPU. 
+If you write a file with the name `.isaac_ros_common-config` in the same directory as the `run_dev.sh`, you can configure the development environment. The following keys can be configured in `.isaac_ros_common-config`:
 
-### Jetson
-- [Jetson AGX Xavier or Xavier NX](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/)
-- [JetPack 4.6.1](https://developer.nvidia.com/embedded/jetpack)
+| Key                         | Type                 | Description                                                 | Examples                               |
+| --------------------------- | -------------------- | ----------------------------------------------------------- | -------------------------------------- |
+| `CONFIG_IMAGE_KEY`          | String               | Image key with period-delimited components                  | `humble.nav2.realsense` <br/> `humble` |
+| `CONFIG_DOCKER_SEARCH_DIRS` | Bash array of string | List of directories to search for Dockerfiles when matching | `($HOME/ros_ws/docker $HOME/docker)`   |
 
-### x86_64
-- Ubuntu 20.04+
-- CUDA 11.4 supported discrete GPU
-- VPI 1.1.11
 
-You must first install the [Nvidia Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html) to make use of the Docker container development/runtime environment.
-
-Configure `nvidia-container-runtime` as the default runtime for Docker by editing `/etc/docker/daemon.json` to include the following:
+For example, suppose you had a directory structure as follows:
 ```
-    "runtimes": {
-        "nvidia": {
-            "path": "nvidia-container-runtime",
-            "runtimeArgs": []
-        }
-    },
-    "default-runtime": "nvidia"
-```
-and then restarting Docker: `sudo systemctl daemon-reload && sudo systemctl restart docker`
+workspaces/isaac_ros-dev
+    workspaces/isaac_ros-dev/ros_ws
+        workspaces/isaac_ros-dev/ros_ws/src
+        workspaces/isaac_ros-dev/ros_ws/src/isaac_ros_common
+        workspaces/isaac_ros-dev/ros_ws/src/isaac_ros_common/scripts
+        workspaces/isaac_ros-dev/ros_ws/src/isaac_ros_common/scripts/.isaac_ros_common-config
 
-**Note:** For best performance on Jetson, ensure that power settings are configured appropriately ([Power Management for Jetson](https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%20Linux%20Driver%20Package%20Development%20Guide/power_management_jetson_xavier.html#wwpID0EUHA)).
-
-## Troubleshooting
-### `run_dev.sh` on x86 fails with `vpi-lib-1.1.11-cuda11-x86_64-linux.deb` is not a Debian format archive
-When building a Docker image, `run_dev.sh` may fail because some files seem to be invalid. Debian packages for VPI on x86 are packaged in Isaac ROS using `git-lfs`. These files need to be fetched in order to install VPI in the Docker image.
-
-#### Symptoms
+        workspaces/isaac_ros-dev/ros_ws/docker
+        workspaces/isaac_ros-dev/ros_ws/docker/Dockerfile.mine
+        workspaces/isaac_ros-dev/ros_ws/docker/myfile.txt
 ```
-dpkg-deb: error: 'vpi-lib-1.1.11-cuda11-x86_64-linux.deb' is not a Debian format archive
-dpkg: error processing archive vpi-lib-1.1.11-cuda11-x86_64-linux.deb (--install):
- dpkg-deb --control subprocess returned error exit status 2
-Errors were encountered while processing:
- vpi-lib-1.1.11-cuda11-x86_64-linux.deb
-```
-#### Solution
-Run `git lfs pull` in each Isaac ROS repository you have checked out, especially `isaac_ros_common`, to ensure all of the large binary files have been downloaded.
 
-### Nodes crashed on initial launch or failed to build, reporting shared libraries have a file format not recognized
-Many dependent shared library binary files are stored in `git-lfs`. These files need to be fetched in order for Isaac ROS nodes to function correctly.
+where `Dockerfile.mine` can be your own custom image layers of the form using its host directory for Docker build context:
 
-#### Symptoms
+```Dockerfile
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+... steps ...
+
+COPY myfile.txt /myfile.txt
+
+... more steps ...
 ```
-/usr/bin/ld:/workspaces/isaac_ros-dev/ros_ws/src/isaac_ros_common/isaac_ros_nvengine/gxf/lib/gxf_jetpack46/core/libgxf_core.so: file format not recognized; treating as linker script
-/usr/bin/ld:/workspaces/isaac_ros-dev/ros_ws/src/isaac_ros_common/isaac_ros_nvengine/gxf/lib/gxf_jetpack46/core/libgxf_core.so:1: syntax error
-collect2: error: ld returned 1 exit status
-make[2]: *** [libgxe_node.so] Error 1
-make[1]: *** [CMakeFiles/gxe_node.dir/all] Error 2
-make: *** [all] Error 2
+
+You could extend the base image launched as a container by `run_dev.sh` as follows. 
+
+`workspaces/isaac_ros-dev/ros_ws/src/isaac_ros_common/scripts/.isaac_ros_common_config`
 ```
-#### Solution
-Run `git lfs pull` in each Isaac ROS repository you have checked out, especially `isaac_ros_common`, to ensure all of the large binary files have been downloaded.
+CONFIG_IMAGE_KEY="humble.nav2.mine"
+CONFIG_DOCKER_SEARCH_DIRS=(workspaces/isaac_ros-dev/ros_ws/docker)
+```
+
+This configures the image key to match with `mine` included and where to look first for the Dockerfiles before the default.
+
+## Table of Contents
+- [Isaac ROS Common](#isaac-ros-common)
+  - [Overview](#overview)
+    - [Docker Development Scripts](#docker-development-scripts)
+    - [Configuring run_dev.sh](#configuring-run_devsh)
+  - [Table of Contents](#table-of-contents)
+  - [Latest Update](#latest-update)
+  - [Supported Platforms](#supported-platforms)
+- [Updates](#updates)
+
+## Latest Update
+Update 2022-06-30: Support ROS2 Humble and miscellaneous bug fixes.
+
+## Supported Platforms
+This package is designed and tested to be compatible with ROS2 Humble running on [Jetson](https://developer.nvidia.com/embedded-computing) or an x86_64 system with an NVIDIA GPU.
+
+
+| Platform | Hardware                                                                                                                                                                                                | Software                                                                                                             | Notes                                                                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jetson   | [Jetson Orin](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/)<br/>[Jetson Xavier](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-agx-xavier/) | [JetPack 5.0.1 DP](https://developer.nvidia.com/embedded/jetpack)                                                    | For best performance, ensure that [power settings](https://docs.nvidia.com/jetson/archives/r34.1/DeveloperGuide/text/SD/PlatformPowerAndPerformance.html) are configured appropriately. |
+| x86_64   | NVIDIA GPU                                                                                                                                                                                              | [Ubuntu 20.04+](https://releases.ubuntu.com/20.04/) <br> [CUDA 11.6.1+](https://developer.nvidia.com/cuda-downloads) |
+
 
 # Updates
 
-| Date | Changes |
-| -----| ------- |
-| 2021-10-20 | Migrated to [NVIDIA-ISAAC-ROS](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common), added `isaac_ros_nvengine` and `isaac_ros_nvengine_interfaces` packages  |
-| 2021-08-11 | Initial release to [NVIDIA-AI-IOT](https://github.com/NVIDIA-AI-IOT/isaac_ros_common) |
+| Date       | Changes                                                                                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2022-06-30 | Support ROS2 Humble and miscellaneous bug fixes.                                                                                                              |
+| 2022-06-16 | Update `run_dev.sh` and removed `isaac_ros_nvengine`                                                                                                          |
+| 2021-10-20 | Migrated to [NVIDIA-ISAAC-ROS](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common), added `isaac_ros_nvengine` and `isaac_ros_nvengine_interfaces` packages |
+| 2021-08-11 | Initial release to [NVIDIA-AI-IOT](https://github.com/NVIDIA-AI-IOT/isaac_ros_common)                                                                         |
