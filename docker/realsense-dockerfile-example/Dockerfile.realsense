@@ -3,8 +3,8 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-COPY realsense/buildLibrealsense.sh /opt/realsense/buildLibrealsense.sh
-COPY realsense/installDependencies.sh /opt/realsense/installDependencies.sh
+COPY buildLibrealsense.sh /opt/realsense/buildLibrealsense.sh
+COPY installDependencies.sh /opt/realsense/installDependencies.sh
 
 RUN chmod +x /opt/realsense/installDependencies.sh && /opt/realsense/installDependencies.sh
 RUN chmod +x /opt/realsense/buildLibrealsense.sh && /opt/realsense/buildLibrealsense.sh
