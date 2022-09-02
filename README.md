@@ -60,7 +60,7 @@ COPY myfile.txt /myfile.txt
 
 You could extend the base image launched as a container by `run_dev.sh` as follows. 
 
-`workspaces/isaac_ros-dev/ros_ws/src/isaac_ros_common/scripts/.isaac_ros_common_config`
+`workspaces/isaac_ros-dev/ros_ws/src/isaac_ros_common/scripts/.isaac_ros_common-config`
 ```
 CONFIG_IMAGE_KEY="humble.nav2.mine"
 CONFIG_DOCKER_SEARCH_DIRS=(workspaces/isaac_ros-dev/ros_ws/docker)
@@ -79,15 +79,17 @@ This configures the image key to match with `mine` included and where to look fi
 - [Updates](#updates)
 
 ## Latest Update
-Update 2022-06-30: Support ROS2 Humble and miscellaneous bug fixes.
+Update 2022-08-31: Update to be compatible with JetPack 5.0.2
 
 ## Supported Platforms
 This package is designed and tested to be compatible with ROS2 Humble running on [Jetson](https://developer.nvidia.com/embedded-computing) or an x86_64 system with an NVIDIA GPU.
 
+> **Note**: Versions of ROS2 earlier than Humble are **not** supported. This package depends on specific ROS2 implementation features that were only introduced beginning with the Humble release.
+
 
 | Platform | Hardware                                                                                                                                                                                                | Software                                                                                                             | Notes                                                                                                                                                                                   |
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jetson   | [Jetson Orin](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/)<br/>[Jetson Xavier](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-agx-xavier/) | [JetPack 5.0.1 DP](https://developer.nvidia.com/embedded/jetpack)                                                    | For best performance, ensure that [power settings](https://docs.nvidia.com/jetson/archives/r34.1/DeveloperGuide/text/SD/PlatformPowerAndPerformance.html) are configured appropriately. |
+| Jetson   | [Jetson Orin](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-orin/)<br/>[Jetson Xavier](https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/jetson-agx-xavier/) | [JetPack 5.0.2](https://developer.nvidia.com/embedded/jetpack)                                                       | For best performance, ensure that [power settings](https://docs.nvidia.com/jetson/archives/r34.1/DeveloperGuide/text/SD/PlatformPowerAndPerformance.html) are configured appropriately. |
 | x86_64   | NVIDIA GPU                                                                                                                                                                                              | [Ubuntu 20.04+](https://releases.ubuntu.com/20.04/) <br> [CUDA 11.6.1+](https://developer.nvidia.com/cuda-downloads) |
 
 
@@ -95,6 +97,7 @@ This package is designed and tested to be compatible with ROS2 Humble running on
 
 | Date       | Changes                                                                                                                                                       |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2022-08-31 | Update to be compatible with JetPack 5.0.2                                                                                                                    |
 | 2022-06-30 | Support ROS2 Humble and miscellaneous bug fixes.                                                                                                              |
 | 2022-06-16 | Update `run_dev.sh` and removed `isaac_ros_nvengine`                                                                                                          |
 | 2021-10-20 | Migrated to [NVIDIA-ISAAC-ROS](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common), added `isaac_ros_nvengine` and `isaac_ros_nvengine_interfaces` packages |

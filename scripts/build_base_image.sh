@@ -46,24 +46,21 @@ TARGET_IMAGE_NAME="$1"
 if [[ -z "$TARGET_IMAGE_NAME" ]]; then
     TARGET_IMAGE_NAME="${TARGET_IMAGE_STR//./-}-image"    
     print_warning "Target image name not specified, using ${TARGET_IMAGE_NAME}"
-else
-    shift 1
 fi
+shift 1
 
 
 BASE_IMAGE_NAME="$1"
 if [[ -z "$BASE_IMAGE_NAME" ]]; then
     print_warning "Using base image name not specified, using '${BASE_IMAGE_NAME}'"
-else
-    shift 1
 fi
+shift 1
 
 DOCKER_CONTEXT_DIR="$1"
 if [[ -z "$DOCKER_CONTEXT_DIR" ]]; then
     print_warning "Using docker context dir not specified, using Dockerfile directory"
-else
-    shift 1
 fi
+shift 1
 
 ON_EXIT=()
 function cleanup {

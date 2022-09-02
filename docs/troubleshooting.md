@@ -75,38 +75,7 @@ Launching the realsense node using `ros2 launch realsense2_camera rs_launch.py`,
 ```
 
 ### Solution
-Please make the following changes in the file `isaac_ros_common/scripts/run_dev.sh` and start a new container:
-
-`isaac_ros_common/scripts/run_dev.sh`
-```diff
-if [ "$(docker ps -a --quiet --filter status=running --filter name=$CONTAINER_NAME)" ]; then
-    print_info "Attaching to running container: $CONTAINER_NAME"
---    docker exec -i -t -u admin --workdir /workspaces/isaac_ros-dev $CONTAINER_NAME /bin/bash $@
-++    docker exec -i -t --workdir /workspaces/isaac_ros-dev $CONTAINER_NAME /bin/bash $@
-    exit 0
-fi
-```
-
-`isaac_ros_common/scripts/run_dev.sh`
-```diff
-# Run container from image
-print_info "Running $CONTAINER_NAME"
-docker run -it --rm \
-    --privileged \
-    --network host \
-    ${DOCKER_ARGS[@]} \
-    -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
-    -v /dev/shm:/dev/shm \
-    -v /dev/*:/dev/* \
-    --name "$CONTAINER_NAME" \
-    --runtime nvidia \
---    --user="admin" \
-    --entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh \
-    --workdir /workspaces/isaac_ros-dev \
-    $@ \
-    $BASE_NAME \
-    /bin/bash
-```
+**Before** starting the isaac_ros-dev docker container using run_dev.sh, run [setup_udev_rules.sh](https://github.com/IntelRealSense/librealsense/blob/master/scripts/setup_udev_rules.sh) from [librealsense](https://github.com/IntelRealSense/librealsense) **in a terminal outside docker**
 ## Failed to get valid output from Isaac ROS Rectify or Apriltag Node
 ### Symptom
 If there is no available calibration data for an Argus camera, you will see warning messages similar to:

@@ -14,7 +14,7 @@ from typing import Dict, List, Tuple
 
 import cv2
 from cv_bridge import CvBridge
-from isaac_ros_apriltag_interfaces.msg import AprilTagDetection, AprilTagDetectionArray
+from geometry_msgs.msg import Pose, PoseArray
 from sensor_msgs.msg import CameraInfo, Image
 
 
@@ -56,56 +56,6 @@ class JSONConversion:
         """
         with open(json_filepath, 'w+') as json_file:
             json.dump(obj, json_file, indent=2)
-
-    @staticmethod
-    def load_april_tag_detection_array_from_json(json_filepath: Path) -> AprilTagDetectionArray:
-        """
-        Load a AprilTagDetectionArray message from a JSON filepath.
-
-        Parameters
-        ----------
-        json_filepath : Path
-            The path to a JSON file containing the AprilTagDetectionArray fields
-
-        Returns
-        -------
-        AprilTagDetectionArray
-            Generated AprilTagDetectionArray message
-
-        """
-        apriltag_detection_array_json = JSONConversion.load_from_json(
-            json_filepath)
-
-        apriltag_detection_array = AprilTagDetectionArray()
-        apriltag_detection_array.header.frame_id = apriltag_detection_array_json[
-            'header']['frame_id']
-        for detection in apriltag_detection_array_json['detections']:
-            apriltag_detection = AprilTagDetection()
-            apriltag_detection.id = detection['id']
-            apriltag_detection.family = detection['family']
-            apriltag_detection.center.x = detection['center']['x']
-            apriltag_detection.center.y = detection['center']['y']
-            for corner_index, corner in enumerate(detection['corners']):
-                apriltag_detection.corners[corner_index].x = corner['x']
-                apriltag_detection.corners[corner_index].y = corner['y']
-            apriltag_detection.pose.header.frame_id = detection['pose']['header']['frame_id']
-            apriltag_detection.pose.pose.pose.position.x = detection[
-                'pose']['pose']['pose']['position']['x']
-            apriltag_detection.pose.pose.pose.position.y = detection[
-                'pose']['pose']['pose']['position']['y']
-            apriltag_detection.pose.pose.pose.position.z = detection[
-                'pose']['pose']['pose']['position']['z']
-            apriltag_detection.pose.pose.pose.orientation.x = detection[
-                'pose']['pose']['pose']['orientation']['x']
-            apriltag_detection.pose.pose.pose.orientation.y = detection[
-                'pose']['pose']['pose']['orientation']['y']
-            apriltag_detection.pose.pose.pose.orientation.z = detection[
-                'pose']['pose']['pose']['orientation']['z']
-            apriltag_detection.pose.pose.pose.orientation.w = detection[
-                'pose']['pose']['pose']['orientation']['w']
-            apriltag_detection_array.detections.append(apriltag_detection)
-
-        return apriltag_detection_array
 
     @staticmethod
     def load_camera_info_from_json(json_filepath: Path,
@@ -172,6 +122,43 @@ class JSONConversion:
         camera_info_json['P'] = camera_info.p.tolist()
 
         JSONConversion.save_to_json(camera_info_json, json_filepath)
+
+    @staticmethod
+    def load_pose_array_from_json(json_filepath: Path) -> PoseArray:
+        """
+        Load a PoseArray message from a JSON filepath.
+
+        Parameters
+        ----------
+        json_filepath : Path
+            The path to a JSON file containing the PoseArray fields
+
+        Returns
+        -------
+        PoseArray
+            Generated PoseArray message
+
+        """
+        pose_array_json = JSONConversion.load_from_json(json_filepath)
+
+        pose_array = PoseArray()
+        pose_array.header.frame_id = pose_array_json['header']['frame_id']
+
+        for pose_json in pose_array_json['poses']:
+            pose = Pose()
+
+            pose.position.x = pose_json['position']['x']
+            pose.position.y = pose_json['position']['y']
+            pose.position.z = pose_json['position']['z']
+
+            pose.orientation.x = pose_json['orientation']['x']
+            pose.orientation.y = pose_json['orientation']['y']
+            pose.orientation.z = pose_json['orientation']['z']
+            pose.orientation.w = pose_json['orientation']['w']
+
+            pose_array.poses.append(pose)
+
+        return pose_array
 
     @staticmethod
     def load_image_from_json(json_filepath: Path) -> Image:

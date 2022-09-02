@@ -7,7 +7,7 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 # Docker file for aarch64 based Jetson device
-ARG BASE_IMAGE="nvcr.io/nvidia/l4t-base:r34.1"
+ARG BASE_IMAGE="nvcr.io/nvidia/l4t-base:r35.1.0"
 FROM ${BASE_IMAGE}
 
 # Disable terminal interaction for apt
@@ -18,7 +18,6 @@ SHELL ["/bin/bash", "-c"]
 # Fundamentals
 RUN apt-get update && apt-get install -y \
     build-essential \
-    cmake \
     curl \
     git \
     lsb-release \
@@ -32,12 +31,24 @@ RUN apt-get update && apt-get install -y \
 && rm -rf /var/lib/apt/lists/* \
 && apt-get clean
 
+# Upgrade cmake to 3.23.2
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
+    && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null \
+    && apt-get update \
+    && rm /usr/share/keyrings/kitware-archive-keyring.gpg \
+    && apt-get install -y kitware-archive-keyring \
+    && apt-get remove cmake && apt-get purge cmake && apt-get remove cmake-data && apt-get purge cmake \
+    && apt-get install -y cmake=3.23.2-0kitware1ubuntu20.04.1 cmake-data=3.23.2-0kitware1ubuntu20.04.1 \
+    && cmake --version \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
 # Set Python3 as default
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 # Python basics
 RUN apt-get update && apt-get install -y \
-        python3-flake8 \        
+        python3-flake8 \
         python3-pip \
         python3-pytest-cov \
         python3-setuptools \
@@ -105,17 +116,6 @@ RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.d
 && rm -rf /var/lib/apt/lists/* \
 && apt-get clean
 
-# Upgrade cmake to latest
-RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
-    && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ bionic main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null \
-    && apt-get update \
-    && rm /usr/share/keyrings/kitware-archive-keyring.gpg \
-    && apt-get install -y kitware-archive-keyring \
-    && apt-get install -y cmake \
-    && cmake --version \
-&& rm -rf /var/lib/apt/lists/* \
-&& apt-get clean 
-
 # Install TensorRT and VPI
 RUN apt-get update && apt-get install -y \
     tensorrt \
@@ -144,16 +144,12 @@ ENV PATH="${PATH}:/usr/local/cuda/bin"
 # https://forums.developer.nvidia.com/t/error-importerror-usr-lib-aarch64-linux-gnu-libgomp-so-1-cannot-allocate-memory-in-static-tls-block-i-looked-through-available-threads-already/166494/3
 ENV LD_PRELOAD="/usr/lib/aarch64-linux-gnu/libgomp.so.1"
 
-# Restore using the default Foxy DDS middleware: FastRTPS
-ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+# PyTorch (NV CUDA edition)
+# https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html
+RUN python3 -m pip install --no-cache \
+        https://developer.download.nvidia.cn/compute/redist/jp/v50/pytorch/torch-1.13.0a0+340c4120.nv22.06-cp38-cp38-linux_aarch64.whl
 
-# Pytorch
-RUN python3 -m pip install -U --extra-index-url https://download.pytorch.org/whl/cu113 \
-    torch \
-    torchvision \
-    torchaudio
-
-# Install Triton server 2.13 from https://github.com/triton-inference-server/server/releases/tag/v2.13.0
+# Install Triton server 2.24 from https://github.com/triton-inference-server/server/releases/tag/v2.24.0
 RUN apt-get update && apt-get install -y --no-install-recommends \
     autoconf \
     automake \
@@ -166,23 +162,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     patchelf \
     rapidjson-dev \
     zlib1g-dev \
-&& rm -rf /var/lib/apt/lists/*
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
 
 RUN mkdir -p /opt/tritonserver && cd /opt/tritonserver \
-    && wget https://github.com/triton-inference-server/server/releases/download/v2.20.0/tritonserver2.20.0-jetpack5.0.tgz \
-    && tar -xzvf tritonserver2.20.0-jetpack5.0.tgz \
-    && rm tritonserver2.20.0-jetpack5.0.tgz
+    && wget https://github.com/triton-inference-server/server/releases/download/v2.24.0/tritonserver2.24.0-jetpack5.0.2.tgz \
+    && tar -xzvf tritonserver2.24.0-jetpack5.0.2.tgz \
+    && rm tritonserver2.24.0-jetpack5.0.2.tgz
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/tritonserver/lib"
 
 # Add MQTT binaries and libraries
 RUN apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
-    && apt-get update \
-    && apt-get install -y mosquitto mosquitto-clients
+    && apt-get update && apt-get install -y \
+        mosquitto \
+        mosquitto-clients \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
 
 # Note: VPN cannot be on for pymongo download
 RUN python3 -m pip install -U \
-  pymongo paho-mqtt
+  pymongo \
+  paho-mqtt
   
 # Core dev libraries
 RUN apt-get update && apt-get install -y \

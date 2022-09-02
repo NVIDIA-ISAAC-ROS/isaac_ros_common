@@ -1,6 +1,4 @@
 # Isaac Sim Setup for Software in the Loop (SIL)
-> **Note: Isaac Sim 2022.1.0 published on 6/3/2022 does not support ROS2 Humble. Please follow one of the [workarounds](#isaac-sim-202210-workarounds) mentioned below before continuing with the tutorial.**
-
 > **Note:** This tutorial runs a software in the loop simulation. In order to run a hardware in the loop simulation, follow the steps in the [corresponding tutorial](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common/blob/main/docs/isaac-sim-hil-setup.md).
 
 Software in the Loop (SIL) refers to a configuration where the software being tested is not running on the target hardware platform. For example, Isaac ROS packages being tested on x86 before deployment on Jetson is SIL.
@@ -25,29 +23,3 @@ Software in the Loop (SIL) refers to a configuration where the software being te
 <div align="center"><img src="../resources/isaac_sim_ros_bridge.png" width="800px"/></div>
 
 5. Continue with the next steps in your specfic Isaac ROS package tutorial.
-
-## Isaac Sim 2022.1.0 Workarounds
-
-- Run Isaac Sim and the Isaac ROS Packages on different systems. For example, you can run Isaac Sim 2022.1.0 on your laptop and run the Isaac ROS Package on an AGX Xavier. 
-    > **Note:** Both systems must be connected to the same network.
-
-- If you are running Isaac Sim 2022.1.0 and the Docker container launched by `isaac_ros_common/scripts/run_dev.sh` on the same machine, please make the following patch to prevent port clashes:
-    
-    `isaac_ros_common/scripts/run_dev.sh`
-    ```diff
-    docker run -it --rm \
-        --privileged \
-    --    --network host \
-        ${DOCKER_ARGS[@]} \
-        -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
-    --    -v /dev/shm:/dev/shm \
-    --    -v /dev/*:/dev/* \
-        --name "$CONTAINER_NAME" \
-        --runtime nvidia \
-        --user="admin" \
-        --entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh \
-        --workdir /workspaces/isaac_ros-dev \
-        $@ \
-        $BASE_NAME \
-        /bin/bash
-    ```
