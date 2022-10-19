@@ -211,3 +211,7 @@ RUN apt-get update && apt-get install -y --only-upgrade \
 # Downgrade protobuf
 RUN python3 -m pip install \
         protobuf==3.20.1
+
+# GPU usage monitoring on Jetson
+RUN python3 -m pip install -U \
+  jetson-stats

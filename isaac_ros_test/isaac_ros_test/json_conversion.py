@@ -15,6 +15,7 @@ from typing import Dict, List, Tuple
 import cv2
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Pose, PoseArray
+from nav_msgs.msg import OccupancyGrid
 from sensor_msgs.msg import CameraInfo, Image
 
 
@@ -122,6 +123,51 @@ class JSONConversion:
         camera_info_json['P'] = camera_info.p.tolist()
 
         JSONConversion.save_to_json(camera_info_json, json_filepath)
+
+    @staticmethod
+    def load_occupancy_grid_from_json(json_filepath: Path) -> OccupancyGrid:
+        """
+        Load a OccupancyGrid message from a JSON filepath.
+
+        Parameters
+        ----------
+        json_filepath : Path
+            The path to a JSON file containing the OccupancyGrid fields
+
+        Returns
+        -------
+        OccupancyGrid
+            Generated OccupancyGrid message
+
+        """
+        occupancy_grid_json = JSONConversion.load_from_json(json_filepath)
+
+        occupancy_grid = OccupancyGrid()
+        occupancy_grid.header.frame_id = occupancy_grid_json['header']['frame_id']
+
+        occupancy_grid.info.resolution = occupancy_grid_json['info']['resolution']
+        occupancy_grid.info.width = occupancy_grid_json['info']['width']
+        occupancy_grid.info.height = occupancy_grid_json['info']['height']
+
+        occupancy_grid.info.origin.position.x = occupancy_grid_json[
+            'info']['origin']['position']['x']
+        occupancy_grid.info.origin.position.y = occupancy_grid_json[
+            'info']['origin']['position']['y']
+        occupancy_grid.info.origin.position.z = occupancy_grid_json[
+            'info']['origin']['position']['z']
+
+        occupancy_grid.info.origin.orientation.x = occupancy_grid_json[
+            'info']['origin']['orientation']['x']
+        occupancy_grid.info.origin.orientation.y = occupancy_grid_json[
+            'info']['origin']['orientation']['y']
+        occupancy_grid.info.origin.orientation.z = occupancy_grid_json[
+            'info']['origin']['orientation']['z']
+        occupancy_grid.info.origin.orientation.w = occupancy_grid_json[
+            'info']['origin']['orientation']['w']
+
+        occupancy_grid.data = occupancy_grid_json['data']
+
+        return occupancy_grid
 
     @staticmethod
     def load_pose_array_from_json(json_filepath: Path) -> PoseArray:

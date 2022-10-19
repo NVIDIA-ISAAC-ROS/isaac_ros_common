@@ -44,7 +44,7 @@ function cleanup {
 }
 trap cleanup EXIT
 
-pushd .
+pushd . >/dev/null
 cd $ROOT
 ON_EXIT+=("popd")
 
@@ -112,7 +112,12 @@ fi
 
 BASE_IMAGE_KEY=$PLATFORM.user
 if [[ ! -z "${IMAGE_KEY}" ]]; then
-    BASE_IMAGE_KEY=$PLATFORM.$IMAGE_KEY.user
+    BASE_IMAGE_KEY=$PLATFORM.$IMAGE_KEY
+
+    # If the configured key does not have .user, append it last
+    if [[ $IMAGE_KEY != *".user"* ]]; then
+        BASE_IMAGE_KEY=$BASE_IMAGE_KEY.user
+    fi
 fi
 
 print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME using key $BASE_IMAGE_KEY"
@@ -125,6 +130,7 @@ fi
 
 # Map host's display socket to docker
 DOCKER_ARGS+=("-v /tmp/.X11-unix:/tmp/.X11-unix")
+DOCKER_ARGS+=("-v $HOME/.Xauthority:/home/admin/.Xauthority:rw")
 DOCKER_ARGS+=("-e DISPLAY")
 DOCKER_ARGS+=("-e NVIDIA_VISIBLE_DEVICES=all")
 DOCKER_ARGS+=("-e NVIDIA_DRIVER_CAPABILITIES=all")
@@ -145,6 +151,7 @@ if [[ $PLATFORM == "aarch64" ]]; then
     DOCKER_ARGS+=("--pid=host")
     DOCKER_ARGS+=("-v /opt/nvidia/vpi2:/opt/nvidia/vpi2")
     DOCKER_ARGS+=("-v /usr/share/vpi2:/usr/share/vpi2")
+    DOCKER_ARGS+=("-v /run/jtop.sock:/run/jtop.sock:ro")
 fi
 
 # Optionally load custom docker arguments from file

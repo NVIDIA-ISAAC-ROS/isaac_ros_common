@@ -188,6 +188,7 @@ for (( i=${#DOCKERFILES[@]}-1 ; i>=0 ; i-- )); do
     print_warning "Building ${DOCKERFILE} as image: ${IMAGE_NAME} with base: ${BASE_IMAGE_NAME}"
     
     docker build -f ${DOCKERFILE} \
+     --network host \
      -t ${IMAGE_NAME} \
      ${BASE_IMAGE_ARG} \
      "${BUILD_ARGS[@]}" \
