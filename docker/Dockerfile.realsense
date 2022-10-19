@@ -1,0 +1,10 @@
+# Dockerfile for setting up Realsense driver
+#  https://github.com/jetsonhacks/installRealSenseSDK
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+COPY scripts/build-librealsense.sh /opt/realsense/build-librealsense.sh
+COPY scripts/install-realsense-dependencies.sh /opt/realsense/install-realsense-dependencies.sh
+
+RUN chmod +x /opt/realsense/install-realsense-dependencies.sh && /opt/realsense/install-realsense-dependencies.sh
+RUN chmod +x /opt/realsense/build-librealsense.sh && /opt/realsense/build-librealsense.sh

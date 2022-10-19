@@ -8,7 +8,7 @@
 #
 # Docker file to build on x86_64
 # https://docs.nvidia.com/deeplearning/frameworks/user-guide/index.html
-ARG BASE_IMAGE=nvcr.io/nvidia/tritonserver:22.03-py3
+ARG BASE_IMAGE=nvcr.io/nvidia/tritonserver:22.08-py3
 FROM ${BASE_IMAGE}
 
 # disable terminal interaction for apt
@@ -177,3 +177,14 @@ RUN apt-get update && apt-get install -y --only-upgrade \
 # Downgrade protobuf
 RUN python3 -m pip install \
         protobuf==3.20.1
+
+# GPU usage monitoring on x86
+RUN python3 -m pip install \
+    gpustat==0.6.0
+
+# Python3 (PIP)
+RUN python3 -m pip install -U \
+    mailcap-fix
+
+# Resolve vulnerability in mailcap.py by removing it (CVE-2015-20107)
+RUN rm -f /opt/tritonserver/backends/dali/conda/envs/dalienv/lib/python3.8/mailcap.py

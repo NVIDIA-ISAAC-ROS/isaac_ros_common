@@ -1,2 +1,0 @@
-CONFIG_IMAGE_KEY=humble.nav2.realsense
-CONFIG_DOCKER_SEARCH_DIRS=($DOCKER_DIR/realsense-dockerfile-example)

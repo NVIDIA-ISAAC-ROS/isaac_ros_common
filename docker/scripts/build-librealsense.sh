@@ -11,7 +11,7 @@ USE_CUDA=true
 
 function usage ()
 {
-    echo "Usage: ./buildLibrealsense.sh [-n | -no_cuda] [-v | -version <version>] [-j | --jobs <number of jobs>] [-h | --help] "
+    echo "Usage: ./build-librealsense.sh [-n | -no_cuda] [-v | -version <version>] [-j | --jobs <number of jobs>] [-h | --help] "
     echo "-n  | --no_cuda   Build with no CUDA (Defaults to with CUDA)"
     echo "-v  | --version   Version of librealsense to build 
                       (defaults to latest release)"
@@ -21,7 +21,7 @@ function usage ()
     exit 2
 }
 
-PARSED_ARGUMENTS=$(getopt -a -n buildLibrealsense.sh -o nv:j:h --longoptions version:,no_cuda,jobs:,help -- "$@" )
+PARSED_ARGUMENTS=$(getopt -a -n build-librealsense.sh -o nv:j:h --longoptions version:,no_cuda,jobs:,help -- "$@" )
 VALID_ARGUMENTS=$?
 
 if [ "$VALID_ARGUMENTS" != "0" ]; then

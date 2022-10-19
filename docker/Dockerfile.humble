@@ -106,10 +106,8 @@ RUN mkdir -p ${ROS_ROOT}/src && \
 	> ros2.${ROS_DISTRO}.ros_base.rosinstall && \
     cat ros2.${ROS_DISTRO}.ros_base.rosinstall && \
     vcs import src < ros2.${ROS_DISTRO}.ros_base.rosinstall && \
-    rm ${ROS_ROOT}/*.rosinstall
-
-# Install dependencies using rosdep
-RUN cd ${ROS_ROOT} \
+    rm ${ROS_ROOT}/*.rosinstall && \
+    cd ${ROS_ROOT} \
     && apt-get update \
     && rosdep init \
     && rosdep update \
@@ -119,13 +117,11 @@ RUN cd ${ROS_ROOT} \
       --rosdistro ${ROS_DISTRO} \
       --skip-keys "fastcdr rti-connext-dds-6.0.1 rti-connext-dds-5.3.1 urdfdom_headers libopencv-dev libopencv-contrib-dev libopencv-imgproc-dev python-opencv python3-opencv" \
     && rm -Rf /var/lib/apt/lists/* \
-    && apt-get clean
-
-# Build ROS2 source
-RUN cd ${ROS_ROOT} \
-      && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --packages-up-to behaviortree_cpp_v3 \
-      && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-      && rm -Rf src build log
+    && apt-get clean && \ 
+    cd ${ROS_ROOT} \
+    && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --packages-up-to behaviortree_cpp_v3 \
+    && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    && rm -Rf src build log
 
 # Alias setup.bash for consistency with pre-built binary installations of ROS2
 RUN echo "source /opt/ros/${ROS_DISTRO}/install/setup.bash ; export ROS_DISTRO=${ROS_DISTRO}" > /opt/ros/${ROS_DISTRO}/setup.bash
