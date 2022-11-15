@@ -34,7 +34,7 @@ As of Sep 13 2022, the [Realsense ROS2 wrapper package's `ros2` branch](https://
 
 ### Solution
 
-Use the [Realsense ROS2 driver `ros2-beta` branch](https://github.com/IntelRealSense/realsense-ros/tree/ros2-beta)
+Use the [Realsense ROS2 driver `ros2-development` branch](https://github.com/IntelRealSense/realsense-ros/tree/ros2-development)
 
 ## Input images must have even height and width
 
