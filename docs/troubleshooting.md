@@ -22,6 +22,13 @@
   - [RealSense error `Failed to resolve the request`](#realsense-error-failed-to-resolve-the-request)
     - [Symptom](#symptom-4)
     - [Solution](#solution-5)
+  - [RealSense `incompatible QoS Policy` error](#realsense-incompatible-qos-policy-error)
+    - [Symptom](#symptom-5)
+    - [Solution](#solution-6)
+  - [Linker error `foo.so: file format not recognized; treating as linker script`](#linker-error-fooso-file-format-not-recognized-treating-as-linker-script)
+    - [Symptom](#symptom-6)
+    - [Solution](#solution-7)
+
 
 ## Realsense driver doesn't work with ROS2 Humble
 
@@ -34,7 +41,7 @@ As of Sep 13 2022, the [Realsense ROS2 wrapper package's `ros2` branch](https://
 
 ### Solution
 
-Use the [Realsense ROS2 driver `ros2-development` branch](https://github.com/IntelRealSense/realsense-ros/tree/ros2-development)
+Use the [RealSense ROS2 driver `ros2-development` branch](https://github.com/IntelRealSense/realsense-ros/tree/ros2-development)
 
 ## Input images must have even height and width
 
@@ -166,3 +173,40 @@ When any RealSense tutorial is launched, the output topic from RealSense is not 
 
 Change the QoS policy in `realsense.yaml` file from the launched package. Take `isaac_ros_h264_encoder` as an example, change [policy](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_compression/blob/main/isaac_ros_h264_encoder/config/realsense.yaml#L7) from `SENSOR_DATA` to `SYSTEM_DEFAULT` could make the RealSense rgb_camera publisher compatible with the subscriber of `isaac_ros_h264_encoder`.
 > **Note**: For more information on Quality of Service compatibilities refer to [this link](https://docs.ros.org/en/humble/Concepts/About-Quality-of-Service-Settings.html)
+
+## Linker error `foo.so: file format not recognized; treating as linker script`
+### Symptom
+When attempting to build an Isaac ROS package by running `colcon build`, the linker complains with an error that resembles the following:
+```
+--- stderr: isaac_ros_nitros                                                                                      
+/usr/bin/ld:/workspaces/isaac_ros-dev/src/isaac_ros_nitros/isaac_ros_nitros/gxf/lib/gxf_x86_64_cuda_11_7/core/libgxf_core.so: file format not recognized; treating as linker script
+/usr/bin/ld:/workspaces/isaac_ros-dev/src/isaac_ros_nitros/isaac_ros_nitros/gxf/lib/gxf_x86_64_cuda_11_7/core/libgxf_core.so:1: syntax error
+collect2: error: ld returned 1 exit status
+make[2]: *** [CMakeFiles/isaac_ros_nitros.dir/build.make:311: libisaac_ros_nitros.so] Error 1
+make[1]: *** [CMakeFiles/Makefile2:139: CMakeFiles/isaac_ros_nitros.dir/all] Error 2
+make: *** [Makefile:146: all] Error 2
+---
+Failed   <<< isaac_ros_nitros [0.52s, exited with code 2]
+```
+
+### Solution
+This error typically arises when the local copy of a `.so` binary on your machine contains only the Git LFS pointer, instead of the actual binary contents.
+
+> **Note:** If you're encountering this error, you may have forgotten to install and perform one-time setup for Git LFS on your machine. Please refer to the instructions for [development environment setup](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common/blob/main/docs/dev-env-setup.md#quickstart).
+
+To correct this, navigate to the Isaac ROS package that is failing to build and re-pull the binary files using Git LFS.
+
+For example, if `isaac_ros_nitros` is failing to build as shown above:
+
+1. Navigate to the package:
+   ```bash
+   cd ~/workspaces/isaac_ros-dev/src/isaac_ros_nitros
+   ```
+2. Pull from Git LFS:
+   ```bash
+   git lfs pull
+   ```
+3. Return to the workspace and run the build command again:
+   ```bash
+   cd ~/workspaces/isaac_ros-dev && colcon build --symlink-install
+   ```

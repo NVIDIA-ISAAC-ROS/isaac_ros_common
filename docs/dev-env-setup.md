@@ -36,6 +36,10 @@
     sudo apt-get install git-lfs
     ```  
 
+    ```bash
+    git lfs install
+    ```
+
 4. Finally, create a ROS2 workspace for experimenting with Isaac ROS:  
 
     ```bash
