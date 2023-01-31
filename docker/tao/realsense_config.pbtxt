@@ -1,0 +1,30 @@
+name: "detectnet"
+platform: "tensorrt_plan"
+max_batch_size: 16
+input [
+  {
+    name: "input_1"
+    data_type: TYPE_FP32
+    format: FORMAT_NCHW
+    dims: [ 3, 720, 1280 ]
+  }
+]
+output [
+  {
+        name: "output_bbox/BiasAdd"
+        data_type: TYPE_FP32
+        dims: [ 12, 45, 80]
+    },
+    {
+        name: "output_cov/Sigmoid"
+        data_type: TYPE_FP32
+        dims: [ 3, 45, 80]
+    }
+]
+dynamic_batching { }
+version_policy: {
+  specific {
+    versions: [ 1 ]
+  }
+}
+
