@@ -6,4 +6,4 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
-FROM nvcr.io/nvidia/isaac/ros:aarch64-humble-nav2_c2befe2b1d90532fc15ef72650ccd7b0
+FROM nvcr.io/nvidia/isaac/ros:aarch64-humble-nav2_6dfaf7adbe190f1181c3a0a2f2418760
