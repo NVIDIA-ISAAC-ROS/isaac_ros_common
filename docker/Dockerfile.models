@@ -15,19 +15,19 @@ RUN mkdir -p /tmp/models/bi3d && \
     wget https://api.ngc.nvidia.com/v2/models/nvidia/isaac/bi3d_proximity_segmentation/versions/2.0.0/files/featnet.onnx && \
     wget https://api.ngc.nvidia.com/v2/models/nvidia/isaac/bi3d_proximity_segmentation/versions/2.0.0/files/segnet.onnx
 
-RUN if [[ "$ARCH" !~ .*"x86".* ]]; \
+RUN if [[ "$ARCH" =~ .*"x86".* ]]; \
     then \
+      /usr/src/tensorrt/bin/trtexec --saveEngine=/tmp/models/bi3d/bi3dnet_featnet.plan \
+      --onnx=/tmp/models/bi3d/featnet.onnx --int8 && \
+      /usr/src/tensorrt/bin/trtexec --saveEngine=/tmp/models/bi3d/bi3dnet_segnet.plan \
+      --onnx=/tmp/models/bi3d/segnet.onnx --int8 ; \
+    else \
       /usr/src/tensorrt/bin/trtexec --saveEngine=/tmp/models/bi3d/bi3dnet_featnet.plan \
       --onnx=/tmp/models/bi3d/featnet.onnx \
       --int8 --useDLACore=0 && \
       /usr/src/tensorrt/bin/trtexec --saveEngine=/tmp/models/bi3d/bi3dnet_segnet.plan \
       --onnx=/tmp/models/bi3d/segnet.onnx \
       --int8 --useDLACore=0 ; \
-    else \
-      /usr/src/tensorrt/bin/trtexec --saveEngine=/tmp/models/bi3d/bi3dnet_featnet.plan \
-      --onnx=/tmp/models/bi3d/featnet.onnx --int8 && \
-      /usr/src/tensorrt/bin/trtexec --saveEngine=/tmp/models/bi3d/bi3dnet_segnet.plan \
-      --onnx=/tmp/models/bi3d/segnet.onnx --int8 ; \
     fi
 
 #Peoplesegnet
