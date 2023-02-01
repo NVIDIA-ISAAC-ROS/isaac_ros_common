@@ -164,19 +164,43 @@ if [[ -f "$DOCKER_ARGS_FILE" ]]; then
     done
 fi
 
-# Run container from image
-print_info "Running $CONTAINER_NAME"
-docker run -it --rm \
-    --privileged \
-    --network host \
-    ${DOCKER_ARGS[@]} \
-    -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
-    -v /dev/*:/dev/* \
-    --name "$CONTAINER_NAME" \
-    --runtime nvidia \
-    --user="admin" \
-    --entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh \
-    --workdir /workspaces/isaac_ros-dev \
-    $@ \
-    $BASE_NAME \
-    /bin/bash
+ARCH=$(uname -m)
+
+if [[ "$ARCH" =~ .*"x86".* ]]; 
+    then 
+        # Run container from image
+        print_info "Running $CONTAINER_NAME"
+        docker run -it --rm \
+            --privileged \
+            --network host \
+            ${DOCKER_ARGS[@]} \
+            -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
+            -v /dev/*:/dev/* \
+            --name "$CONTAINER_NAME" \
+            --runtime nvidia \
+            --user="admin" \
+            --entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh \
+            --workdir /workspaces/isaac_ros-dev \
+            $@ \
+            $BASE_NAME \
+            /bin/bash ;
+    else
+        # Run container from image
+        print_info "Running $CONTAINER_NAME"
+        docker run -it --rm \
+            --privileged \
+            --network host \
+            ${DOCKER_ARGS[@]} \
+            -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
+            -v /dev/*:/dev/* \
+            -v /sys:/sys \
+            -v /proc/device-tree/compatible:/proc/device-tree/compatible \
+            --name "$CONTAINER_NAME" \
+            --runtime nvidia \
+            --user="admin" \
+            --entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh \
+            --workdir /workspaces/isaac_ros-dev \
+            $@ \
+            $BASE_NAME \
+            /bin/bash ;
+fi

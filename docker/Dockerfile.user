@@ -13,6 +13,7 @@ FROM ${BASE_IMAGE}
 ARG USERNAME=admin
 ARG USER_UID=1000
 ARG USER_GID=1000
+ARG ARCH
 
 # Install prerequisites
 RUN apt-get update && apt-get install -y \
@@ -47,6 +48,17 @@ RUN  chmod +x /usr/local/bin/scripts/*.sh
 # Copy middleware profiles
 RUN mkdir -p /usr/local/share/middleware_profiles
 COPY middleware_profiles/*profile.xml /usr/local/share/middleware_profiles/
+
+#Add gpio if running on aarch64
+RUN if [[ "$ARCH" =~ .*"x86".* ]]; \
+    then \
+        echo Skipping gpio install; \
+    else \
+        echo Adding gpio group and permissions && \
+        groupadd -f -r -g 999 gpio && \
+        echo Defaults exempt_group+=${USERNAME} >> /etc/sudoers.d/${USERNAME} && \
+        usermod -a -G gpio ${USERNAME} ; \
+    fi
 
 ENV USERNAME=${USERNAME}
 ENV USER_GID=${USER_GID}

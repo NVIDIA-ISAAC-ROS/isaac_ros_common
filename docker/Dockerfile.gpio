@@ -1,0 +1,11 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+RUN apt-get update && \
+    apt-get install -y python-pip && \
+    pip install Jetson.GPIO
+
+WORKDIR /app
+COPY scripts/simple_out.py /app
+
+CMD ["/bin/sh", "-c", "python /app/simple_out.py"]
