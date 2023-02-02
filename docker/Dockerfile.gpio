@@ -2,7 +2,7 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 RUN apt-get update && \
-    apt-get install -y python-pip && \
+    apt-get install -y python3-pip && \
     pip install Jetson.GPIO
 
 WORKDIR /app
