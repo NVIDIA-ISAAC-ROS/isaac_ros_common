@@ -5,7 +5,4 @@ RUN apt-get update && \
     apt-get install -y python3-pip && \
     pip install Jetson.GPIO
 
-WORKDIR /app
-COPY scripts/simple_out.py /app
-
-CMD ["/bin/sh", "-c", "python /app/simple_out.py"]
+COPY scripts/simple_out.py ./
