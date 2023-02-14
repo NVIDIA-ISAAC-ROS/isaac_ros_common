@@ -6,6 +6,7 @@ ARG ARCH
 # Isaac detectnet
 COPY scripts/setup_model.sh /tmp/setup_model.sh
 COPY tao/realsense_config.pbtxt /tmp/realsense_config.pbtxt
+COPY tao/realsense_config.pbtxt /tmp/models/detectnet/config.pbtxt
 RUN cd /tmp && \
     ./setup_model.sh --height 720 --width 1280 --config-file realsense_config.pbtxt
 
@@ -31,6 +32,7 @@ RUN if [[ "$ARCH" =~ .*"x86".* ]]; \
     fi
 
 #Peoplesegnet
+COPY tao/people_seg.pbtxt /tmp/models/peoplesemsegnet_shuffleseg/config.pbtxt
 RUN mkdir -p /tmp/models/peoplesemsegnet_shuffleseg/1 && \
     cd /tmp/models/peoplesemsegnet_shuffleseg && \
     wget https://api.ngc.nvidia.com/v2/models/nvidia/tao/peoplesemsegnet/versions/deployable_shuffleseg_unet_v1.0/files/peoplesemsegnet_shuffleseg_etlt.etlt && \
