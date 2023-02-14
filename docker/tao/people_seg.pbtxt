@@ -1,0 +1,22 @@
+name: "peoplesemsegnet_shuffleseg"
+platform: "tensorrt_plan"
+max_batch_size: 0
+input [
+  {
+    name: "input_2:0"
+    data_type: TYPE_FP32
+    dims: [ 1, 3, 544, 960 ]
+  }
+]
+output [
+  {
+    name: "argmax_1"
+    data_type: TYPE_INT32
+    dims: [ 1, 544, 960, 1 ]
+  }
+]
+version_policy: {
+  specific {
+    versions: [ 1 ]
+  }
+}
