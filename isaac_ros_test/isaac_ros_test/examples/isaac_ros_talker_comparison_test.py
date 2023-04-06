@@ -19,7 +19,7 @@ from std_msgs.msg import String
 
 @pytest.mark.rostest
 def generate_test_description():
-    """Generate launch description with all ROS2 nodes for testing."""
+    """Generate launch description with all ROS 2 nodes for testing."""
     nodes = [
         # Normally, we will compare our custom implementation to a reference implementation,
         # but for the sake of example here we will compare two separate reference implementations.

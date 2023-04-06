@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y \
 
 # Reuse triton-server user as 'admin' user if exists
 RUN if [ $(getent group triton-server) ]; then \
-        groupmod --gid ${USER_GID} -n ${USERNAME} triton-server ; \
+        groupmod -o --gid ${USER_GID} -n ${USERNAME} triton-server ; \
         usermod -l ${USERNAME} -u ${USER_UID} -m -d /home/${USERNAME} triton-server ; \
         mkdir -p /home/${USERNAME} ; \
         sudo chown ${USERNAME}:${USERNAME} /home/${USERNAME} ; \
@@ -37,7 +37,7 @@ RUN if [ ! $(getent passwd ${USERNAME}) ]; then \
 # Update 'admin' user
 RUN echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
     && chmod 0440 /etc/sudoers.d/${USERNAME} \
-    && adduser ${USERNAME} video && adduser ${USERNAME} sudo
+    && adduser ${USERNAME} video && adduser ${USERNAME} plugdev && adduser ${USERNAME} sudo
 
 # Copy scripts
 RUN mkdir -p /usr/local/bin/scripts

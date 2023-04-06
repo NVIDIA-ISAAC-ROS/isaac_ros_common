@@ -2,13 +2,13 @@
 
 ## Quickstart
 
-> **Note:** Before you begin, verify that you have sufficient storage space available on your device. We recommend at least **30 GB**, to account for the size of the container and datasets.
+> **Note**: Before you begin, verify that you have sufficient storage space available on your device. We recommend at least **30 GB**, to account for the size of the container and datasets.
 >
-> On Jetson Xavier platforms, an external drive is **required** to have enough storage space.
+> On Jetson platforms, an NVMe SSD storage is **required** to have sufficient and fast storage.
 
 1. **On x86_64 platforms**: Install the `nvidia-container-runtime` using the instructions [here](https://github.com/NVIDIA/nvidia-container-runtime#installation).
 
-   **On Jetson platforms**: No installation necessary; the container runtime is preinstalled as part of Jetpack. 
+   **On Jetson platforms**: Follow [this instruction](dev-env-setup_jetson.md) to first set your Jetson up with SSD, then come back to this document and resume from Step 3.
 
 2. Configure `nvidia-container-runtime` as the default runtime for Docker.
 
@@ -41,11 +41,23 @@
     ```  
 
     ```bash
-    git lfs install
+    git lfs install --skip-repo
     ```
 
-5. Finally, create a ROS2 workspace for experimenting with Isaac ROS:  
+5. Finally, create a ROS 2 workspace for experimenting with Isaac ROS:  
+
+    > **For Jetson setup with SSD as optional storage**:
+    >
+    > ```bash
+    > mkdir -p  /ssd/workspaces/isaac_ros-dev/src
+    > echo "export ISAAC_ROS_WS=/ssd/workspaces/isaac_ros-dev/" >> ~/.bashrc
+    > source ~/.bashrc
+    > ```
 
     ```bash
     mkdir -p  ~/workspaces/isaac_ros-dev/src
+    echo "export ISAAC_ROS_WS=${HOME}/workspaces/isaac_ros-dev/" >> ~/.bashrc
+    source ~/.bashrc
     ```
+
+    Note that we are going to use `ISAAC_ROS_WS` environmental variable in the future to refer to this ROS 2 workspace directory.

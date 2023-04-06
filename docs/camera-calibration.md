@@ -1,19 +1,19 @@
 # Monocular Camera Calibration
 
-> **Note:** These instructions are specifically for a monocular camera. To calibrate a stereoscopic camera, please follow [these instructions](http://wiki.ros.org/camera_calibration).
+> **Note**: These instructions are specifically for a monocular camera. To calibrate a stereoscopic camera, please follow [these instructions](http://wiki.ros.org/camera_calibration).
 
 1. Set up your development environment by following the instructions [here](./dev-env-setup.md).
 2. Print a large checkerboard with known dimensions.
   
     This tutorial uses a 6x8 checkerboard with 200mm squares. Calibration uses the interior vertex points of the checkerboard, so a “7x9” board uses the interior vertex parameter “6x8” as in the example below. Checkerboards with specific dimensions can be downloaded [here](https://calib.io/pages/camera-calibration-pattern-generator).
-3. Clone the ROS2 `usb_cam` package:
+3. Clone the ROS 2 `usb_cam` package:
 
    ```bash
     cd ~/workspaces/isaac_ros-dev/src && \
       git clone -b ros2 https://github.com/ros-drivers/usb_cam
     ```
 
-    > **Note:** Your camera vendor may offer a specific ROS2-compatible camera driver package that can be used in place of the `usb_cam` package.
+    > **Note**: Your camera vendor may offer a specific ROS 2-compatible camera driver package that can be used in place of the `usb_cam` package.
 
 4. Launch the Docker container using the `run_dev.sh` script:
 

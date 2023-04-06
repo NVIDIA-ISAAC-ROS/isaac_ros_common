@@ -6,7 +6,7 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
-"""Utilities to convert ROS2 messages from PCD files."""
+"""Utilities to convert ROS 2 messages from PCD files."""
 
 from pathlib import Path
 from typing import Tuple

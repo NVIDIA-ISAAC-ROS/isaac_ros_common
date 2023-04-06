@@ -6,7 +6,7 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
-"""Utilities to convert ROS2 messages to and from human-readable JSON."""
+"""Utilities to convert ROS 2 messages to and from human-readable JSON."""
 
 import json
 from pathlib import Path

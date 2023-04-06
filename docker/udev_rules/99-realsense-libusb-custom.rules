@@ -1,0 +1,11 @@
+##Version=0.1##
+# Device rules for Intel RealSense devices (D435 D435i D455)
+# For D435
+ACTION=="add" SUBSYSTEMS=="usb", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="0b07", MODE:="0666", GROUP:="plugdev", RUN+="/opt/realsense/hotplug-realsense.sh -a add -d '%N' -M '%M' -m '%m'"
+ACTION=="remove" SUBSYSTEMS=="usb", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="0b07", MODE:="0666", GROUP:="plugdev", RUN+="/opt/realsense/hotplug-realsense.sh -a remove -d '%N' -p '%P'"
+# For D435i
+ACTION=="add" SUBSYSTEMS=="usb", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="0b3a", MODE:="0666", GROUP:="plugdev", RUN+="/opt/realsense/hotplug-realsense.sh -a add -d '%N' -M '%M' -m '%m'"
+ACTION=="remove" SUBSYSTEMS=="usb", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="0b3a", MODE:="0666", GROUP:="plugdev", RUN+="/opt/realsense/hotplug-realsense.sh -a remove -d '%N' -p '%P'"
+# For D455
+ACTION=="add" SUBSYSTEMS=="usb", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="0b5c", MODE:="0666", GROUP:="plugdev", RUN+="/opt/realsense/hotplug-realsense.sh -a add -d '%N' -M '%M' -m '%m'"
+ACTION=="remove" SUBSYSTEMS=="usb", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="0b5c", MODE:="0666", GROUP:="plugdev", RUN+="/opt/realsense/hotplug-realsense.sh -a remove -d '%N' -p '%P'"

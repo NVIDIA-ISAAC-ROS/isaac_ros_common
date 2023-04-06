@@ -19,7 +19,7 @@ from std_msgs.msg import String
 
 @pytest.mark.rostest
 def generate_test_description():
-    """Generate launch description with all ROS2 nodes for testing."""
+    """Generate launch description with all ROS 2 nodes for testing."""
     nodes = [
         launch_ros.actions.Node(package='demo_nodes_cpp',
                                 executable='talker',
