@@ -1,5 +1,9 @@
 # Isaac ROS Common
 
+## Latest Update
+
+Update 2023-04-05: Merged 'Dockerfile.humble' and 'Dockerfile.nav2' into 'Dockerfile.ros2_humble' as image key 'ros2_humble'.
+
 ## Overview
 
 The [Isaac ROS Common](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common) repository contains a number of scripts and Dockerfiles to help streamline development and testing with the Isaac ROS suite.
