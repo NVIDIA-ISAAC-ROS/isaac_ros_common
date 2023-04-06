@@ -33,7 +33,7 @@ If you write a file with the name `.isaac_ros_common-config` in the same directo
 
 | Key                         | Type                 | Description                                                 | Examples                              |
 | --------------------------- | -------------------- | ----------------------------------------------------------- | ------------------------------------- |
-| `CONFIG_IMAGE_KEY`          | String               | Image key with period-delimited components                  | `ros2_humble.realsense` <br> `humble` |
+| `CONFIG_IMAGE_KEY`          | String               | Image key with period-delimited components                  | `ros2_humble.realsense` <br> `first.second.third` |
 | `CONFIG_DOCKER_SEARCH_DIRS` | Bash array of string | List of directories to search for Dockerfiles when matching | `($HOME/ros_ws/docker $HOME/docker)`  |
 
 For example, if you had the following directory structure:
