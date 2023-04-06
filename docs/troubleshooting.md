@@ -129,7 +129,7 @@ Please refer to [this guide](./camera-calibration.md) to calibrate the camera. I
 - `./installLibrealsense.sh`
 - `./buildLibrealsense.sh --no_cuda`
 
-> **Note**: For more details on this issue, refer to the [nvblox troubleshooting section](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_nvblox/blob/main/docs/troubleshooting-nvblox-vslam-realsense.md)
+> **Note**: For more details on this issue, refer to the [nvblox troubleshooting section](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_nvblox/blob/main/docs/troubleshooting-nvblox-realsense.md)
 
 ## RealSense error `Failed to resolve the request`
 
