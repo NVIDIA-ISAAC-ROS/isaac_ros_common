@@ -1,0 +1,268 @@
+# Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+ARG BASE_IMAGE
+
+# ------------------------------------------------------------------------------
+ARG CUDA_VERSION=11.4.1
+ARG BASE_DIST=ubuntu20.04
+FROM nvidia/cuda:${CUDA_VERSION}-devel-${BASE_DIST} as ros_builder
+
+# disable terminal interaction for apt
+ENV DEBIAN_FRONTEND=noninteractive
+ENV SHELL /bin/bash
+SHELL ["/bin/bash", "-c"]
+
+# Basics
+RUN apt-get update && apt-get install -y \
+        curl \
+        gnupg \
+        locales \
+        lsb-release \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Env setup
+RUN locale-gen en_US en_US.UTF-8
+RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV ROS_PYTHON_VERSION=3
+ENV ROS_DISTRO=humble
+ENV ROS_ROOT=/opt/ros/${ROS_DISTRO}
+
+# Avoid setup.py and easy_install deprecation warnings caused by colcon and setuptools
+# https://github.com/colcon/colcon-core/issues/454
+ENV PYTHONWARNINGS=ignore:::setuptools.command.install,ignore:::setuptools.command.easy_install,ignore:::pkg_resources
+RUN echo "Warning: Using the PYTHONWARNINGS environment variable to silence setup.py and easy_install deprecation warnings caused by colcon"
+
+# Add ROS 2 apt repository
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2-testing/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+# ROS fundamentals
+RUN apt-get update && apt-get install -y \
+        build-essential \
+        git \
+        libopencv-dev \
+        python3-colcon-common-extensions \
+        python3-pip \
+        python3-pybind11 \
+        python3-pytest-cov \
+        python3-rosdep \
+        python3-rosinstall-generator \
+        python3-vcstool \
+        wget \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# ROS Python fundamentals
+RUN python3 -m pip install -U \
+        flake8-blind-except \
+        flake8-builtins \
+        flake8-class-newline \
+        flake8-comprehensions \
+        flake8-deprecated \
+        flake8-docstrings \
+        flake8-import-order \
+        flake8-quotes \
+        pytest-repeat \
+        pytest-rerunfailures \
+        pytest \
+        setuptools==65.7.0
+
+# Download ROS 2 source
+RUN mkdir -p ${ROS_ROOT}/src && \
+    cd ${ROS_ROOT} && \
+    # https://answers.ros.org/question/325245/minimal-ros2-installation/?answer=325249#post-id-325249
+    rosinstall_generator --deps --rosdistro ${ROS_DISTRO} ros_base \
+        angles \
+        apriltag \
+        behaviortree_cpp_v3 \
+        bondcpp \
+        camera_calibration_parsers \
+        camera_info_manager \
+        compressed_image_transport \
+        compressed_depth_image_transport \
+        cv_bridge \
+        demo_nodes_cpp \
+        demo_nodes_py \
+        diagnostic_updater \
+        example_interfaces \
+        image_geometry \
+        image_pipeline \
+        image_transport \
+        image_transport_plugins \
+        launch_xml \
+        launch_yaml \
+        launch_testing \
+        launch_testing_ament_cmake \
+        nav2_msgs \
+        ompl \
+        resource_retriever \
+        rqt_image_view \
+        rviz2 \
+        sensor_msgs \
+        slam_toolbox \
+        v4l2_camera \
+        vision_opencv \
+        vision_msgs \
+	> ros2.${ROS_DISTRO}.ros_base.rosinstall
+
+# Build ROS 2 from source
+RUN cd ${ROS_ROOT} \
+    && cat ros2.${ROS_DISTRO}.ros_base.rosinstall \
+    && vcs import src < ros2.${ROS_DISTRO}.ros_base.rosinstall \
+    && apt-get update \
+    && rosdep init \
+    && rosdep update \
+    && rosdep install -y \
+      --ignore-src \
+      --from-paths src \
+      --rosdistro ${ROS_DISTRO} \
+      --skip-keys "fastcdr rti-connext-dds-6.0.1 rti-connext-dds-5.3.1 urdfdom_headers libopencv-dev libopencv-contrib-dev libopencv-imgproc-dev python-opencv python3-opencv" \
+    && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    && rm -Rf src build log \
+&& rm -Rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Alias setup.bash for consistency with pre-built binary installations of ROS 2
+RUN echo "source /opt/ros/${ROS_DISTRO}/install/setup.bash ; export ROS_DISTRO=${ROS_DISTRO}" > /opt/ros/${ROS_DISTRO}/setup.bash
+
+# Install negotiated
+RUN apt-get update && mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && git clone https://github.com/osrf/negotiated && cd negotiated && git checkout master && cd .. \
+    && source ${ROS_ROOT}/setup.bash && cd ${ROS_ROOT} \
+    && rosdep install -y -r --ignore-src --from-paths src --rosdistro ${ROS_DISTRO} \
+    && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --packages-up-to-regex negotiated* \
+    && rm -Rf src build log \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Install nav2
+RUN apt-get update && mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && git clone https://github.com/ros-planning/navigation2.git && cd navigation2 && git checkout ec49c2772a0926c86ca83a4933c664744712e2e9 && cd .. \
+    && git clone https://github.com/BehaviorTree/BehaviorTree.CPP.git && cd BehaviorTree.CPP && git checkout a363bdcae88350bc748598a7d2950e300859469c && cd .. \
+    && source ${ROS_ROOT}/setup.bash && cd ${ROS_ROOT} \
+    && rosdep install -y -r --ignore-src --from-paths src --rosdistro ${ROS_DISTRO} \
+    && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --packages-up-to-regex nav2* --packages-ignore nav2_system_tests \
+    && rm -Rf src build log \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Install vda5050_msgs
+RUN apt-get update && mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && git clone https://github.com/ipa320/vda5050_msgs.git vda5050_root \
+    && cd vda5050_root && git checkout ros2 && cd .. \
+    && mv vda5050_root/vda5050_msgs/ vda5050_msgs \
+    && rm -rf vda5050_root \
+    && source ${ROS_ROOT}/setup.bash && cd ${ROS_ROOT} \
+    && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --packages-up-to vda5050_msgs \
+    && rm -Rf src build log \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Install rosbridge_library
+RUN apt-get update && mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && git clone https://github.com/RobotWebTools/rosbridge_suite.git && cd rosbridge_suite && git checkout ros2 && cd .. \
+    && source ${ROS_ROOT}/setup.bash && cd ${ROS_ROOT} \
+    && rosdep install -y -r --ignore-src --from-paths src --rosdistro ${ROS_DISTRO} \
+    && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --packages-up-to rosbridge_library rosbridge_server \
+    && rm -Rf src build log \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Install patched image_proc package with backported resize node fix
+# https://github.com/ros-perception/image_pipeline/pull/786
+RUN apt-get update && mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && git clone https://github.com/ros-perception/image_pipeline.git && cd image_pipeline && git checkout humble \
+    && git config user.email "builder@nvidia.com" && git config user.name "NVIDIA Builder" \
+    && git remote add fork https://github.com/schornakj/image_pipeline.git && git fetch fork && git cherry-pick fork/pr-backport-693 \
+    && source ${ROS_ROOT}/setup.bash && cd ${ROS_ROOT} \
+    && rosdep install -y -r --ignore-src --from-paths src --rosdistro ${ROS_DISTRO} \
+    && colcon build --merge-install --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --packages-up-to image_proc \
+    && rm -Rf src build log \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# ------------------------------------------------------------------------------
+
+FROM ${BASE_IMAGE}
+COPY --from=ros_builder /opt/ros /opt/ros
+
+# Env setup
+RUN locale-gen en_US en_US.UTF-8
+RUN update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV ROS_PYTHON_VERSION=3
+ENV ROS_DISTRO=humble
+ENV ROS_ROOT=/opt/ros/${ROS_DISTRO}
+
+# Avoid setup.py and easy_install deprecation warnings caused by colcon and setuptools
+# https://github.com/colcon/colcon-core/issues/454
+ENV PYTHONWARNINGS=ignore:::setuptools.command.install,ignore:::setuptools.command.easy_install,ignore:::pkg_resources
+RUN echo "Warning: Using the PYTHONWARNINGS environment variable to silence setup.py and easy_install deprecation warnings caused by colcon"
+
+# Add ROS 2 apt repository
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2-testing/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+# Restore using the default Humble DDS middleware: FastRTPS
+ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+
+# Basics
+RUN apt-get update && apt-get install -y \
+        curl \
+        gnupg \
+        lsb-release \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# ROS fundamentals
+RUN apt-get update && apt-get install -y \
+        build-essential \
+        git \
+        python3-colcon-common-extensions \
+        python3-pip \
+        python3-pybind11 \
+        python3-pytest-cov \
+        python3-rosdep \
+        python3-rosinstall-generator \
+        python3-vcstool \
+        wget \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# ROS Python fundamentals
+RUN python3 -m pip install -U \
+        flake8-blind-except \
+        flake8-builtins \
+        flake8-class-newline \
+        flake8-comprehensions \
+        flake8-deprecated \
+        flake8-docstrings \
+        flake8-import-order \
+        flake8-quotes \
+        pytest-repeat \
+        pytest-rerunfailures \
+        pytest \
+        setuptools==65.7.0
+
+# Install ROS dependencies
+RUN apt-get update \
+  && source ${ROS_ROOT}/setup.bash && cd ${ROS_ROOT} \
+  && rosdep init \
+  && rosdep update \
+  && rosdep install -y -r \
+      --from-path install/share \
+      --rosdistro ${ROS_DISTRO} \
+      --skip-keys "fastcdr rti-connext-dds-6.0.1 rti-connext-dds-5.3.1 urdfdom_headers libopencv-dev libopencv-contrib-dev libopencv-imgproc-dev python-opencv python3-opencv" \
+  && rm -rf /var/lib/apt/lists/* \
+  && apt-get clean
+
+
+

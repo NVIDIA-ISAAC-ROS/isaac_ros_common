@@ -15,4 +15,7 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 sudo apt-get update
 rosdep update
 
+# Restart udev daemon
+sudo service udev restart
+
 $@

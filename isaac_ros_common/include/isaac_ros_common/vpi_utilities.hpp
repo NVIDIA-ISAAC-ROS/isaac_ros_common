@@ -33,7 +33,7 @@ namespace common
 {
 
 /**
- * @brief Declare and parse ROS2 parameter into VPI backend flags
+ * @brief Declare and parse ROS 2 parameter into VPI backend flags
  *
  * @param node The node to declare the parameter with
  * @param default_backends The default backends to use if given invalid input
