@@ -109,7 +109,7 @@ This package is designed and tested to be compatible with ROS 2 Humble running o
 
 | Date       | Changes                                                                                                                                                       |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2023-04-05 | Experimental support for WSL2                                                                                                                                 |
+| 2023-04-05 | Experimental support for WSL2, merged image keys 'humble' and 'nav2' into 'ros2_humble'                                                                                                                     |
 | 2022-10-19 | Minor updates and bugfixes                                                                                                                                    |
 | 2022-08-31 | Update to be compatible with JetPack 5.0.2                                                                                                                    |
 | 2022-06-30 | Support ROS 2 Humble and miscellaneous bug fixes.                                                                                                             |
