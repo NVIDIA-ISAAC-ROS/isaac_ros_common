@@ -152,7 +152,7 @@ fi
 
 if [[ "$PLATFORM" == "aarch64" ]]; then
     # Make sure the nvidia docker runtime will be used for builds
-    DEFAULT_RUNTIME=$(docker info | grep "Default Runtime: nvidia" ; true)
+    DEFAULT_RUNTIME=$(docker info | grep "Runtimes: io.containerd.runc.v2 io.containerd.runtime.v1.linux nvidia runc" ; true)
     if [[ -z "$DEFAULT_RUNTIME" ]]; then
         print_error "Default docker runtime is not nvidia!, please make sure the following line is"
         print_error "present in /etc/docker/daemon.json"
