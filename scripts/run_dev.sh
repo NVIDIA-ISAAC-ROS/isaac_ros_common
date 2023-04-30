@@ -28,7 +28,7 @@ ISAAC_ROS_DEV_DIR="$1"
 if [[ -z "$ISAAC_ROS_DEV_DIR" ]]; then
     ISAAC_ROS_DEV_DIR="$HOME/workspaces/isaac_ros-dev"
     if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
-        ISAAC_ROS_DEV_DIR=$(pwd)
+        ISAAC_ROS_DEV_DIR="$ROOT/../../.."
     fi
     print_warning "isaac_ros_dev not specified, assuming $ISAAC_ROS_DEV_DIR"
 else
@@ -80,7 +80,7 @@ fi
 # Check if all LFS files are in place
 git rev-parse &>/dev/null
 if [[ $? -eq 0 ]]; then
-    LFS_FILES_STATUS=$(cd $ISAAC_ROS_DEV_DIR && git lfs ls-files | cut -d ' ' -f2)
+    LFS_FILES_STATUS=$(cd "$ISAAC_ROS_DEV_DIR/src/isaac_ros_common" && git lfs ls-files | cut -d ' ' -f2)
     for (( i=0; i<${#LFS_FILES_STATUS}; i++ )); do
         f="${LFS_FILES_STATUS:$i:1}"
         if [[ "$f" == "-" ]]; then
@@ -181,7 +181,7 @@ docker run -it --rm \
     --privileged \
     --network host \
     ${DOCKER_ARGS[@]} \
-    -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
+    -v "$ISAAC_ROS_DEV_DIR":/workspaces/isaac_ros-dev \
     -v /dev/*:/dev/* \
     -v /etc/localtime:/etc/localtime:ro \
     --name "$CONTAINER_NAME" \
