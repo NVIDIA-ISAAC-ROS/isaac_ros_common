@@ -123,13 +123,13 @@ if [[ ! -z "${IMAGE_KEY}" ]]; then
     fi
 fi
 
-print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME using key $BASE_IMAGE_KEY"
-$ROOT/build_base_image.sh $BASE_IMAGE_KEY $BASE_NAME '' '' ''
+#print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME using key $BASE_IMAGE_KEY"
+#$ROOT/build_base_image.sh $BASE_IMAGE_KEY $BASE_NAME '' '' ''
 
-if [ $? -ne 0 ]; then
-    print_error "Failed to build base image: $BASE_NAME, aborting."
-    exit 1
-fi
+# if [ $? -ne 0 ]; then
+#     print_error "Failed to build base image: $BASE_NAME, aborting."
+#     exit 1
+# fi
 
 # Map host's display socket to docker
 DOCKER_ARGS+=("-v /tmp/.X11-unix:/tmp/.X11-unix")
