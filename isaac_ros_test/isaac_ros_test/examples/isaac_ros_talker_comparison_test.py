@@ -68,10 +68,10 @@ class IsaacROSTalkerComparisonTest(IsaacROSBaseTest):
             while time.time() < end_time:
                 rclpy.spin_once(self.node, timeout_sec=0.1)
 
-                if all([
+                if all(
                     len(messages) >= MESSAGES_RECEIVED_COUNT
                     for messages in received_messages.values()
-                ]):
+                ):
                     done = True
                     break
 
