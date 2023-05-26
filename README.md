@@ -1,9 +1,5 @@
 # Isaac ROS Common
 
-## Latest Update
-
-Update 2023-04-05: Merged 'Dockerfile.humble' and 'Dockerfile.nav2' into 'Dockerfile.ros2_humble' as image key 'ros2_humble'.
-
 ## Overview
 
 The [Isaac ROS Common](https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common) repository contains a number of scripts and Dockerfiles to help streamline development and testing with the Isaac ROS suite.
@@ -37,7 +33,7 @@ If you write a file with the name `.isaac_ros_common-config` in the same directo
 
 | Key                         | Type                 | Description                                                 | Examples                              |
 | --------------------------- | -------------------- | ----------------------------------------------------------- | ------------------------------------- |
-| `CONFIG_IMAGE_KEY`          | String               | Image key with period-delimited components                  | `ros2_humble.realsense` <br> `first.second.third` |
+| `CONFIG_IMAGE_KEY`          | String               | Image key with period-delimited components                  | `ros2_humble.realsense` <br> `humble` |
 | `CONFIG_DOCKER_SEARCH_DIRS` | Bash array of string | List of directories to search for Dockerfiles when matching | `($HOME/ros_ws/docker $HOME/docker)`  |
 
 For example, if you had the following directory structure:
@@ -92,7 +88,7 @@ This configures the image key to match with `mine` included and specifies where 
 
 ## Latest Update
 
-Update 2023-04-05: Experimental support for WSL2
+Update 2023-05-25: Refreshed ROS 2 Humble.
 
 ## Supported Platforms
 
@@ -109,7 +105,8 @@ This package is designed and tested to be compatible with ROS 2 Humble running o
 
 | Date       | Changes                                                                                                                                                       |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2023-04-05 | Experimental support for WSL2, merged image keys 'humble' and 'nav2' into 'ros2_humble'                                                                                                                     |
+| 2023-05-25 | Refreshed ROS 2 Humble                                                                                                                                        |
+| 2023-04-05 | Experimental support for WSL2, merged image keys 'humble' and 'nav2' into 'ros2_humble'                                                                       |
 | 2022-10-19 | Minor updates and bugfixes                                                                                                                                    |
 | 2022-08-31 | Update to be compatible with JetPack 5.0.2                                                                                                                    |
 | 2022-06-30 | Support ROS 2 Humble and miscellaneous bug fixes.                                                                                                             |

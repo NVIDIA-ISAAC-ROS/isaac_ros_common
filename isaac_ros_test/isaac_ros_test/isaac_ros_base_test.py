@@ -11,13 +11,14 @@
 import functools
 from pathlib import Path
 import time
-from typing import Any, Callable, Dict, Iterable, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Tuple
 import unittest
 
 import cv2  # noqa: F401
 from cv_bridge import CvBridge
 import launch
 import launch_testing.actions
+from message_filters import Subscriber, TimeSynchronizer
 import numpy as np
 import rclpy
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
@@ -180,7 +181,8 @@ class IsaacROSBaseTest(unittest.TestCase):
 
         """
         self.assertTupleEqual(actual.shape, expected.shape)
-        difference = np.linalg.norm(actual - expected)
+        # convert to int32 to prevent -ve overflow when input numpy array is of type uint8
+        difference = np.linalg.norm(actual.astype(np.int32) - expected.astype(np.int32))
         threshold_pixels = threshold_fraction * actual.size * 255
         self.assertLessEqual(
             difference, threshold_pixels,
@@ -243,7 +245,9 @@ class IsaacROSBaseTest(unittest.TestCase):
                         received_messages[topic].append(msg)
                 else:
                     self.assertTrue(topic not in received_messages,
-                                    f'Already received a message on topic {topic}!')
+                                    f'Already received a message on topic {topic}! \
+                                    To enable multiple messages on the same topic \
+                                    use the accept_multiple_messages flag')
                     received_messages[topic] = msg
 
             return callback
@@ -254,6 +258,68 @@ class IsaacROSBaseTest(unittest.TestCase):
             make_callback(topic),
             qos_profile,
         ) for topic, msg_type in subscription_requests]
+
+        return subscriptions
+
+    def create_exact_time_sync_logging_subscribers(
+        self,
+        subscription_requests: Iterable[Tuple[str, Any]],
+        received_messages: List[Any],
+        accept_multiple_messages: bool = False,
+        exact_time_sync_queue: int = 10,
+        add_received_message_timestamps: bool = False
+    ) -> Iterable[Subscription]:
+        """
+        Create subscribers that log time synced messages received to the passed-in dictionary.
+
+        Parameters
+        ----------
+        subscription_requests : Iterable[Tuple[str, Any]]
+            List of topic names and topic types to subscribe to.
+
+        received_messages : List[Any]
+            Output list of synced messages
+
+        accept_multiple_messages : bool
+            Whether the generated subscription callbacks should accept multiple messages,
+            by default False
+
+        exact_time_sync_queue : int
+            The size of the time sync buffer queue.
+
+        add_received_message_timestamps : bool
+            Whether the generated subscription callbacks should add a timestamp to the messages,
+            by default False
+
+        Returns
+        -------
+        Iterable[Subscription]
+            List of subscribers, passing the unsubscribing responsibility to the caller
+
+        """
+        def callback(*arg):
+            if accept_multiple_messages:
+                if add_received_message_timestamps:
+                    received_messages.append((arg, time.time()))
+                else:
+                    received_messages.append(arg)
+            else:
+                self.assertTrue(len(received_messages) == 0,
+                                'Already received a syned message! \
+                                To enable multiple messages on the same topic \
+                                use the accept_multiple_messages flag')
+                if add_received_message_timestamps:
+                    received_messages.append((arg, time.time()))
+                else:
+                    received_messages.append(arg)
+
+        subscriptions = [Subscriber(self.node, msg_type, topic)
+                         for topic, msg_type in subscription_requests]
+        ets = TimeSynchronizer(
+            subscriptions,
+            exact_time_sync_queue
+        )
+        ets.registerCallback(callback)
 
         return subscriptions
 

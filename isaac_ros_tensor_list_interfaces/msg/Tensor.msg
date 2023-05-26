@@ -6,15 +6,15 @@ TensorShape shape
 
 # Data type for tensor
 # Use the following values to represent these data types:
-# - 1: "uint8"
-# - 2: "int8"
-# - 3: "uint16"
-# - 4: "int16"
-# - 5: "uint32"
-# - 6: "int32"
-# - 7: "uint64"
-# - 8: "int64"
-# - 9: "float32"
+# -  1: "int8"
+# -  2: "uint8"
+# -  3: "int16"
+# -  4: "uint16"
+# -  5: "int32"
+# -  6: "uint32"
+# -  7: "int64"
+# -  8: "uint64"
+# -  9: "float32"
 # - 10: "float64"
 int32 data_type
 
