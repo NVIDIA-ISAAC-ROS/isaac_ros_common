@@ -38,7 +38,7 @@ NUM_PROCS=""
 while :
 do
    case "$1" in
-      -n | --build_no_cuda) USE_CUDA=false   ; shift ;;
+      -n | --no_cuda)       USE_CUDA=false   ; shift ;;
       -v | --version )      LIBREALSENSE_VERSION="$2" ; shift 2 ;;
       -j | --jobs)          NUM_PROCS="$2" ; 
                             shift 2 ;
