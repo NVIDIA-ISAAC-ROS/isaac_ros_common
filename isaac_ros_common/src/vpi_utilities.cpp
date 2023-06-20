@@ -39,7 +39,7 @@ uint32_t DeclareVPIBackendParameter(rclcpp::Node * node, uint32_t default_backen
   const std::string DEFAULT_BACKENDS_STRING{""};
   const std::string backends_string{node->declare_parameter("backends", DEFAULT_BACKENDS_STRING)};
 
-  // If the ROS2 parameter is still at the default value, then return the default backend
+  // If the ROS 2 parameter is still at the default value, then return the default backend
   if (backends_string == DEFAULT_BACKENDS_STRING) {
     return default_backends;
   }

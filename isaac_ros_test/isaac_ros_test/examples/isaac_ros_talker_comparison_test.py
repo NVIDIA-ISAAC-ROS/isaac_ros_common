@@ -19,7 +19,7 @@ from std_msgs.msg import String
 
 @pytest.mark.rostest
 def generate_test_description():
-    """Generate launch description with all ROS2 nodes for testing."""
+    """Generate launch description with all ROS 2 nodes for testing."""
     nodes = [
         # Normally, we will compare our custom implementation to a reference implementation,
         # but for the sake of example here we will compare two separate reference implementations.
@@ -68,10 +68,10 @@ class IsaacROSTalkerComparisonTest(IsaacROSBaseTest):
             while time.time() < end_time:
                 rclpy.spin_once(self.node, timeout_sec=0.1)
 
-                if all([
+                if all(
                     len(messages) >= MESSAGES_RECEIVED_COUNT
                     for messages in received_messages.values()
-                ]):
+                ):
                     done = True
                     break
 

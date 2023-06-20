@@ -1,0 +1,28 @@
+"""
+ SPDX-FileCopyrightText: Copyright (c) 2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ SPDX-License-Identifier: Apache-2.0
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+"""
+
+--- usr/local/cuda-11.4/targets/aarch64-linux/include/cuda/std/detail/libcxx/include/cmath	2022-11-09 12:28:48.381859565 -0800
++++ usr/local/cuda-11.4/targets/aarch64-linux/include/cuda/std/detail/libcxx/include/cmath	2022-11-09 12:28:58.021653123 -0800
+@@ -565,7 +565,7 @@
+ using ::truncl;
+ #endif
+
+-#if _LIBCUDACXX_STD_VER > 14 && (defined(_LIBCUDACXX_NO_HOST_CPP17_HYPOT) || !defined(_LIBCUDACXX_COMPILER_NVCC))
++#if _LIBCUDACXX_STD_VER > 14 && !defined(__cuda_std__)
+ inline _LIBCUDACXX_INLINE_VISIBILITY float       hypot(       float x,       float y,       float z ) { return sqrt(x*x + y*y + z*z); }
+ inline _LIBCUDACXX_INLINE_VISIBILITY double      hypot(      double x,      double y,      double z ) { return sqrt(x*x + y*y + z*z); }
+ #ifdef _LIBCUDACXX_HAS_COMPLEX_LONG_DOUBLE
