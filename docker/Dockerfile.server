@@ -1,0 +1,5 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+#install deps
+RUN pip3 install fastapi uvicorn[standard] python-socketio asyncio azure-iot-device
