@@ -18,4 +18,10 @@ rosdep update
 # Restart udev daemon
 sudo service udev restart
 
+echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
+source /workspaces/isaac_ros-dev/install/setup.bash
+#ros2 launch yolox_ros_cpp yolox_tensorrt_jetson.launch.py &
+# python3 /workspaces/isaac_ros-dev/src/backend_ui_server/backend_ui_server/mock_hardware_service.py &
+#ros2 launch micro_ros_agent micro_ros_agent_launch.py &
+
 $@
