@@ -184,6 +184,7 @@ docker run -it --rm \
     -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
     -v /dev/*:/dev/* \
     -v /etc/localtime:/etc/localtime:ro \
+    -v /home/mdev:/home/admin \
     --name "$CONTAINER_NAME" \
     --runtime nvidia \
     --user="admin" \
