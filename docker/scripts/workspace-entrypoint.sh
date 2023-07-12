@@ -27,9 +27,9 @@ pip3 install typing-extensions --upgrade
 
 # Start the applications
 #ros2 launch yolox_ros_cpp yolox_tensorrt_jetson.launch.py &
-ros2 launch micro_ros_agent micro_ros_agent_launch.py &
 python3 /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/main.py \
     --conn_string_path /usr/config/connection.txt \
     --default_config_path /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/default_machine_config.json \
-    --config_path /usr/config/machine_config.json
+    --config_path /usr/config/machine_config.json &
+ros2 launch micro_ros_agent micro_ros_agent_launch.py
 $@
