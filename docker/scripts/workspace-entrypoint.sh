@@ -12,8 +12,8 @@
 echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 source /opt/ros/${ROS_DISTRO}/setup.bash
 
-sudo apt-get update
-rosdep update
+# sudo apt-get update
+# rosdep update
 
 # Restart udev daemon
 sudo service udev restart
@@ -23,5 +23,15 @@ source /workspaces/isaac_ros-dev/install/setup.bash
 #ros2 launch yolox_ros_cpp yolox_tensorrt_jetson.launch.py &
 # python3 /workspaces/isaac_ros-dev/src/backend_ui_server/backend_ui_server/mock_hardware_service.py &
 #ros2 launch micro_ros_agent micro_ros_agent_launch.py &
+
+# Start the BE server
+sudo chown 1000:1000 /usr/config/
+pip3 install typing-extensions --upgrade
+python3 /workspaces/isaac_ros-dev/jetsondevelopment/src/backend_ui_server/backend_ui_server/main.py
+python3 /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/main.py \
+    --conn_string_path /usr/config/connection.txt \
+    --default_config_path /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/default_machine_config.json \
+    --config_path /usr/config/machine_config.json
+
 
 $@
