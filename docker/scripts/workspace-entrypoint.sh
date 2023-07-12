@@ -27,7 +27,7 @@ source /workspaces/isaac_ros-dev/install/setup.bash
 # Start the BE server
 sudo chown 1000:1000 /usr/config/
 pip3 install typing-extensions --upgrade
-python3 /workspaces/isaac_ros-dev/jetsondevelopment/src/backend_ui_server/backend_ui_server/main.py
+
 python3 /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/main.py \
     --conn_string_path /usr/config/connection.txt \
     --default_config_path /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/default_machine_config.json \
