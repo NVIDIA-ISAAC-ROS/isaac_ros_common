@@ -12,6 +12,7 @@
 echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 source /opt/ros/${ROS_DISTRO}/setup.bash
 
+# source workspace
 WORKDIR_INSTALL="/workspaces/isaac_ros-dev/install"
 if [ -d ${WORKDIR_INSTALL} ]; then
     echo "source ${WORKDIR_INSTALL}/setup.bash" >> ~/.bashrc
