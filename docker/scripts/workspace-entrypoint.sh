@@ -12,6 +12,13 @@
 echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 source /opt/ros/${ROS_DISTRO}/setup.bash
 
+WORKDIR_INSTALL="/workspaces/isaac_ros-dev/install"
+if [ -d ${WORKDIR_INSTALL} ]; then
+    echo "source ${WORKDIR_INSTALL}/setup.bash" >> ~/.bashrc
+    chmod +x ${WORKDIR_INSTALL}/*.bash
+    source ${WORKDIR_INSTALL}/setup.bash
+fi
+
 sudo apt-get update
 rosdep update
 
