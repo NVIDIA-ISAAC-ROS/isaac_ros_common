@@ -19,7 +19,7 @@ The second option requires more work, but saves the need to reflash the Jetson. 
 
 Before setting up the SSD, make sure you have all necessary software installed.
 
-> **Note**: If you used an NVIDIA-supplied SD card image to flash your SD card, all necessary JetPack components are already pre-installed, so this section can be skipped.
+> **Note**: If you used an NVIDIA-supplied SD card image to flash your SD card, all necessary JetPack components are already pre-installed, so this section can be skipped. Although, verifying the correct setup won't hurt!
 
 1. Install the full NVIDIA JetPack SDK, which includes the `nvidia-container` package.
 
