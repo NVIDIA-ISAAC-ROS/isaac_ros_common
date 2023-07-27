@@ -210,6 +210,14 @@ Now that the SSD is installed and available to your device, you can use the extr
         sudo journalctl -u docker
     ```
 
+6. Restart the Docker service and add your user to the `docker` group.
+
+   ```bash
+   sudo systemctl restart docker
+   sudo usermod -aG docker $USER
+   newgrp docker
+   ```
+
 ### Test Docker on SSD
 
 1. \[Terminal 1\] First, open a terminal to monitor the disk usage while pulling a Docker image.
