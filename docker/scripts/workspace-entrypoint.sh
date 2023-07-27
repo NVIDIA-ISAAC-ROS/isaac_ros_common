@@ -8,6 +8,9 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
+#Get platform
+PLATFORM="$(uname -m)"
+
 # Build ROS dependency
 echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 source /opt/ros/${ROS_DISTRO}/setup.bash
@@ -18,18 +21,19 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 # Restart udev daemon
 sudo service udev restart
 
-echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
+# echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
 source /workspaces/isaac_ros-dev/install/setup.bash
 
 # Setup before starting BE server
 sudo chown 1000:1000 /usr/config/
-pip3 install typing-extensions --upgrade
+if [[ "$PLATFORM" == "aarch64" ]]; then
+    pip3 install typing-extensions --upgrade
+fi
 
 # Start the applications
-#ros2 launch yolox_ros_cpp yolox_tensorrt_jetson.launch.py &
 python3 /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/main.py \
-    --conn_string_path /usr/config/connection.txt \
-    --default_config_path /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/default_machine_config.json \
-    --config_path /usr/config/machine_config.json &
+   --conn_string_path /usr/config/connection.txt \
+   --default_config_path /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/default_machine_config.json \
+   --config_path /usr/config/machine_config.json &
 ros2 launch micro_ros_agent micro_ros_agent_launch.py
 $@
