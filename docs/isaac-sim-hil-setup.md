@@ -8,7 +8,7 @@ Hardware in the Loop (HIL) refers to a configuration where the software is being
 
 1. Complete the Quickstart section in the main README of the package of interest.
 2. Install Isaac Sim and Nucleus following steps 1-2 of the [Isaac Sim Software in the Loop (SIL) guide](./isaac-sim-sil-setup.md).
-3. Open the location of the Isaac Sim package in the terminal by clicking the [**Open in Terminal**](https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim/user_interface_launcher.html) button.
+3. Open the location of the Isaac Sim package in the terminal by clicking the [**Open in Terminal**](https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim/reference_user_interface.html#isaac-sim-app-selector) button.
 
    <div align="center"><img src="../resources/Isaac_sim_app_launcher.png" width="400px"/></div>
 4. In the terminal opened by the previous step, set the `ROS_DOMAIN_ID` as shown:
