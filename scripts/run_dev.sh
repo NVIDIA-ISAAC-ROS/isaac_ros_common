@@ -93,7 +93,7 @@ fi
 PLATFORM="$(uname -m)"
 
 BASE_NAME="isaac_ros_dev-$PLATFORM"
-CONTAINER_NAME="$BASE_NAME-container"
+CONTAINER_NAME="$BASE_NAME"
 
 # Remove any exited containers.
 if [ "$(docker ps -a --quiet --filter status=exited --filter name=$CONTAINER_NAME)" ]; then
@@ -124,13 +124,15 @@ if [[ ! -z "${IMAGE_KEY}" ]]; then
 fi
 
 #print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME using key $BASE_IMAGE_KEY"
-#$ROOT/build_base_image.sh $BASE_IMAGE_KEY $BASE_NAME '' '' ''
 
-# if [ $? -ne 0 ]; then
-#     print_error "Failed to build base image: $BASE_NAME, aborting."
-#     exit 1
-# fi
+if [[ $(docker image inspect "$CONTAINER_NAME") == [] ]]; then
+    $ROOT/build_base_image.sh $BASE_IMAGE_KEY $BASE_NAME '' '' ''
 
+    if [ $? -ne 0 ]; then
+        print_error "Failed to build base image: $BASE_NAME, aborting."
+        exit 1
+    fi
+fi
 # Map host's display socket to docker
 DOCKER_ARGS+=("-v /tmp/.X11-unix:/tmp/.X11-unix")
 DOCKER_ARGS+=("-v $HOME/.Xauthority:/home/admin/.Xauthority:rw")
