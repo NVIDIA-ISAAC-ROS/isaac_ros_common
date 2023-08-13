@@ -15,12 +15,4 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 # Restart udev daemon
 sudo service udev restart
 
-# Build and source the workspace
-cd /workspaces/isaac_ros-dev && \
-  colcon build --symlink-install && \
-  source install/setup.bash
-
-# Launch the apriltag package
-ros2 launch isaac_ros_apriltag isaac_ros_apriltag_realsense.launch.py
-
 $@
