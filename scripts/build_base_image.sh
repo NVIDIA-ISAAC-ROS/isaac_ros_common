@@ -29,7 +29,7 @@ if [[ -f "${ROOT}/.isaac_ros_common-config" ]]; then
     # Prepend configured docker search dirs
     if [ ${#CONFIG_DOCKER_SEARCH_DIRS[@]} -gt 0 ]; then
         for (( i=${#CONFIG_DOCKER_SEARCH_DIRS[@]}-1 ; i>=0 ; i-- )); do
-            if [[ "${CONFIG_DOCKER_SEARCH_DIRS[i]}" != '/*'* ]]; then
+            if [[ "${CONFIG_DOCKER_SEARCH_DIRS[i]}" != '/'* ]]; then
                 CONFIG_DOCKER_SEARCH_DIRS[$i]="${ROOT}/${CONFIG_DOCKER_SEARCH_DIRS[i]}"
             fi
         done
