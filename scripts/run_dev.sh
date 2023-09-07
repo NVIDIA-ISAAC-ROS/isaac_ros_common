@@ -182,7 +182,7 @@ docker run -it --rm \
     --network host \
     ${DOCKER_ARGS[@]} \
     -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
-    -v /dev/*:/dev/* \
+    -v /dev/:/dev/ \
     -v /etc/localtime:/etc/localtime:ro \
     -v /usr/config:/usr/config \
     --name "$CONTAINER_NAME" \
