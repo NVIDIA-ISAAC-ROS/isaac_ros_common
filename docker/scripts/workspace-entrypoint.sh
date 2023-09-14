@@ -17,7 +17,8 @@
 
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
- 
+#Get platform
+PLATFORM="$(uname -m)"
 
 # Build ROS dependency
 
@@ -37,23 +38,31 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 
 sudo service udev restart
 
- 
-
-echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
-
+# echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
 source /workspaces/isaac_ros-dev/install/setup.bash
 
-#ros2 launch yolox_ros_cpp yolox_tensorrt_jetson.launch.py &
+# Setup before starting BE server
+sudo chown 1000:1000 /usr/config/
+if [[ "$PLATFORM" == "aarch64" ]]; then
+    pip3 install typing-extensions --upgrade
+fi
 
+# Start the applications
+python3 /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/main.py \
+   --conn_string_path /usr/config/connection.txt \
+   --default_config_path /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/default_machine_config.json \
+   --config_path /usr/config/machine_config.json \
+   --resource_path /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/resource &
+   
 ros2 launch micro_ros_agent micro_ros_agent_launch.py &
 
-pip install typing-extensions --upgrade
-
-python3 /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/main.py --conn_string_path /usr/config/connection.txt --default_config_path /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/default_machine_config.json --config_path /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/machine_config.json
-
- 
-
- 
+#Install can if not already installed
+if [ -d "/sys/class/net/can0" ]; then
+    echo "CAN Installed"
+    ros2 run py_ui_messaging run_msgs
+else
+    echo "CAN Controller is not configured on this device!"
+fi
 
 $@
 
