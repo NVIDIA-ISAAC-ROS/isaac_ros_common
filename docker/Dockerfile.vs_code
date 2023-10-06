@@ -4,6 +4,8 @@ FROM ${BASE_IMAGE}
 # Set environment variables to non-interactive (this prevents some prompts)
 ENV DEBIAN_FRONTEND=non-interactive
 
+ENV VSCODE=true
+
 # Run package updates and install packages
 RUN apt-get update \
     && apt-get install -y \
@@ -22,9 +24,6 @@ RUN wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | apt-key add 
 # Install VS Code
 RUN apt-get update \
     && apt-get install -y code
-
-# Install Python extension for VS Code
-RUN code --install-extension ms-python.python --force --user-data-dir /home/root/.vscode/
 
 # Add Google Chrome's GPG key and repository
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
