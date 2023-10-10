@@ -37,6 +37,8 @@ if [[ "$VSCODE" == true ]]; then
     code --install-extension codium.codium --force --user-data-dir $HOME/.vscode/
     code --install-extension github.copilot --force --user-data-dir $HOME/.vscode/
     code --install-extension ms-azuretools.vscode-docker --force --user-data-dir $HOME/.vscode/
+    code --install-extension github.vscode-pull-request-github --force --user-data-dir $HOME/.vscode/
+    code --install-extension eamodio.gitlens --force --user-data-dir $HOME/.vscode/
 fi
  
 
