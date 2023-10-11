@@ -9,7 +9,7 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $ROOT/utils/print_color.sh
+source "$ROOT/utils/print_color.sh"
 
 function usage() {
     print_info "Usage: run_dev.sh" {isaac_ros_dev directory path OPTIONAL}
@@ -26,12 +26,23 @@ fi
 
 ISAAC_ROS_DEV_DIR="$1"
 if [[ -z "$ISAAC_ROS_DEV_DIR" ]]; then
-    ISAAC_ROS_DEV_DIR="$HOME/workspaces/isaac_ros-dev"
+    ISAAC_ROS_DEV_DIR_DEFAULTS=("$HOME/workspaces/isaac_ros-dev" "/ssd/workspaces/isaac_ros-dev")
+    for ISAAC_ROS_DEV_DIR in "${ISAAC_ROS_DEV_DIR_DEFAULTS[@]}"
+    do
+        if [[ -d "$ISAAC_ROS_DEV_DIR" ]]; then
+            break
+        fi
+    done
+
     if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
-        ISAAC_ROS_DEV_DIR=$(pwd)
+        ISAAC_ROS_DEV_DIR=$(realpath "$ROOT/../../../")
     fi
     print_warning "isaac_ros_dev not specified, assuming $ISAAC_ROS_DEV_DIR"
 else
+    if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
+        print_error "Specified isaac_ros_dev does not exist: $ISAAC_ROS_DEV_DIR"
+        exit 1
+    fi
     shift 1
 fi
 
@@ -45,7 +56,7 @@ function cleanup {
 trap cleanup EXIT
 
 pushd . >/dev/null
-cd $ROOT
+cd "$ROOT"
 ON_EXIT+=("popd")
 
 # Prevent running as root.
@@ -72,15 +83,17 @@ if [[ -z "$(docker ps)" ]] ;  then
 fi
 
 # Check if git-lfs is installed.
-if [[ -z "$(git lfs)" ]] ; then
+git lfs &>/dev/null
+if [[ $? -ne 0 ]] ; then
     print_error "git-lfs is not insalled. Please make sure git-lfs is installed before you clone the repo."
     exit 1
 fi
 
-# Check if all LFS files are in place
+# Check if all LFS files are in place in the repository where this script is running from.
+cd "$ROOT"
 git rev-parse &>/dev/null
 if [[ $? -eq 0 ]]; then
-    LFS_FILES_STATUS=$(cd $ISAAC_ROS_DEV_DIR && git lfs ls-files | cut -d ' ' -f2)
+    LFS_FILES_STATUS=$(cd "$ROOT/.." && git lfs ls-files | cut -d ' ' -f2)
     for (( i=0; i<${#LFS_FILES_STATUS}; i++ )); do
         f="${LFS_FILES_STATUS:$i:1}"
         if [[ "$f" == "-" ]]; then
@@ -124,7 +137,7 @@ if [[ ! -z "${IMAGE_KEY}" ]]; then
 fi
 
 print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME using key $BASE_IMAGE_KEY"
-$ROOT/build_base_image.sh $BASE_IMAGE_KEY $BASE_NAME '' '' ''
+"$ROOT/build_base_image.sh" $BASE_IMAGE_KEY $BASE_NAME '' '' ''
 
 if [ $? -ne 0 ]; then
     print_error "Failed to build base image: $BASE_NAME, aborting."
@@ -181,7 +194,7 @@ docker run -it --rm \
     --privileged \
     --network host \
     ${DOCKER_ARGS[@]} \
-    -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
+    -v "$ISAAC_ROS_DEV_DIR":/workspaces/isaac_ros-dev \
     -v /dev/*:/dev/* \
     -v /etc/localtime:/etc/localtime:ro \
     --name "$CONTAINER_NAME" \
