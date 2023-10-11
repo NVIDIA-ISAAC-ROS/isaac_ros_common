@@ -26,12 +26,23 @@ fi
 
 ISAAC_ROS_DEV_DIR="$1"
 if [[ -z "$ISAAC_ROS_DEV_DIR" ]]; then
-    ISAAC_ROS_DEV_DIR="$HOME/workspaces/isaac_ros-dev"
+    ISAAC_ROS_DEV_DIR_DEFAULTS=("$HOME/workspaces/isaac_ros-dev" "/workspaces/isaac_ros-dev")
+    for ISAAC_ROS_DEV_DIR in "${ISAAC_ROS_DEV_DIR_DEFAULTS[@]}"
+    do
+        if [[ -d "$ISAAC_ROS_DEV_DIR" ]]; then
+            break
+        fi
+    done
+
     if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
-        ISAAC_ROS_DEV_DIR="$ROOT/../../.."
+        ISAAC_ROS_DEV_DIR=$(realpath "$ROOT/../../")
     fi
     print_warning "isaac_ros_dev not specified, assuming $ISAAC_ROS_DEV_DIR"
 else
+    if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
+        print_error "Specified isaac_ros_dev does not exist: $ISAAC_ROS_DEV_DIR"
+        exit 1
+    fi
     shift 1
 fi
 
@@ -72,15 +83,17 @@ if [[ -z "$(docker ps)" ]] ;  then
 fi
 
 # Check if git-lfs is installed.
-if [[ -z "$(git lfs)" ]] ; then
+git lfs &>/dev/null
+if [[ $? -ne 0 ]] ; then
     print_error "git-lfs is not insalled. Please make sure git-lfs is installed before you clone the repo."
     exit 1
 fi
 
-# Check if all LFS files are in place
+# Check if all LFS files are in place in the repository where this script is running from.
+cd $ROOT
 git rev-parse &>/dev/null
 if [[ $? -eq 0 ]]; then
-    LFS_FILES_STATUS=$(cd "$ISAAC_ROS_DEV_DIR/src/isaac_ros_common" && git lfs ls-files | cut -d ' ' -f2)
+    LFS_FILES_STATUS=$(cd $ISAAC_ROS_DEV_DIR && git lfs ls-files | cut -d ' ' -f2)
     for (( i=0; i<${#LFS_FILES_STATUS}; i++ )); do
         f="${LFS_FILES_STATUS:$i:1}"
         if [[ "$f" == "-" ]]; then
@@ -181,7 +194,7 @@ docker run -it --rm \
     --privileged \
     --network host \
     ${DOCKER_ARGS[@]} \
-    -v "$ISAAC_ROS_DEV_DIR":/workspaces/isaac_ros-dev \
+    -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
     -v /dev/*:/dev/* \
     -v /etc/localtime:/etc/localtime:ro \
     --name "$CONTAINER_NAME" \
