@@ -9,7 +9,7 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $ROOT/utils/print_color.sh
+source "$ROOT/utils/print_color.sh"
 DOCKER_DIR="${ROOT}/../docker"
 
 function usage() {
@@ -17,7 +17,7 @@ function usage() {
     print_info "Copyright (c) 2022, NVIDIA CORPORATION."
 }
 
-DOCKER_SEARCH_DIRS=(${DOCKER_DIR})
+DOCKER_SEARCH_DIRS=("${DOCKER_DIR}")
 
 # Read and parse config file if exists
 #
@@ -34,8 +34,8 @@ if [[ -f "${ROOT}/.isaac_ros_common-config" ]]; then
             fi
         done
 
-        CONFIG_DOCKER_SEARCH_DIRS+=(${DOCKER_SEARCH_DIRS[@]})
-        DOCKER_SEARCH_DIRS=(${CONFIG_DOCKER_SEARCH_DIRS[@]})
+        CONFIG_DOCKER_SEARCH_DIRS+=("${DOCKER_SEARCH_DIRS[@]}")
+        DOCKER_SEARCH_DIRS=("${CONFIG_DOCKER_SEARCH_DIRS[@]}")
 
         print_info "Using configured docker search paths: ${DOCKER_SEARCH_DIRS[*]}"
     fi
@@ -107,12 +107,12 @@ until [ ${#IMAGE_IDS[@]} -le 0 ]; do
         LAYER_IMAGE_IDS=${IMAGE_IDS[@]:i}
         LAYER_IMAGE_SUFFIX="${LAYER_IMAGE_IDS[@]// /.}"
 
-        for DOCKER_SEARCH_DIR in ${DOCKER_SEARCH_DIRS[@]}; do
+        for DOCKER_SEARCH_DIR in "${DOCKER_SEARCH_DIRS[@]}"; do
             DOCKERFILE="${DOCKER_SEARCH_DIR}/Dockerfile.${LAYER_IMAGE_SUFFIX}"
 
             if [[ -f "${DOCKERFILE}" ]]; then
-                DOCKERFILES+=(${DOCKERFILE})
-                DOCKERFILE_CONTEXT_DIRS+=(${DOCKER_SEARCH_DIR})
+                DOCKERFILES+=("${DOCKERFILE}")
+                DOCKERFILE_CONTEXT_DIRS+=("${DOCKER_SEARCH_DIR}")
                 IMAGE_IDS=(${IMAGE_IDS[@]:0:i})
                 break 2
             fi
@@ -121,12 +121,12 @@ until [ ${#IMAGE_IDS[@]} -le 0 ]; do
 
     if [ ${UNMATCHED_ID_COUNT} -eq ${#IMAGE_IDS[@]} ]; then
         UNMATCHED_IDS=${IMAGE_IDS[@]}
-        MATCHED_DOCKERFILES=${DOCKERFILES[@]}
+        MATCHED_DOCKERFILES="${DOCKERFILES[@]}"
         print_error "Could not resolve Dockerfiles for target image ids: ${UNMATCHED_IDS// /.}"
 
-        if [ ${#DOCKERFILES[@]} -gt 0 ]; then
+        if [ "${#DOCKERFILES[@]}" -gt 0 ]; then
             print_warning "Partially resolved the following Dockerfiles for target image: ${TARGET_IMAGE_STR}"
-            for DOCKERFILE in ${DOCKERFILES[@]}; do
+            for DOCKERFILE in "${DOCKERFILES[@]}"; do
                 print_warning "${DOCKERFILE}"
             done
         fi
@@ -165,27 +165,27 @@ fi
 
 
 print_info "Resolved the following Dockerfiles for target image: ${TARGET_IMAGE_STR}"
-for DOCKERFILE in ${DOCKERFILES[@]}; do
+for DOCKERFILE in "${DOCKERFILES[@]}"; do
     print_info "${DOCKERFILE}"
 done
 
 # Build image layers
-for (( i=${#DOCKERFILES[@]}-1 ; i>=0 ; i-- )); do
-    DOCKERFILE=${DOCKERFILES[i]}
-    DOCKERFILE_CONTEXT_DIR=${DOCKERFILE_CONTEXT_DIRS[i]}
+for (( i="${#DOCKERFILES[@]}"-1 ; i>=0 ; i-- )); do
+    DOCKERFILE="${DOCKERFILES[i]}"
+    DOCKERFILE_CONTEXT_DIR="${DOCKERFILE_CONTEXT_DIRS[i]}"
     IMAGE_NAME=${DOCKERFILE#*"/Dockerfile."}
     IMAGE_NAME="${IMAGE_NAME//./-}-image"
 
     # Build the base images in layers first
     BASE_IMAGE_ARG=
-    if [ $i -eq $(( ${#DOCKERFILES[@]} - 1 )) ]; then
+    if [ $i -eq $(( "${#DOCKERFILES[@]}" - 1 )) ]; then
         if [[ ! -z "${BASE_IMAGE_NAME}" ]] ; then
             BASE_IMAGE_ARG="--build-arg BASE_IMAGE="${BASE_IMAGE_NAME}""
         fi
     fi
 
-    if [ $i -lt $(( ${#DOCKERFILES[@]} - 1 )) ]; then
-        BASE_DOCKERFILE=${DOCKERFILES[i+1]}
+    if [ $i -lt $(( "${#DOCKERFILES[@]}" - 1 )) ]; then
+        BASE_DOCKERFILE="${DOCKERFILES[i+1]}"
         BASE_IMAGE_NAME=${BASE_DOCKERFILE#*"/Dockerfile."}
         BASE_IMAGE_NAME="${BASE_IMAGE_NAME//./-}-image"
 
@@ -194,21 +194,21 @@ for (( i=${#DOCKERFILES[@]}-1 ; i>=0 ; i-- )); do
 
     # The last image should be the target image name
     # Use docker context dir script arg only for last image
-    DOCKER_CONTEXT_ARG=${DOCKERFILE_CONTEXT_DIR}
+    DOCKER_CONTEXT_ARG="${DOCKERFILE_CONTEXT_DIR}"
     if [ $i -eq 0 ]; then
-        IMAGE_NAME=${TARGET_IMAGE_NAME}
+        IMAGE_NAME="${TARGET_IMAGE_NAME}"
         if [[ ! -z "${DOCKER_CONTEXT_DIR}" ]]; then
-            DOCKER_CONTEXT_ARG=${DOCKER_CONTEXT_DIR}
+            DOCKER_CONTEXT_ARG="${DOCKER_CONTEXT_DIR}"
         fi
     fi
 
     print_warning "Building ${DOCKERFILE} as image: ${IMAGE_NAME} with base: ${BASE_IMAGE_NAME}"
 
-    DOCKER_BUILDKIT=${DOCKER_BUILDKIT} docker build -f ${DOCKERFILE} \
+    DOCKER_BUILDKIT=${DOCKER_BUILDKIT} docker build -f "${DOCKERFILE}" \
      --network host \
-     -t ${IMAGE_NAME} \
+     -t "${IMAGE_NAME}" \
      ${BASE_IMAGE_ARG} \
      "${BUILD_ARGS[@]}" \
      $@ \
-     ${DOCKER_CONTEXT_ARG}
+     "${DOCKER_CONTEXT_ARG}"
 done

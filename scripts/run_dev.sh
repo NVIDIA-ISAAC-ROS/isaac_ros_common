@@ -9,7 +9,7 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $ROOT/utils/print_color.sh
+source "$ROOT/utils/print_color.sh"
 
 function usage() {
     print_info "Usage: run_dev.sh" {isaac_ros_dev directory path OPTIONAL}
@@ -56,7 +56,7 @@ function cleanup {
 trap cleanup EXIT
 
 pushd . >/dev/null
-cd $ROOT
+cd "$ROOT"
 ON_EXIT+=("popd")
 
 # Prevent running as root.
@@ -90,7 +90,7 @@ if [[ $? -ne 0 ]] ; then
 fi
 
 # Check if all LFS files are in place in the repository where this script is running from.
-cd $ROOT
+cd "$ROOT"
 git rev-parse &>/dev/null
 if [[ $? -eq 0 ]]; then
     LFS_FILES_STATUS=$(cd "$ROOT/.." && git lfs ls-files | cut -d ' ' -f2)
@@ -137,7 +137,7 @@ if [[ ! -z "${IMAGE_KEY}" ]]; then
 fi
 
 print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME using key $BASE_IMAGE_KEY"
-$ROOT/build_base_image.sh $BASE_IMAGE_KEY $BASE_NAME '' '' ''
+"$ROOT/build_base_image.sh" $BASE_IMAGE_KEY $BASE_NAME '' '' ''
 
 if [ $? -ne 0 ]; then
     print_error "Failed to build base image: $BASE_NAME, aborting."
@@ -194,7 +194,7 @@ docker run -it --rm \
     --privileged \
     --network host \
     ${DOCKER_ARGS[@]} \
-    -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
+    -v "$ISAAC_ROS_DEV_DIR":/workspaces/isaac_ros-dev \
     -v /dev/*:/dev/* \
     -v /etc/localtime:/etc/localtime:ro \
     --name "$CONTAINER_NAME" \
