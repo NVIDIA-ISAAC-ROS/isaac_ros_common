@@ -185,6 +185,7 @@ docker run -it --rm \
     -v /dev/:/dev/ \
     -v /etc/localtime:/etc/localtime:ro \
     -v /usr/config:/usr/config \
+    -v /usr/data:/usr/data \
     --name "$CONTAINER_NAME" \
     --runtime nvidia \
     --user="admin" \
