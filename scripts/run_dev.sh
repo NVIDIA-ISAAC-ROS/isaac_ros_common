@@ -26,7 +26,7 @@ fi
 
 ISAAC_ROS_DEV_DIR="$1"
 if [[ -z "$ISAAC_ROS_DEV_DIR" ]]; then
-    ISAAC_ROS_DEV_DIR_DEFAULTS=("$HOME/workspaces/isaac_ros-dev" "/workspaces/isaac_ros-dev")
+    ISAAC_ROS_DEV_DIR_DEFAULTS=("$HOME/workspaces/isaac_ros-dev" "/ssd/workspaces/isaac_ros-dev")
     for ISAAC_ROS_DEV_DIR in "${ISAAC_ROS_DEV_DIR_DEFAULTS[@]}"
     do
         if [[ -d "$ISAAC_ROS_DEV_DIR" ]]; then
@@ -35,7 +35,7 @@ if [[ -z "$ISAAC_ROS_DEV_DIR" ]]; then
     done
 
     if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
-        ISAAC_ROS_DEV_DIR=$(realpath "$ROOT/../../")
+        ISAAC_ROS_DEV_DIR=$(realpath "$ROOT/../../../")
     fi
     print_warning "isaac_ros_dev not specified, assuming $ISAAC_ROS_DEV_DIR"
 else
@@ -93,7 +93,7 @@ fi
 cd $ROOT
 git rev-parse &>/dev/null
 if [[ $? -eq 0 ]]; then
-    LFS_FILES_STATUS=$(cd $ISAAC_ROS_DEV_DIR && git lfs ls-files | cut -d ' ' -f2)
+    LFS_FILES_STATUS=$(cd "$ROOT/.." && git lfs ls-files | cut -d ' ' -f2)
     for (( i=0; i<${#LFS_FILES_STATUS}; i++ )); do
         f="${LFS_FILES_STATUS:$i:1}"
         if [[ "$f" == "-" ]]; then
