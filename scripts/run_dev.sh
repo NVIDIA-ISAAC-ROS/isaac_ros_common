@@ -126,6 +126,11 @@ fi
 print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME using key $BASE_IMAGE_KEY"
 $ROOT/build_base_image.sh $BASE_IMAGE_KEY $BASE_NAME '' '' ''
 
+# If using the tests layer, run the test entrypoint not the regular one
+if [[ $BASE_IMAGE_KEY == *"tests"* ]]; then
+  RUN_TESTS=true
+fi
+
 if [ $? -ne 0 ]; then
     print_error "Failed to build base image: $BASE_NAME, aborting."
     exit 1
@@ -175,6 +180,12 @@ if [[ -f "$DOCKER_ARGS_FILE" ]]; then
     done
 fi
 
+if [[ -z "$RUN_TESTS" ]]; then
+    DOCKER_ARGS+=(--entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh)
+    else
+    DOCKER_ARGS+=("--entrypoint /usr/local/bin/scripts/test_entrypoint.sh")
+fi
+
 # Run container from image
 print_info "Running $CONTAINER_NAME"
 docker run -it --rm \
@@ -189,7 +200,6 @@ docker run -it --rm \
     --name "$CONTAINER_NAME" \
     --runtime nvidia \
     --user="admin" \
-    --entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh \
     --workdir /workspaces/isaac_ros-dev \
     $@ \
     $BASE_NAME \
