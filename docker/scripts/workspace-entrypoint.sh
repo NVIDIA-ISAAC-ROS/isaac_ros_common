@@ -46,7 +46,9 @@ fi
 
 sudo service udev restart
 
-# echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
+colcon build --symlink-install
+
+echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
 source /workspaces/isaac_ros-dev/install/setup.bash
 
 # Setup before starting BE server
@@ -58,6 +60,7 @@ if [[ "$PLATFORM" == "aarch64" ]]; then
 fi
 
 export RUN_DEV=true
+
 
 # Start the applications
 python3 /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/main.py \
