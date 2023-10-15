@@ -15,4 +15,15 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 # Restart udev daemon
 sudo service udev restart
 
+# Automatically build and source the workspace
+cd /workspaces/isaac_ros-dev && \
+colcon build --symlink-install && \
+source install/setup.bash
+
+# Automatically launch the apriltags package
+#ros2 launch isaac_ros_apriltag isaac_ros_apriltag_realsense.launch.py
+
+# Automatically launch the nvblox package
+# TODO: Launch nvblox_nav2 here
+
 $@
