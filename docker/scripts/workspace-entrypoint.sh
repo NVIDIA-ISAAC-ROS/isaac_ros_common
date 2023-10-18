@@ -18,4 +18,9 @@ rosdep update
 # Restart udev daemon
 sudo service udev restart
 
+# Build and source the workspace
+cd /workspaces/isaac_ros-dev && \
+colcon build --symlink-install && \
+source install/setup.bash
+
 $@
