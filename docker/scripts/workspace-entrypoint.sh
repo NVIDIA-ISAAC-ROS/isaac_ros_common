@@ -12,13 +12,13 @@
 echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 source /opt/ros/${ROS_DISTRO}/setup.bash
 
-#sudo apt-get update
-#rosdep update
+sudo apt-get update
+rosdep update
 
 # Restart udev daemon
 sudo service udev restart
 
-# Automatically build and source the workspace
+# Build and source the workspace
 cd /workspaces/isaac_ros-dev && \
 colcon build --symlink-install && \
 source install/setup.bash
@@ -27,6 +27,6 @@ source install/setup.bash
 #ros2 launch isaac_ros_apriltag isaac_ros_apriltag_realsense.launch.py
 
 # Automatically launch the nvblox package
-# TODO: Launch nvblox_nav2 here
+ros2 launch nvblox_nav2 nvblox_launch.py
 
 $@
