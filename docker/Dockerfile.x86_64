@@ -8,6 +8,7 @@
 #
 # Docker file to build on x86_64
 # https://docs.nvidia.com/deeplearning/frameworks/user-guide/index.html
+# https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html
 ARG BASE_IMAGE=nvcr.io/nvidia/tritonserver:22.09-py3
 FROM ${BASE_IMAGE}
 
@@ -22,6 +23,15 @@ RUN apt-key del 7fa2af80 && mkdir -p /tmp && cd /tmp \
         && dpkg -i cuda-keyring_1.0-1_all.deb \
         && rm cuda-keyring_1.0-1_all.deb \
         && add-apt-repository --remove 'deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /'
+
+# Add Isaac apt repository
+RUN wget -qO - https://isaac.download.nvidia.com/isaac-ros/repos.key | apt-key add -
+RUN echo 'deb https://isaac.download.nvidia.com/isaac-ros/ubuntu/main focal main' | tee -a /etc/apt/sources.list
+
+# Ensure we have universe
+RUN apt-get update \
+        && apt-get install -y software-properties-common \
+        && add-apt-repository universe
 
 # Fundamentals
 RUN apt-get update && apt-get install -y \
@@ -73,6 +83,7 @@ RUN apt-get update && apt-get install -y \
         libbullet-dev \
         libtinyxml2-dev \
         libcunit1-dev \
+        libyaml-cpp-dev \
         libopencv-dev \
         python3-opencv \
 && rm -rf /var/lib/apt/lists/* \
@@ -105,13 +116,12 @@ RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.d
 && rm -rf /var/lib/apt/lists/* \
 && apt-get clean
 
-# Upgrade cmake to 3.23.2
+# Upgrade cmake to 3.22.1 to match Ubuntu 22.04
 RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
     && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null \
     && apt-get update \
-    && apt-get update \
-    && apt-get remove -y cmake && apt-get purge -y cmake && apt-get remove -y cmake-data && apt-get purge -y cmake \
-    && apt-get install -y cmake=3.23.2-0kitware1ubuntu20.04.1 cmake-data=3.23.2-0kitware1ubuntu20.04.1 \
+    && apt-get remove -y cmake && apt-get purge -y cmake && apt-get remove -y cmake-data && apt-get purge -y cmake-data \
+    && apt-get install -y cmake=3.22.1-0kitware1ubuntu20.04.1 cmake-data=3.22.1-0kitware1ubuntu20.04.1 \
     && cmake --version \
 && rm -rf /var/lib/apt/lists/* \
 && apt-get clean
@@ -127,10 +137,11 @@ ARG HAS_GPU="true"
 RUN if [ "$HAS_GPU" = "true" ]; then \
 	set -e ; \
         apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc ; \
-        add-apt-repository 'deb http://repo.download.nvidia.com/jetson/x86_64/focal r35.2 main' ; \
+        add-apt-repository 'deb http://repo.download.nvidia.com/jetson/x86_64/focal r35.4 main' ; \
         apt-get update ; \
         apt-get install libnvvpi2 vpi2-dev ; \
         rm -rf /var/lib/apt/lists/* ; \
+        apt-get clean ; \
     fi
 
 # Install Tao converter
@@ -156,6 +167,16 @@ RUN apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
 
 RUN python3 -m pip install -U \
         paho-mqtt
+
+# Compression dependencies
+RUN apt-get update && apt-get install -y \
+        libv4l-dev \
+        kmod \
+&& rm -rf /var/lib/apt/lists/* \
+&& apt-get clean
+
+# Install NVIDIA v4l2 extensions for h264 support
+RUN apt-get update && apt-get install -y nvv4l2
 
 # Upgrade libc to resolve vulnerabilities including CVE-2019-11477
 RUN apt-get update && apt-get install -y --only-upgrade \
@@ -192,3 +213,6 @@ RUN rm -rf \
     /usr/lib/x86_64-linux-gnu/libnvidia-*.so* \
     /usr/lib/firmware \
     /usr/local/cuda/compat/lib || true
+
+# Restore symlink for nvencode
+RUN ln -f -s /usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1 /usr/lib/x86_64-linux-gnu/libnvidia-encode.so

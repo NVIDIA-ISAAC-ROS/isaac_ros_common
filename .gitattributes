@@ -26,3 +26,6 @@
 
 # trtexec
 trtexec_x86_64 filter=lfs diff=lfs merge=lfs -text
+
+# Debian packages
+*.deb filter=lfs diff=lfs merge=lfs -text

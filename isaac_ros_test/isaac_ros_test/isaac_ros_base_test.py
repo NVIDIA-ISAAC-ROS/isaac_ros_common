@@ -1,10 +1,19 @@
-# Copyright (c) 2021-2022, NVIDIA CORPORATION.  All rights reserved.
+# SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
+# Copyright (c) 2021-2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
-# NVIDIA CORPORATION and its licensors retain all intellectual property
-# and proprietary rights in and to this software, related documentation
-# and any modifications thereto.  Any use, reproduction, disclosure or
-# distribution of this software and related documentation without an express
-# license agreement from NVIDIA CORPORATION is strictly prohibited.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
 
 """Base test class for all Isaac ROS tests."""
 
@@ -18,7 +27,7 @@ import cv2  # noqa: F401
 from cv_bridge import CvBridge
 import launch
 import launch_testing.actions
-from message_filters import Subscriber, TimeSynchronizer
+from message_filters import ApproximateTimeSynchronizer, Subscriber, TimeSynchronizer
 import numpy as np
 import rclpy
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
@@ -266,7 +275,7 @@ class IsaacROSBaseTest(unittest.TestCase):
         subscription_requests: Iterable[Tuple[str, Any]],
         received_messages: List[Any],
         accept_multiple_messages: bool = False,
-        exact_time_sync_queue: int = 10,
+        time_sync_queue_size: int = 10,
         add_received_message_timestamps: bool = False
     ) -> Iterable[Subscription]:
         """
@@ -284,7 +293,7 @@ class IsaacROSBaseTest(unittest.TestCase):
             Whether the generated subscription callbacks should accept multiple messages,
             by default False
 
-        exact_time_sync_queue : int
+        time_sync_queue_size : int
             The size of the time sync buffer queue.
 
         add_received_message_timestamps : bool
@@ -315,11 +324,78 @@ class IsaacROSBaseTest(unittest.TestCase):
 
         subscriptions = [Subscriber(self.node, msg_type, topic)
                          for topic, msg_type in subscription_requests]
-        ets = TimeSynchronizer(
+        synchronizer = TimeSynchronizer(
             subscriptions,
-            exact_time_sync_queue
+            time_sync_queue_size
         )
-        ets.registerCallback(callback)
+        synchronizer.registerCallback(callback)
+
+        return subscriptions
+
+    def create_approximate_time_sync_logging_subscribers(
+        self,
+        subscription_requests: Iterable[Tuple[str, Any]],
+        received_messages: List[Any],
+        accept_multiple_messages: bool = False,
+        time_sync_queue_size: int = 10,
+        add_received_message_timestamps: bool = False,
+        sync_threshold_s: float = 0.001
+    ) -> Iterable[Subscription]:
+        """
+        Create subscribers that log time synced messages received to the passed-in dictionary.
+
+        Parameters
+        ----------
+        subscription_requests : Iterable[Tuple[str, Any]]
+            List of topic names and topic types to subscribe to.
+
+        received_messages : List[Any]
+            Output list of synced messages
+
+        accept_multiple_messages : bool
+            Whether the generated subscription callbacks should accept multiple messages,
+            by default False
+
+        time_sync_queue_size : int
+            The size of the time sync buffer queue.
+
+        add_received_message_timestamps : bool
+            Whether the generated subscription callbacks should add a timestamp to the messages,
+            by default False
+
+        sync_threshold_s : float
+            Amount of delay (in seconds) messages can be synchronized
+
+        Returns
+        -------
+        Iterable[Subscription]
+            List of subscribers, passing the unsubscribing responsibility to the caller
+
+        """
+        def callback(*arg):
+            if accept_multiple_messages:
+                if add_received_message_timestamps:
+                    received_messages.append((arg, time.time()))
+                else:
+                    received_messages.append(arg)
+            else:
+                self.assertTrue(len(received_messages) == 0,
+                                'Already received a syned message! \
+                                To enable multiple messages on the same topic \
+                                use the accept_multiple_messages flag')
+                if add_received_message_timestamps:
+                    received_messages.append((arg, time.time()))
+                else:
+                    received_messages.append(arg)
+
+        subscriptions = [Subscriber(self.node, msg_type, topic)
+                         for topic, msg_type in subscription_requests]
+        synchronizer = ApproximateTimeSynchronizer(
+            subscriptions,
+            time_sync_queue_size,
+            sync_threshold_s
+        )
+        synchronizer.registerCallback(callback)
 
         return subscriptions
 
