@@ -1,10 +1,19 @@
-# Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.
+# SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
+# Copyright (c) 2021-2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
-# NVIDIA CORPORATION and its licensors retain all intellectual property
-# and proprietary rights in and to this software, related documentation
-# and any modifications thereto.  Any use, reproduction, disclosure or
-# distribution of this software and related documentation without an express
-# license agreement from NVIDIA CORPORATION is strictly prohibited.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
 
 """Utilities to convert ROS 2 messages to and from human-readable JSON."""
 
@@ -16,7 +25,9 @@ import cv2
 from cv_bridge import CvBridge
 from geometry_msgs.msg import Pose, PoseArray
 from nav_msgs.msg import OccupancyGrid
+import numpy as np
 from sensor_msgs.msg import CameraInfo, Image
+from stereo_msgs.msg import DisparityImage
 
 
 class JSONConversion:
@@ -123,6 +134,35 @@ class JSONConversion:
         camera_info_json['P'] = camera_info.p.tolist()
 
         JSONConversion.save_to_json(camera_info_json, json_filepath)
+
+    @staticmethod
+    def load_disparity_image_from_json(json_filepath: Path) -> DisparityImage:
+        """
+        Load an DisparityImage message from a JSON filepath.
+
+        Parameters
+        ----------
+        json_filepath : Path
+            The path to a JSON file containing the DisparityImage fields
+
+        Returns
+        -------
+        DisparityImage
+            Generated DisparityImage message
+
+        """
+        disparity_image_json = JSONConversion.load_from_json(json_filepath)
+
+        disparity_image = DisparityImage()
+        disparity_image.header.frame_id = disparity_image_json['header']['frame_id']
+        disp_img = np.load(str(json_filepath.parent / disparity_image_json['image'])
+                           ).astype(np.float32)
+        disparity_image.image = CvBridge().cv2_to_imgmsg(disp_img, '32FC1')
+        disparity_image.min_disparity = disparity_image_json['min_disparity']
+        disparity_image.max_disparity = disparity_image_json['max_disparity']
+        disparity_image.f = disparity_image_json['f']
+        disparity_image.t = disparity_image_json['t']
+        return disparity_image
 
     @staticmethod
     def load_occupancy_grid_from_json(json_filepath: Path) -> OccupancyGrid:
