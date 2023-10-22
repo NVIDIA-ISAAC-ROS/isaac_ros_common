@@ -1,0 +1,7 @@
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+RUN apt-get update && apt-get install -y \
+    ros-humble-can-msgs \
+    && rm -rf /var/lib/apt/lists/*
