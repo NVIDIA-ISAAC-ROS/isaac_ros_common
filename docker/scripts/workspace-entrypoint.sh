@@ -12,11 +12,6 @@
 echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 source /opt/ros/${ROS_DISTRO}/setup.bash
 
-sudo apt-get update
-rosdep update
-rosdep install -i --from-path src --rosdistro $ROS_DISTRO -y --skip-keys "nvblox"
-
-# Restart udev daemon
 sudo service udev restart
 
 # Build and source the workspace
