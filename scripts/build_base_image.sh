@@ -70,7 +70,8 @@ if [[ -z "$DOCKER_CONTEXT_DIR" ]]; then
 fi
 shift 1
 
-DOCKER_BUILDKIT=1
+#buildkit disabled since docker is cringe
+DOCKER_BUILDKIT=0
 DISABLE_BUILDKIT_STR="$1"
 if [[ ! -z "$DISABLE_BUILDKIT_STR" ]]; then
     print_warning "WARNING: Explicitly disabling BuildKit"
