@@ -1,0 +1,24 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+USER root
+
+# to get list of packages rosdep install --reinstall --simulate --from-path src --ignore-src --skip-keys 'nvblox negotiated'| awk '{print $5 }'
+RUN apt-get update  && apt-get install -y \
+ ros-humble-rclc \
+    libboost-all-dev \
+    python3-pytest \
+    ros-humble-joy \
+    ros-humble-ament-cmake-clang-format \
+    python3-numpy \
+    ros-humble-launch-pytest \
+    python3-tqdm \
+    python3-requests \
+    libeigen3-dev \
+    ros-humble-grid-map-rviz-plugin \
+    ros-humble-can-msgs \
+    && rm -rf /var/lib/apt/lists/*
+
+USER root
+# download zed modules
+RUN ZED_Diagnostic -nrlo 
