@@ -17,6 +17,7 @@ RUN apt-get update  && apt-get install -y \
     libeigen3-dev \
     ros-humble-grid-map-rviz-plugin \
     ros-humble-can-msgs \
+    ros-humble-usb-cam \
     && rm -rf /var/lib/apt/lists/*
 
 USER root
