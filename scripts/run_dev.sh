@@ -197,6 +197,7 @@ docker run -it --rm \
     -v /etc/localtime:/etc/localtime:ro \
     -v /usr/config:/usr/config \
     -v /usr/data:/usr/data \
+    -v /var/run/dbus:/var/run/dbus \
     --name "$CONTAINER_NAME" \
     --runtime nvidia \
     --user="admin" \

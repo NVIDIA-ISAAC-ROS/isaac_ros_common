@@ -1,5 +1,10 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
+RUN apt-get update && apt-get install -y network-manager \
+    && systemctl mask NetworkManager.service \
+    && apt-get clean
+
+
 #install deps
-RUN pip3 install fastapi uvicorn[standard] python-socketio asyncio azure-iot-device azure-storage-blob loguru 
+RUN pip3 install fastapi uvicorn[standard] python-socketio asyncio azure-iot-device azure-storage-blob loguru nmcli
