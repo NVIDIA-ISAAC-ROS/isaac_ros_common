@@ -35,7 +35,7 @@ if [[ -z "$ISAAC_ROS_DEV_DIR" ]]; then
     done
 
     if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
-        ISAAC_ROS_DEV_DIR=$(realpath "$ROOT/../../")
+        ISAAC_ROS_DEV_DIR=$(realpath "$ROOT/../")
     fi
     print_warning "isaac_ros_dev not specified, assuming $ISAAC_ROS_DEV_DIR"
 else

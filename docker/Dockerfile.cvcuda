@@ -1,0 +1,30 @@
+# Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# Install cvCUDA into the dev image
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+RUN if [ "$(uname -m)" = "x86_64" ]; then \
+    cd /tmp; \
+    wget https://github.com/CVCUDA/CV-CUDA/releases/download/v0.4.0-beta/nvcv-lib-0.4.0_beta-cuda11-x86_64-linux.deb; \
+    dpkg -i nvcv-lib-0.4.0_beta-cuda11-x86_64-linux.deb; \
+    wget https://github.com/CVCUDA/CV-CUDA/releases/download/v0.4.0-beta/nvcv-dev-0.4.0_beta-cuda11-x86_64-linux.deb; \
+    dpkg -i nvcv-dev-0.4.0_beta-cuda11-x86_64-linux.deb; \
+    wget https://github.com/CVCUDA/CV-CUDA/releases/download/v0.4.0-beta/nvcv-lib-0.4.0_beta-cuda11-x86_64-linux.deb; \
+    dpkg -i nvcv-lib-0.4.0_beta-cuda11-x86_64-linux.deb; \
+  else \
+    echo "Not available on aarch64 pending availability of https://github.com/CVCUDA/CV-CUDA/releases/download/v0.4.0-beta/nvcv-lib-0.4.0_beta-cuda11-aarch64-linux.deb" ; \
+    # cd /tmp; \
+    # wget https://github.com/CVCUDA/CV-CUDA/releases/download/v0.4.0-beta/nvcv-lib-0.4.0_beta-cuda11-aarch64-linux.deb; \
+    # dpkg -i nvcv-lib-0.4.0_beta-cuda11-aarch64-linux.deb; \
+    # wget https://github.com/CVCUDA/CV-CUDA/releases/download/v0.4.0-beta/nvcv-dev-0.4.0_beta-cuda11-aarch64-linux.deb; \
+    # dpkg -i nvcv-dev-0.4.0_beta-cuda11-aarch64-linux.deb; \
+  fi
+
