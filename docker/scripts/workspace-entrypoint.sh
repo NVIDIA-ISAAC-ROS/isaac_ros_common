@@ -46,7 +46,7 @@ fi
 
 sudo service udev restart
 
-colcon build --symlink-install
+colcon build
 
 echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
 source /workspaces/isaac_ros-dev/install/setup.bash
@@ -63,12 +63,7 @@ export RUN_DEV=true
 
 
 # Start the applications
-python3 /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/main.py \
-   --conn_string_path /usr/config/connection.txt \
-   --default_config_path /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/default_machine_config.json \
-   --config_path /usr/config/machine_config.json \
-   --resource_path /backend_components/backend_ui_server/resource \
-   --migrations_path /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/database/migrations &
+python3 /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/main.py &
    
 ros2 launch micro_ros_agent micro_ros_agent_launch.py &
 
