@@ -18,6 +18,11 @@
 # Common flags and cmake commands for all Isaac ROS packages.
 message(STATUS "Loading isaac_ros_common extras")
 
+# The FindCUDA module is removed
+if(POLICY CMP0146)
+  cmake_policy(SET CMP0146 OLD)
+endif()
+
 # Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)

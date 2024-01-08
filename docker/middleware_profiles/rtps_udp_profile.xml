@@ -16,6 +16,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
         <transport_descriptor>
             <transport_id>UdpTransport</transport_id>
             <type>UDPv4</type>
+            <maxInitialPeersRange>400</maxInitialPeersRange>
         </transport_descriptor>
     </transport_descriptors>
 
