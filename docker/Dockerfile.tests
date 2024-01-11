@@ -3,5 +3,6 @@ FROM ${BASE_IMAGE}
 
 ENV DEV_TESTS true
 
-RUN pip3 install azure-iot-hub pytest-cov pytest-asyncio
+RUN pip3 install azure-iot-hub pytest pytest-cov pytest-asyncio pytest-mock
+RUN pip3 install --upgrade pluggy
 
