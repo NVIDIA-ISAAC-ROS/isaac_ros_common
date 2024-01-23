@@ -90,6 +90,8 @@ if [[ $? -ne 0 ]] ; then
 fi
 
 # Check if all LFS files are in place in the repository where this script is running from.
+echo $ROOT
+echo $ISAAC_ROS_DEV_DIR
 cd $ROOT
 git rev-parse &>/dev/null
 if [[ $? -eq 0 ]]; then
