@@ -51,6 +51,6 @@ fi
 ros2 launch micro_ros_agent micro_ros_agent_launch.py &
 
 # Start the applications
-python3 /workspaces/isaac_ros-dev/src/backend_components/backend_ui_server/backend_ui_server/main.py &
+ros2 run backend_ui_server server
 
 $@
