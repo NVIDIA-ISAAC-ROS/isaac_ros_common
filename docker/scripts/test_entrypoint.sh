@@ -6,7 +6,7 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 
 sudo chown -R admin /workspaces/isaac_ros-dev/
 
-colcon build  --continue-on-error --packages-select \
+colcon build --packages-select \
     backend_msgs \
     backend_ui_server \
     can_ros_nodes \
