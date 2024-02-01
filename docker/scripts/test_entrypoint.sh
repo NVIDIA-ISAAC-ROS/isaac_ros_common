@@ -6,8 +6,6 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 
 sudo chown -R admin /workspaces/isaac_ros-dev/
 
-rosdep update
-
 colcon build --packages-select \
     backend_msgs \
     backend_ui_server \
