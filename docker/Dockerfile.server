@@ -8,3 +8,4 @@ RUN apt-get update && apt-get install -y network-manager \
 
 #install deps
 RUN pip3 install fastapi uvicorn[standard] python-socketio asyncio azure-iot-device azure-storage-blob loguru nmcli
+RUN apt-get install -y python3-serial-asyncio
