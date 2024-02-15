@@ -68,6 +68,7 @@ colcon build  --continue-on-error --packages-select \
     micro_ros_msgs \
     microxrcedds_client \
     mmc_ui_msgs \
+    serial_ros_nodes \
     xacro \
 
     # Skip these packages for now

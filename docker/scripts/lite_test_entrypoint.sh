@@ -11,6 +11,7 @@ colcon build --packages-select \
     backend_ui_server \
     can_ros_nodes \
     mmc_ui_msgs \
+    serial_ros_nodes \
 
     # Skip these packages for now
     # custom_nitros_image \
