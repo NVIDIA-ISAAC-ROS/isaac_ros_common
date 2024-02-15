@@ -1,1 +1,1 @@
-CONFIG_IMAGE_KEY="x86_64.ros2_humble.oak-d.server"
+CONFIG_IMAGE_KEY="x86_64.ros2_humble.oak-d.server.tests"
