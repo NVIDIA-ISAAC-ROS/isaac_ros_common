@@ -2,6 +2,9 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 RUN apt-get update && \
-    wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash && \
-    apt install -y libusb-1.0-0-dev
+    wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
+RUN apt-get update && \
+    apt install -y libusb-1.0-0-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    apt-get clean
 RUN sudo wget -qO- https://raw.githubusercontent.com/luxonis/depthai-ros/main/install_dependencies.sh | sudo bash
