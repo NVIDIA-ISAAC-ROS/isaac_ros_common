@@ -128,6 +128,7 @@ RUN apt-get update && apt-get install -y ros-humble-ros-base \
     ros-humble-v4l2-camera \
     ros-humble-vision-opencv \
     ros-humble-vision-msgs \
+    ros-humble-rmw-fastrtps-cpp \
 && rm -rf /var/lib/apt/lists/* \
 && apt-get clean
 

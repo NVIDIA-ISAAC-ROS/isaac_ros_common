@@ -1,10 +1,41 @@
 #!/bin/bash
 
+# Set the machine identification
+MACHINE_CONFIG_PATH="/usr/config/good_machine_config.json"
+
+if [ -f "$MACHINE_CONFIG_PATH" ]; then
+    CONFIG_ROUTE=".desired.machine_config.identification"
+    MACHINE_ID=$(jq -r "$CONFIG_ROUTE.machine_id" $MACHINE_CONFIG_PATH)
+    ROS_DOMAIN_ID=$(jq -r "$CONFIG_ROUTE.ros_domain_id" $MACHINE_CONFIG_PATH)
+    ROS_NAMESPACE=$(jq -r "$CONFIG_ROUTE.ros_namespace" $MACHINE_CONFIG_PATH)
+else
+    echo "Error: $MACHINE_CONFIG_PATH does not exist."
+fi
+
+# if ros domain id is less than 232 and greater than 0 set it
+if [ "$ROS_DOMAIN_ID" != "null" ] && [ "$ROS_DOMAIN_ID" -lt "233" ] && [ "$ROS_DOMAIN_ID" -gt "-1" ]; then
+    export ROS_DOMAIN_ID=$ROS_DOMAIN_ID
+    echo "export ROS_DOMAIN_ID=$ROS_DOMAIN_ID" >> ~/.bashrc
+    echo "ROS_DOMAIN_ID is set to $ROS_DOMAIN_ID"
+else
+    echo "ROS_DOMAIN_ID is not set or out of range"
+fi
+
+if [ "$ROS_NAMESPACE" == "null" ]; then
+    echo "ROS_NAMESPACE is not set"
+    export ROS_NAMESPACE=''
+    echo "export ROS_NAMESPACE=$ROS_NAMESPACE" >> ~/.bashrc
+    echo "ROS_NAMESPACE is set to $ROS_NAMESPACE"
+else
+    export ROS_NAMESPACE=$ROS_NAMESPACE
+    echo "export ROS_NAMESPACE=$ROS_NAMESPACE" >> ~/.bashrc
+    echo "ROS_NAMESPACE is set to $ROS_NAMESPACE"
+fi
 
 #Get platform
 PLATFORM="$(uname -m)"
 
-# Build ROS dependency
+# Build ROS dependencyS
 
 echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 
@@ -70,9 +101,14 @@ colcon build  --continue-on-error --packages-select \
     mmc_ui_msgs \
     serial_ros_nodes \
     xacro \
+    realsense2_camera \
+    realsense2_camera_msgs \
+    realsense2_description \
+    odometry_flattener \
+
 
     # Skip these packages for now
-
+    # realsense_splitter \
     # isaac_ros_apriltag_interfaces \
     # isaac_ros_nitros_april_tag_detection_array_type \
     # isaac_ros_nitros_battery_state_type \
@@ -96,11 +132,7 @@ colcon build  --continue-on-error --packages-select \
     # nvblox_ros_common \
     # nvblox_rviz_plugin \
     # semantic_label_conversion \
-    # odometry_flattener \
-    # realsense2_camera \
-    # realsense2_camera_msgs \
-    # realsense2_description \
-    # realsense_splitter \
+
 
 
 echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
@@ -116,14 +148,6 @@ fi
 
 export RUN_DEV=true
 
-#Install can if not already installed
-if [ -d "/sys/class/net/can0" ]; then
-    echo "CAN Installed"
-    ros2 run py_ui_messaging run_msgs &
-else
-    echo "CAN Controller is not configured on this device!"
-fi
-
 # If VS Code is installed
 if [[ "$VSCODE" == true ]]; then
     code --install-extension ms-python.python --force --user-data-dir $HOME/.vscode/ 
@@ -135,9 +159,29 @@ if [[ "$VSCODE" == true ]]; then
     code --disable-gpu
 fi
 
-ros2 launch micro_ros_agent micro_ros_agent_launch.py &
+#Install can if not already installed
+if [ -d "/sys/class/net/can0" ]; then
+    echo "CAN Installed"
+    ros2 launch can_ros_nodes can_ros_nodes_launch.py namespace:=${ROS_NAMESPACE} &
+    ros2 run can_ros_nodes run_ros_setup &
+else
+    echo "CAN Controller is not configured on this device!" &
+fi
+
+ros2 run image_publisher image_publisher_node /dev/video2 --ros-args -r image_raw:=image  -r __ns:=/${ROS_NAMESPACE} &
+
+ros2 launch micro_ros_agent micro_ros_agent_launch.py namespace:=/${ROS_NAMESPACE} &
+
+_term() {
+    echo "Caught SIGTERM signal!!!"
+    kill -TERM -1
+    exit 0
+}
+trap _term SIGTERM SIGINT
 
 # Start the applications
-ros2 run backend_ui_server server
+ros2 run backend_ui_server server --ros-args -r __ns:=/${ROS_NAMESPACE} &
 
-$@
+# Task to catch the SIGTERM signal
+child=$! 
+wait "$child"
