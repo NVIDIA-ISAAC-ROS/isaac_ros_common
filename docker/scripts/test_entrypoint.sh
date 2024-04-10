@@ -6,19 +6,15 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 
 sudo chown -R admin /workspaces/isaac_ros-dev/
 
-colcon build --packages-select \
+# Patch for launch_testing
+sudo cp /workspaces/isaac_ros-dev/src/isaac_ros_common/docker/patches/hooks.py /opt/ros/humble/lib/python3.8/site-packages/launch_testing/pytest/hooks.py
+
+colcon build  --packages-select \
     backend_msgs \
     backend_ui_server \
     can_ros_nodes \
     custom_nitros_image \
     custom_nitros_string \
-    depthai_bridge \
-    depthai_descriptions \
-    depthai_examples \
-    depthai_filters \
-    depthai-ros \
-    depthai_ros_driver \
-    depthai_ros_msgs \
     isaac_ros_bi3d_interfaces \
     isaac_ros_common \
     isaac_ros_depth_image_proc \
@@ -45,6 +41,7 @@ colcon build --packages-select \
     isaac_ros_nitros_pose_cov_stamped_type \
     isaac_ros_nitros_std_msg_type \
     isaac_ros_nitros_tensor_list_type \
+    isaac_ros_nvblox \
     isaac_ros_pointcloud_interfaces \
     isaac_ros_stereo_image_proc \
     isaac_ros_tensor_list_interfaces \
@@ -55,16 +52,35 @@ colcon build --packages-select \
     isaac_ros_visual_slam_interfaces \
     isaac_ros_yolov8 \
     isaac_slam_saver \
+    map_saver_2d \
     microcdr \
     micro_ros_agent \
     micro_ros_msgs \
     microxrcedds_client \
     mmc_ui_msgs \
+    nvblox \
+    nvblox_cpu_gpu_tools \
+    nvblox_examples_bringup \
+    nvblox_image_padding \
+    nvblox_isaac_sim \
+    nvblox_msgs \
+    nvblox_nav2 \
+    nvblox_performance_measurement \
+    nvblox_performance_measurement_msgs \
+    nvblox_ros \
+    nvblox_ros_common \
+    nvblox_rviz_plugin \
+    odometry_flattener \
+    realsense2_camera \
+    realsense2_camera_msgs \
+    realsense2_description \
+    realsense_splitter \
+    semantic_label_conversion \
     serial_ros_nodes \
     xacro \
 
-    # Skip these packages for now
 
+    # Skip these packages for now
     # isaac_ros_apriltag_interfaces \
     # isaac_ros_nitros_april_tag_detection_array_type \
     # isaac_ros_nitros_battery_state_type \
@@ -73,26 +89,14 @@ colcon build --packages-select \
     # isaac_ros_nitros_flat_scan_type \
     # isaac_ros_nitros_twist_type \
     # isaac_ros_nova_interfaces \
-    # isaac_ros_nvblox \
     # network_performance_measurement \
-    # nvblox \
-    # nvblox_cpu_gpu_tools \
-    # nvblox_examples_bringup \
-    # nvblox_image_padding \
-    # nvblox_isaac_sim \
-    # nvblox_msgs \
-    # nvblox_nav2
-    # nvblox_performance_measurement \
-    # nvblox_performance_measurement_msgs \
-    # nvblox_ros \
-    # nvblox_ros_common \
-    # nvblox_rviz_plugin \
-    # semantic_label_conversion \
-    # odometry_flattener \
-    # realsense2_camera \
-    # realsense2_camera_msgs \
-    # realsense2_description \
-    # realsense_splitter \
+    # depthai_bridge \
+    # depthai_descriptions \
+    # depthai_examples \
+    # depthai_filters \
+    # depthai-ros \
+    # depthai_ros_driver \
+    # depthai_ros_msgs \
 
 echo "source /workspaces/isaac_ros-dev/install/setup.bash" >> ~/.bashrc
 

@@ -12,7 +12,9 @@ colcon build --packages-select \
     can_ros_nodes \
     mmc_ui_msgs \
     serial_ros_nodes \
-
+    isaac_slam_saver \
+    map_saver_2d \
+    
     # Skip these packages for now
     # custom_nitros_image \
     # custom_nitros_string \

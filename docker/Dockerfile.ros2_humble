@@ -223,5 +223,7 @@ RUN apt-get update && apt-get install -y \
     ros-humble-rqt-reconfigure \
     ros-humble-rviz-common \
     ros-humble-rviz-default-plugins \
+    ros-humble-pcl-ros \
+    ros-humble-xacro \
 && rm -rf /var/lib/apt/lists/* \
 && apt-get clean

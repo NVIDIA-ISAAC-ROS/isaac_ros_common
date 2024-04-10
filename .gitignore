@@ -2,4 +2,4 @@
 **/__pycache__/**
 
 # Ignore config files
-#.isaac_ros_common-config
+scripts/.isaac_ros_common-config
