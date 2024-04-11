@@ -6,6 +6,8 @@ source /opt/ros/${ROS_DISTRO}/setup.bash
 
 sudo chown -R admin /workspaces/isaac_ros-dev/
 
+sudo cp /workspaces/isaac_ros-dev/src/isaac_ros_common/docker/patches/hooks.py /opt/ros/humble/lib/python3.8/site-packages/launch_testing/pytest/hooks.py
+
 colcon build --packages-select \
     backend_msgs \
     backend_ui_server \
