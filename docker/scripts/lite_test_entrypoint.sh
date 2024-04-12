@@ -16,6 +16,8 @@ colcon build --packages-select \
     serial_ros_nodes \
     isaac_slam_saver \
     map_saver_2d \
+    mmcrossimulator \
+    ros_module_simulator \
     
     # Skip these packages for now
     # custom_nitros_image \
