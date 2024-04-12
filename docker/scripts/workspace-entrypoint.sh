@@ -180,7 +180,7 @@ else
 fi
 
 # Start serial ROS node if serial port is available
-if [ -d "/dev/ttyWCH1" ]; then
+if [ -f "/dev/ttyWCH1" ]; then
     echo "Starting serial ROS node"
     ros2 launch serial_ros_nodes serial_ros_nodes_launch.py namespace:=${ROS_NAMESPACE} &
 else
