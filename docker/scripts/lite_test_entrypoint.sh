@@ -101,9 +101,9 @@ colcon build --packages-select \
 
 source /workspaces/isaac_ros-dev/install/setup.bash
 
-rm -rf /workspaces/isaac_ros_dev/test_results
+rm -rf /workspaces/isaac_ros-dev/test_results
 
-sudo mkdir -p /workspaces/isaac_ros_dev/test_results
+sudo mkdir -p /workspaces/isaac_ros-dev/test_results
 
 echo Starting Tests...
 
