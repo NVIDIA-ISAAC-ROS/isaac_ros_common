@@ -77,7 +77,6 @@ colcon build  --packages-select \
     realsense_splitter \
     semantic_label_conversion \
     serial_ros_nodes \
-    xacro \
     mmcrossimulator \
     ros_module_simulator \
 
