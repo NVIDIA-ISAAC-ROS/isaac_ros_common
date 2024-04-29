@@ -77,8 +77,8 @@ colcon build  --packages-select \
     realsense_splitter \
     semantic_label_conversion \
     serial_ros_nodes \
-    mmcrossimulator \
-    ros_module_simulator \
+    mli_ros_simulator \
+    ros_simulator_web_app \
 
     # Skip these packages for now
     # isaac_ros_apriltag_interfaces \
