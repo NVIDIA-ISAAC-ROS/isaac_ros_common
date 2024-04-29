@@ -77,7 +77,6 @@ colcon build  --packages-select \
     realsense_splitter \
     semantic_label_conversion \
     serial_ros_nodes \
-    xacro \
     mli_ros_simulator \
     ros_simulator_web_app \
 
@@ -105,7 +104,7 @@ source /workspaces/isaac_ros-dev/install/setup.bash
 
 rm -rf /workspaces/isaac_ros-dev/test_results
 
-sudo mkdir -p /workspaces/isaac_ros-dev/test_results
+mkdir -p /workspaces/isaac_ros-dev/test_results
 
 echo Starting Tests...
 
