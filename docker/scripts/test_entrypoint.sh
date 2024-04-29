@@ -78,8 +78,8 @@ colcon build  --packages-select \
     semantic_label_conversion \
     serial_ros_nodes \
     xacro \
-    mmcrossimulator \
-    ros_module_simulator \
+    mli_ros_simulator \
+    ros_simulator_web_app \
 
     # Skip these packages for now
     # isaac_ros_apriltag_interfaces \
