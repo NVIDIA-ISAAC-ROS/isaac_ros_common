@@ -1,0 +1,21 @@
+# Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+ARG BASE_IMAGE=nvidia/cuda:12.2.2-runtime-ubuntu22.04
+FROM ${BASE_IMAGE} as deploy_ros_ws
+
+ARG ROS_WS
+ENV ROS_WS=${ROS_WS:?}
+
+RUN  --mount=type=cache,target=/var/cache/apt \
+. /opt/ros/${ROS_DISTRO}/setup.sh && rosdep update --rosdistro ${ROS_DISTRO} \
+    && rosdep install -y -r \
+      --from-path ${ROS_WS}/install \
+      --rosdistro ${ROS_DISTRO} \
+      --ignore-src \
+      --skip-keys "libyaml-cpp-dev fastcdr rti-connext-dds-6.0.1 rti-connext-dds-5.3.1 urdfdom_headers libopencv-dev libopencv-contrib-dev libopencv-imgproc-dev python-opencv python3-opencv"

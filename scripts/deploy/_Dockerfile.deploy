@@ -1,0 +1,48 @@
+# Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+ARG SET_LAUNCH_CMD
+ARG BASE_IMAGE=nvidia/cuda:12.2.2-runtime-ubuntu22.04
+FROM ${BASE_IMAGE} as deploy_base
+
+# Setup entrypoint
+COPY deploy-entrypoint.sh /usr/local/bin/scripts/deploy-entrypoint.sh
+RUN chmod +x /usr/local/bin/scripts/deploy-entrypoint.sh
+ENTRYPOINT [ "/usr/local/bin/scripts/deploy-entrypoint.sh" ]
+
+# Install additional debians
+ARG INSTALL_DEBIANS_CSV
+RUN  --mount=type=cache,target=/var/cache/apt \
+  if [[ ! -z "${INSTALL_DEBIANS_CSV}" ]]; then \
+    apt-get update && apt-get install -y ${INSTALL_DEBIANS_CSV//,/ } ; \
+  fi
+
+# Copy built products into container
+COPY staging/ /
+
+# Switch to non-root user
+USER ${USERNAME:?}
+
+# -----------
+
+FROM deploy_base as deploy_has_launch_0
+# -----------
+
+FROM deploy_base as deploy_has_launch_1
+# Default argument
+ARG LAUNCH_FILE
+ENV LAUNCH_FILE=${LAUNCH_FILE:?}
+
+ARG LAUNCH_PACKAGE
+ENV LAUNCH_PACKAGE=${LAUNCH_PACKAGE:?}
+
+CMD ros2 launch $LAUNCH_PACKAGE $LAUNCH_FILE
+# -----------
+
+
+FROM deploy_has_launch_${SET_LAUNCH_CMD} as final

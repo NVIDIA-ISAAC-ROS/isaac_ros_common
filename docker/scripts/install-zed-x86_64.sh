@@ -14,6 +14,10 @@ export CUDA_MINOR="$(nvcc --version | grep -o -P ' release .{0,4}' | cut -d. -f2
 sudo apt-get update -y || true
 sudo apt-get install --no-install-recommends lsb-release wget less udev sudo zstd build-essential cmake libpng-dev libgomp1 -y
 
+# TODO: Remove this when zed-ros2-wrapper has a compatible version with ZED_SDK 4.1 (which supports cuda 12.2).
+CUDA_MAJOR=12
+CUDA_MINOR=1
+
 # Download zed SDK installation RUN file to /tmp directory
 cd /tmp
 wget -q -O ZED_SDK_Linux_Ubuntu${UBUNTU_RELEASE_YEAR}.run https://download.stereolabs.com/zedsdk/${ZED_SDK_MAJOR}.${ZED_SDK_MINOR}/cu${CUDA_MAJOR}${CUDA_MINOR%.*}/ubuntu${UBUNTU_RELEASE_YEAR}

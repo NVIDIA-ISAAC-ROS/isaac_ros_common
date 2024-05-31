@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2021-2022, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2021-2024, NVIDIA CORPORATION.  All rights reserved.
 #
 # NVIDIA CORPORATION and its licensors retain all intellectual property
 # and proprietary rights in and to this software, related documentation
@@ -8,13 +8,17 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
+set -e
+
 ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $ROOT/utils/print_color.sh
 
 function usage() {
-    print_info "Usage: run_dev.sh" {isaac_ros_dev directory path OPTIONAL}
-    print_info "Copyright (c) 2021-2022, NVIDIA CORPORATION."
+    print_info "Usage: run_dev.sh {-d isaac_ros_dev directory path OPTIONAL}"
+    print_info "Copyright (c) 2021-2024, NVIDIA CORPORATION."
 }
+
+DOCKER_ARGS=()
 
 # Read and parse config file if exists
 #
@@ -24,28 +28,57 @@ if [[ -f "${ROOT}/.isaac_ros_common-config" ]]; then
     . "${ROOT}/.isaac_ros_common-config"
 fi
 
-ISAAC_ROS_DEV_DIR="$1"
-if [[ -z "$ISAAC_ROS_DEV_DIR" ]]; then
-    ISAAC_ROS_DEV_DIR_DEFAULTS=("$HOME/workspaces/isaac_ros-dev" "/workspaces/isaac_ros-dev")
-    for ISAAC_ROS_DEV_DIR in "${ISAAC_ROS_DEV_DIR_DEFAULTS[@]}"
-    do
-        if [[ -d "$ISAAC_ROS_DEV_DIR" ]]; then
-            break
-        fi
-    done
-
-    if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
-        ISAAC_ROS_DEV_DIR=$(realpath "$ROOT/../")
-    fi
-    print_warning "isaac_ros_dev not specified, assuming $ISAAC_ROS_DEV_DIR"
-else
-    if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
-        print_error "Specified isaac_ros_dev does not exist: $ISAAC_ROS_DEV_DIR"
-        exit 1
-    fi
-    shift 1
+# Override with config from user home directory if exists
+if [[ -f ~/.isaac_ros_common-config ]]; then
+    . ~/.isaac_ros_common-config
 fi
 
+# Parse command-line args
+IMAGE_KEY=ros2_humble
+
+# Pick up config image key if specified
+if [[ ! -z "${CONFIG_IMAGE_KEY}" ]]; then
+    IMAGE_KEY=$CONFIG_IMAGE_KEY
+fi
+
+ISAAC_ROS_DEV_DIR="${ISAAC_ROS_WS}"
+SKIP_IMAGE_BUILD=0
+VERBOSE=0
+VALID_ARGS=$(getopt -o hvd:i:ba: --long help,verbose,isaac_ros_dev_dir:,image_key_suffix:,skip_image_build,docker_arg: -- "$@")
+eval set -- "$VALID_ARGS"
+while [ : ]; do
+  case "$1" in
+    -d | --isaac_ros_dev_dir)
+        ISAAC_ROS_DEV_DIR="$2"
+        shift 2
+        ;;
+    -i | --image_key)
+        IMAGE_KEY="$2"
+        shift 2
+        ;;
+    -b | --skip_image_build)
+        SKIP_IMAGE_BUILD=1
+        shift
+        ;;
+    -a | --docker_arg)
+        DOCKER_ARGS+=("$2")
+        shift 2
+        ;;
+    -v | --verbose)
+        VERBOSE=1
+        shift
+        ;;
+    -h | --help)
+        usage
+        exit 0
+        ;;
+    --) shift;
+        break
+        ;;
+  esac
+done
+
+# Setup on-exit traps
 ON_EXIT=()
 function cleanup {
     for command in "${ON_EXIT[@]}"
@@ -58,6 +91,28 @@ trap cleanup EXIT
 pushd . >/dev/null
 cd $ROOT
 ON_EXIT+=("popd")
+
+# Fall back if isaac_ros_dev_dir not specified
+if [[ -z "$ISAAC_ROS_DEV_DIR" ]]; then
+    ISAAC_ROS_DEV_DIR_DEFAULTS=("$HOME/workspaces/isaac_ros-dev" "/workspaces/isaac_ros-dev" "/mnt/nova_ssd/workspaces/isaac_ros-dev")
+    for ISAAC_ROS_DEV_DIR in "${ISAAC_ROS_DEV_DIR_DEFAULTS[@]}"
+    do
+        if [[ -d "$ISAAC_ROS_DEV_DIR" ]]; then
+            break
+        fi
+    done
+
+    if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
+        ISAAC_ROS_DEV_DIR=$(realpath "$ROOT/../")
+    fi
+    print_warning "isaac_ros_dev not specified, assuming $ISAAC_ROS_DEV_DIR"
+fi
+
+# Validate isaac_ros_dev_dir
+if [[ ! -d "$ISAAC_ROS_DEV_DIR" ]]; then
+    print_error "Specified isaac_ros_dev does not exist: $ISAAC_ROS_DEV_DIR"
+    exit 1
+fi
 
 # Prevent running as root.
 if [[ $(id -u) -eq 0 ]]; then
@@ -97,15 +152,38 @@ if [[ $? -eq 0 ]]; then
     for (( i=0; i<${#LFS_FILES_STATUS}; i++ )); do
         f="${LFS_FILES_STATUS:$i:1}"
         if [[ "$f" == "-" ]]; then
-            print_error "LFS files are missing. Please re-clone the repo after installing git-lfs."
+            print_error "LFS files are missing. Please re-clone repos after installing git-lfs."
             exit 1
         fi
     done
 fi
 
+# Determine base image key
 PLATFORM="$(uname -m)"
+BASE_IMAGE_KEY=$PLATFORM.user
+if [[ ! -z "${IMAGE_KEY}" ]]; then
+    BASE_IMAGE_KEY=$PLATFORM.$IMAGE_KEY
+
+    # If the configured key does not have .user, append it last
+    if [[ $IMAGE_KEY != *".user"* ]]; then
+        BASE_IMAGE_KEY=$BASE_IMAGE_KEY.user
+    fi
+fi
+
+# Check skip image build from env
+if [[ ! -z $SKIP_DOCKER_BUILD ]]; then
+    SKIP_IMAGE_BUILD=1
+fi
+
+# Check skip image build from config
+if [[ ! -z $CONFIG_SKIP_IMAGE_BUILD ]]; then
+    SKIP_IMAGE_BUILD=1
+fi
 
 BASE_NAME="isaac_ros_dev-$PLATFORM"
+if [[ ! -z "$CONFIG_CONTAINER_NAME_SUFFIX" ]] ; then
+    BASE_NAME="$BASE_NAME-$CONFIG_CONTAINER_NAME_SUFFIX"
+fi
 CONTAINER_NAME="$BASE_NAME-container"
 
 # Remove any exited containers.
@@ -120,27 +198,28 @@ if [ "$(docker ps -a --quiet --filter status=running --filter name=$CONTAINER_NA
     exit 0
 fi
 
-# Build image
-IMAGE_KEY=ros2_humble
-if [[ ! -z "${CONFIG_IMAGE_KEY}" ]]; then
-    IMAGE_KEY=$CONFIG_IMAGE_KEY
-fi
+# Summarize launch
+print_info "Launching Isaac ROS Dev container with image key ${BASE_IMAGE_KEY}: ${ISAAC_ROS_DEV_DIR}"
 
-BASE_IMAGE_KEY=$PLATFORM.user
-if [[ ! -z "${IMAGE_KEY}" ]]; then
-    BASE_IMAGE_KEY=$PLATFORM.$IMAGE_KEY
+# Build imag to launch
+if [[ $SKIP_IMAGE_BUILD -ne 1 ]]; then
+    print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME"
+   $ROOT/build_image_layers.sh --image_key "$BASE_IMAGE_KEY" --image_name "$BASE_NAME"
 
-    # If the configured key does not have .user, append it last
-    if [[ $IMAGE_KEY != *".user"* ]]; then
-        BASE_IMAGE_KEY=$BASE_IMAGE_KEY.user
+    # Check result
+    if [ $? -ne 0 ]; then
+        if [[ -z $(docker image ls --quiet $BASE_NAME) ]]; then
+            print_error "Building image failed and no cached image found for $BASE_NAME, aborting."
+            exit 1
+        else
+            print_warning "Unable to build image, but cached image found."
+        fi
     fi
 fi
 
-print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME using key $BASE_IMAGE_KEY"
-$ROOT/build_base_image.sh $BASE_IMAGE_KEY $BASE_NAME '' '' ''
-
-if [ $? -ne 0 ]; then
-    print_error "Failed to build base image: $BASE_NAME, aborting."
+# Check image is available
+if [[ -z $(docker image ls --quiet $BASE_NAME) ]]; then
+    print_error "No built image found for $BASE_NAME, aborting."
     exit 1
 fi
 
@@ -153,24 +232,16 @@ DOCKER_ARGS+=("-e NVIDIA_DRIVER_CAPABILITIES=all")
 DOCKER_ARGS+=("-e FASTRTPS_DEFAULT_PROFILES_FILE=/usr/local/share/middleware_profiles/rtps_udp_profile.xml")
 DOCKER_ARGS+=("-e ROS_DOMAIN_ID")
 DOCKER_ARGS+=("-e USER")
+DOCKER_ARGS+=("-e ISAAC_ROS_WS=/workspaces/isaac_ros-dev")
 
 if [[ $PLATFORM == "aarch64" ]]; then
     DOCKER_ARGS+=("-v /usr/bin/tegrastats:/usr/bin/tegrastats")
-    DOCKER_ARGS+=("-v /tmp/argus_socket:/tmp/argus_socket")
-    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusolver.so.11:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusolver.so.11")
-    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusparse.so.11:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcusparse.so.11")
-    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcurand.so.10:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcurand.so.10")
-    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcufft.so.10:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcufft.so.10")
-    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/lib/libnvToolsExt.so:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libnvToolsExt.so")
-    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcupti.so.11.4:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcupti.so.11.4")
-    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/lib/libcudla.so.1:/usr/local/cuda-11.4/targets/aarch64-linux/lib/libcudla.so.1")
-    DOCKER_ARGS+=("-v /usr/local/cuda-11.4/targets/aarch64-linux/include/nvToolsExt.h:/usr/local/cuda-11.4/targets/aarch64-linux/include/nvToolsExt.h")
+    DOCKER_ARGS+=("-v /tmp/:/tmp/")
     DOCKER_ARGS+=("-v /usr/lib/aarch64-linux-gnu/tegra:/usr/lib/aarch64-linux-gnu/tegra")
     DOCKER_ARGS+=("-v /usr/src/jetson_multimedia_api:/usr/src/jetson_multimedia_api")
-    DOCKER_ARGS+=("-v /opt/nvidia/nsight-systems-cli:/opt/nvidia/nsight-systems-cli")
     DOCKER_ARGS+=("--pid=host")
-    DOCKER_ARGS+=("-v /opt/nvidia/vpi2:/opt/nvidia/vpi2")
-    DOCKER_ARGS+=("-v /usr/share/vpi2:/usr/share/vpi2")
+    DOCKER_ARGS+=("-v /usr/share/vpi3:/usr/share/vpi3")
+    DOCKER_ARGS+=("-v /dev/input:/dev/input")
 
     # If jtop present, give the container access
     if [[ $(getent group jtop) ]]; then
@@ -181,10 +252,20 @@ if [[ $PLATFORM == "aarch64" ]]; then
 fi
 
 # Optionally load custom docker arguments from file
-DOCKER_ARGS_FILE="$ROOT/.isaac_ros_dev-dockerargs"
-if [[ -f "$DOCKER_ARGS_FILE" ]]; then
-    print_info "Using additional Docker run arguments from $DOCKER_ARGS_FILE"
-    readarray -t DOCKER_ARGS_FILE_LINES < $DOCKER_ARGS_FILE
+if [[ -z "${DOCKER_ARGS_FILE}" ]]; then
+    DOCKER_ARGS_FILE=".isaac_ros_dev-dockerargs"
+fi
+
+# Check for dockerargs file in home directory, then locally in root
+if [[ -f ~/${DOCKER_ARGS_FILE} ]]; then
+    DOCKER_ARGS_FILEPATH=`realpath ~/${DOCKER_ARGS_FILE}`
+elif [[ -f "${ROOT}/${DOCKER_ARGS_FILE}" ]]; then
+    DOCKER_ARGS_FILEPATH="${ROOT}/${DOCKER_ARGS_FILE}"
+fi
+
+if [[ -f "${DOCKER_ARGS_FILEPATH}" ]]; then
+    print_info "Using additional Docker run arguments from $DOCKER_ARGS_FILEPATH"
+    readarray -t DOCKER_ARGS_FILE_LINES < $DOCKER_ARGS_FILEPATH
     for arg in "${DOCKER_ARGS_FILE_LINES[@]}"; do
         DOCKER_ARGS+=($(eval "echo $arg | envsubst"))
     done
@@ -192,18 +273,19 @@ fi
 
 # Run container from image
 print_info "Running $CONTAINER_NAME"
+if [[ $VERBOSE -eq 1 ]]; then
+    set -x
+fi
 docker run -it --rm \
     --privileged \
     --network host \
     ${DOCKER_ARGS[@]} \
     -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
-    -v /dev/*:/dev/* \
     -v /etc/localtime:/etc/localtime:ro \
     --name "$CONTAINER_NAME" \
     --runtime nvidia \
     --user="admin" \
     --entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh \
     --workdir /workspaces/isaac_ros-dev \
-    $@ \
     $BASE_NAME \
     /bin/bash

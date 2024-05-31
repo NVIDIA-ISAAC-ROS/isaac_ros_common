@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022, NVIDIA CORPORATION.  All rights reserved.
+# Copyright (c) 2021-2024, NVIDIA CORPORATION.  All rights reserved.
 #
 # NVIDIA CORPORATION and its licensors retain all intellectual property
 # and proprietary rights in and to this software, related documentation
@@ -9,32 +9,34 @@
 # Docker file to build on x86_64
 # https://docs.nvidia.com/deeplearning/frameworks/user-guide/index.html
 # https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html
-ARG BASE_IMAGE=nvcr.io/nvidia/tritonserver:22.09-py3
+ARG BASE_IMAGE=nvcr.io/nvidia/tritonserver:23.10-py3
 FROM ${BASE_IMAGE}
+
+# Store list of packages (must be first)
+RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/x86_64-start-packages.csv
 
 # disable terminal interaction for apt
 ENV DEBIAN_FRONTEND=noninteractive
 ENV SHELL /bin/bash
 SHELL ["/bin/bash", "-c"]
 
-# NVIDIA repository keys: https://developer.nvidia.com/blog/updating-the-cuda-linux-gpg-repository-key/
-RUN apt-key del 7fa2af80 && mkdir -p /tmp && cd /tmp \
-        && wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-keyring_1.0-1_all.deb \
-        && dpkg -i cuda-keyring_1.0-1_all.deb \
-        && rm cuda-keyring_1.0-1_all.deb \
-        && add-apt-repository --remove 'deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /'
+# Ensure we have universe
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+        software-properties-common \
+&& add-apt-repository universe \
+&& apt-get update
 
 # Add Isaac apt repository
-RUN wget -qO - https://isaac.download.nvidia.com/isaac-ros/repos.key | apt-key add -
-RUN echo 'deb https://isaac.download.nvidia.com/isaac-ros/ubuntu/main focal main' | tee -a /etc/apt/sources.list
-
-# Ensure we have universe
-RUN apt-get update \
-        && apt-get install -y software-properties-common \
-        && add-apt-repository universe
+RUN --mount=type=cache,target=/var/cache/apt \
+    wget -qO - https://isaac.download.nvidia.com/isaac-ros/repos.key | apt-key add - && \
+    grep -qxF "deb https://isaac.download.nvidia.com/isaac-ros/release-3 $(lsb_release -cs) release-3.0" /etc/apt/sources.list || \
+    echo "deb https://isaac.download.nvidia.com/isaac-ros/release-3 $(lsb_release -cs) release-3.0" | tee -a /etc/apt/sources.list \
+    && apt-get update
 
 # Fundamentals
-RUN apt-get update && apt-get install -y \
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
         apt-transport-https \
         bash-completion \
         build-essential \
@@ -43,6 +45,7 @@ RUN apt-get update && apt-get install -y \
         cmake \
         curl \
         git \
+        git-lfs \
         gnupg2 \
         iputils-ping \
         locales \
@@ -53,41 +56,40 @@ RUN apt-get update && apt-get install -y \
         vim \
         unzip \
         mlocate \
-	libgoogle-glog-dev \
-&& rm -rf /var/lib/apt/lists/* \
-&& apt-get clean
+	libgoogle-glog-dev
+
+# Python basics
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+        python3-pip \
+        python3-pybind11 \
+        python3-pytest \
+        python3-pytest-repeat \
+        python3-pytest-rerunfailures \
+        python3-pytest-cov
 
 # Set Python3 as default
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
-# Python basics
-RUN apt-get update && apt-get install -y \
-        python3-pip \
-        python3-pybind11 \
-        python3-pytest-cov \
-&& rm -rf /var/lib/apt/lists/* \
-&& apt-get clean
-
-# Video utilities
-RUN apt-get update && apt-get install -y \
-        v4l-utils \
-        mesa-utils \
-        libcanberra-gtk-module \
-        libcanberra-gtk3-module \
-&& rm -rf /var/lib/apt/lists/* \
-&& apt-get clean
-
 # Core dev libraries
-RUN apt-get update && apt-get install -y \
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+        ffmpeg \
         libasio-dev \
         libbullet-dev \
         libtinyxml2-dev \
         libcunit1-dev \
+        libmnl0 \
+        libmnl-dev \
+        libv4l-dev \
         libyaml-cpp-dev \
         libopencv-dev \
+        libpython3.10 \
+        libx264-dev \
+        kmod \
+        patchelf \
         python3-opencv \
-&& rm -rf /var/lib/apt/lists/* \
-&& apt-get clean
+        nlohmann-json3-dev
 
 # Python3 (PIP)
 RUN python3 -m pip install -U \
@@ -103,117 +105,71 @@ RUN python3 -m pip install -U \
         flake8-import-order \
         flake8-quotes \
         onnx \
-        pytest-repeat \
-        pytest-rerunfailures \
-        pytest \
         pydocstyle \
-        scikit-learn
+        scikit-learn \
+        ninja \
+        networkx \
+        numpy \
+        numpy-quaternion \
+        pyyaml \
+        setuptools_scm>=6.2 \
+        trimesh \
+        yourdfpy>=0.0.53 \
+        warp-lang>=0.9.0 \
+        scipy>=1.7.0 \
+        tqdm \
+        importlib_resources
 
-# Install Git-LFS
-RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash && \
-        apt-get update && apt-get install -y \
-        git-lfs \
-&& rm -rf /var/lib/apt/lists/* \
-&& apt-get clean
+# Install nvv4l2 for GXF Multimedia h264 codec
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+        nvv4l2 \
+&& ln -s /usr/lib/x86_64-linux-gnu/libnvcuvid.so.1 /usr/lib/x86_64-linux-gnu/libnvcuvid.so \
+&& ln -s /usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1 /usr/lib/x86_64-linux-gnu/libnvidia-encode.so
 
-# Upgrade cmake to 3.22.1 to match Ubuntu 22.04
-# Key rotation 2024-01-10
-RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null \
-    && echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | tee /etc/apt/sources.list.d/kitware.list >/dev/null \
-    && apt-get update \
-    && apt-get remove -y cmake && apt-get purge -y cmake && apt-get remove -y cmake-data && apt-get purge -y cmake-data \
-    && apt-get install -y cmake=3.22.1-0kitware1ubuntu20.04.1 cmake-data=3.22.1-0kitware1ubuntu20.04.1 \
-    && cmake --version \
-&& rm -rf /var/lib/apt/lists/* \
-&& apt-get clean
+# Install VPI packages
+ARG HAS_GPU="true"
+RUN --mount=type=cache,target=/var/cache/apt \
+    if [ "$HAS_GPU" = "true" ]; then \
+	set -e ; \
+        apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc ; \
+        add-apt-repository "deb http://repo.download.nvidia.com/jetson/x86_64/$(lsb_release -cs) r36.3 main" ; \
+        apt-get update ; \
+        apt-get install libnvvpi3 vpi3-dev ; \
+    fi
 
 # Pytorch
-RUN python3 -m pip install -U --extra-index-url https://download.pytorch.org/whl/cu113 \
+RUN python3 -m pip install -U --extra-index-url https://download.pytorch.org/whl/cu121 \
         torch \
         torchvision \
         torchaudio
 
-# Install VPI packages
-ARG HAS_GPU="true"
-RUN if [ "$HAS_GPU" = "true" ]; then \
-	set -e ; \
-        apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc ; \
-        add-apt-repository 'deb http://repo.download.nvidia.com/jetson/x86_64/focal r35.4 main' ; \
-        apt-get update ; \
-        apt-get install libnvvpi2 vpi2-dev ; \
-        rm -rf /var/lib/apt/lists/* ; \
-        apt-get clean ; \
-    fi
-
 # Install Tao converter
-RUN mkdir -p /opt/nvidia/tao && \
-    cd /opt/nvidia/tao && \
-    wget https://developer.nvidia.com/tao-converter-80 && \
-    unzip tao-converter-80 && \
-    chmod 755 $(find /opt/nvidia/tao -name "tao-converter") && \
-    ln -sf $(find /opt/nvidia/tao -name "tao-converter") /opt/nvidia/tao/tao-converter && \
-    rm tao-converter-80
+RUN mkdir -p /opt/nvidia/tao && cd /opt/nvidia/tao && \
+    wget --content-disposition 'https://api.ngc.nvidia.com/v2/resources/org/nvidia/team/tao/tao-converter/v5.1.0_8.6.3.1_x86/files?redirect=true&path=tao-converter' -O tao-converter && \
+    chmod 755 tao-converter
 
 ENV PATH="${PATH}:/opt/nvidia/tao"
+ENV TRT_LIB_PATH="/usr/lib/x86_64-linux-gnu"
+ENV TRT_INC_PATH="/usr/include/x86_64-linux-gnu"
 
 # Update environment
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/tritonserver/lib"
 
+# Install CV-CUDA
+RUN --mount=type=cache,target=/var/cache/apt \
+    cd /tmp && \
+    wget https://github.com/CVCUDA/CV-CUDA/releases/download/v0.5.0-beta/nvcv-lib-0.5.0_beta-cuda12-x86_64-linux.deb && \
+    dpkg -i nvcv-lib-0.5.0_beta-cuda12-x86_64-linux.deb && \
+    wget https://github.com/CVCUDA/CV-CUDA/releases/download/v0.5.0-beta/nvcv-dev-0.5.0_beta-cuda12-x86_64-linux.deb && \
+    dpkg -i nvcv-dev-0.5.0_beta-cuda12-x86_64-linux.deb
+
 # Add MQTT binaries and libraries
-RUN apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
-    && apt-get update \
-    && apt-get install -y mosquitto mosquitto-clients \
-&& rm -rf /var/lib/apt/lists/* \
-&& apt-get clean
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
+&& apt-get update && apt-get install -y \
+        mosquitto \
+        mosquitto-clients
 
-RUN python3 -m pip install -U \
-        paho-mqtt
-
-# Compression dependencies
-RUN apt-get update && apt-get install -y \
-        libv4l-dev \
-        kmod \
-&& rm -rf /var/lib/apt/lists/* \
-&& apt-get clean
-
-# Install NVIDIA v4l2 extensions for h264 support
-RUN apt-get update && apt-get install -y nvv4l2
-
-# Upgrade libc to resolve vulnerabilities including CVE-2019-11477
-RUN apt-get update && apt-get install -y --only-upgrade \
-       linux-libc-dev \
-&& rm -rf /var/lib/apt/lists/* \
-&& apt-get clean
-
-# Downgrade protobuf
-RUN python3 -m pip install \
-        protobuf==3.20.1
-
-# GPU usage monitoring on x86
-RUN python3 -m pip install \
-    gpustat==0.6.0
-
-# Python3 (PIP)
-RUN python3 -m pip install -U \
-    mailcap-fix
-
-# Resolve vulnerability in mailcap.py by removing it (CVE-2015-20107)
-RUN rm -f /opt/tritonserver/backends/dali/conda/envs/dalienv/lib/python3.8/mailcap.py
-
-# Remove any platform entangling dependencies
-RUN touch \
-    /usr/lib/x86_64-linux-gnu/libcuda.so \
-    /usr/lib/x86_64-linux-gnu/libnvcuvid.so \
-    /usr/lib/x86_64-linux-gnu/libnvidia.so \
-    /usr/lib/firmware \
-    /usr/local/cuda/compat/lib || true
-
-RUN rm -rf \
-    /usr/lib/x86_64-linux-gnu/libcuda.so* \
-    /usr/lib/x86_64-linux-gnu/libnvcuvid.so* \
-    /usr/lib/x86_64-linux-gnu/libnvidia-*.so* \
-    /usr/lib/firmware \
-    /usr/local/cuda/compat/lib || true
-
-# Restore symlink for nvencode
-RUN ln -f -s /usr/lib/x86_64-linux-gnu/libnvidia-encode.so.1 /usr/lib/x86_64-linux-gnu/libnvidia-encode.so
+# Store list of packages (must be last)
+RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/x86_64-end-packages.csv
