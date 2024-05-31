@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
-# Copyright (c) 2021-2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Copyright (c) 2021-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ find_package(vpi REQUIRED)
 # vpi utilities
 ament_auto_add_library(${PROJECT_NAME} SHARED
   src/vpi_utilities.cpp
+  src/qos.cpp
 )
 target_link_libraries(${PROJECT_NAME} vpi)
 
@@ -41,7 +42,14 @@ ament_index_register_resource(isaac_ros_common_cmake_path CONTENT
     "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/cmake")
 list(APPEND ${PROJECT_NAME}_CONFIG_EXTRAS
   cmake/isaac_ros_common-extras.cmake
-  cmake/isaac_ros_common-extras-modules.cmake)
+  cmake/isaac_ros_common-extras-modules.cmake
+  cmake/isaac_ros_common-extras-assets.cmake
+)
+
+install(
+  DIRECTORY scripts/
+  DESTINATION bin
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

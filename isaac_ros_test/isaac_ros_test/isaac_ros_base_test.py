@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
-# Copyright (c) 2021-2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Copyright (c) 2021-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -426,6 +426,44 @@ class IsaacROSBaseTest(unittest.TestCase):
         camera_info.header.stamp = timestamp
 
         return image, camera_info
+
+    def spin_node_until_messages_received(self, received_messages: Dict[str, List[any]],
+                                          timeout_s: float):
+        """
+        Spin until at least one message received on each channel or the timeout is reached.
+
+        Parameters
+        ----------
+        received_messages : Dict[str, List[any]]
+            Map from topic name to list of messages.
+            Note that this function assumes that `received_messages` is being populated
+            by ROS subscribers from outside this function.
+
+        timeout_s : float
+            The time in seconds, after which we give up waiting and return.
+
+        """
+        end_time = time.time() + timeout_s
+        while time.time() < end_time:
+            SPIN_TIMEOUT = 0.1
+            rclpy.spin_once(self.node, timeout_sec=SPIN_TIMEOUT)
+            if all(len(value) > 0 for value in received_messages.values()):
+                return
+
+    def assert_messages_received(self, received_messages: Dict[str, List[any]]):
+        """
+        Assert that all channels received at least one message.
+
+        Parameters
+        ----------
+        received_messages : Dict[str, List[any]]
+            Map from topic name to list of messages.
+
+        """
+        empty_topics = [name for name, value in received_messages.items() if len(value) == 0]
+        self.assertTrue(
+            len(empty_topics) == 0,
+            f'Didnt receive output on some of the topics. Empty topics: {empty_topics}')
 
     @classmethod
     def setUpClass(cls) -> None:

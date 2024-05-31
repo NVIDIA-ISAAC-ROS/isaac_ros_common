@@ -10,13 +10,9 @@ streamline development and testing with the Isaac ROS suite.
 
 <div align="center"><a class="reference internal image-reference" href="https://media.githubusercontent.com/media/NVIDIA-ISAAC-ROS/.github/main/resources/isaac_ros_docs/repositories_and_packages/isaac_ros_common/isaac_ros_common_tools.png/"><img alt="Isaac ROS DevOps tools" src="https://media.githubusercontent.com/media/NVIDIA-ISAAC-ROS/.github/main/resources/isaac_ros_docs/repositories_and_packages/isaac_ros_common/isaac_ros_common_tools.png/" width="auto"/></a></div>
 
-The Docker images included in this package provide pre-compiled binaries
-for ROS 2 Humble on Ubuntu 20.04 Focal.
-
-Additionally, on x86_64 platforms, Docker containers allow you to
-quickly set up a sensitive set of frameworks and dependencies to ensure
-a smooth experience with Isaac ROS packages. The Dockerfiles for this
-platform are based on the version 22.03 image from [Deep Learning
+Docker containers allow you to quickly set up a sensitive set of frameworks
+and dependencies to ensure a smooth experience with Isaac ROS packages.
+The Dockerfiles for x86_64 are based on the version 23.10 image from [Deep Learning
 Frameworks Containers](https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html).
 On Jetson platforms, JetPack manages all of these dependencies for you.
 
@@ -35,4 +31,4 @@ Please visit the [Isaac ROS Documentation](https://nvidia-isaac-ros.github.io/re
 
 ## Latest
 
-Update 2023-10-18: Updated for Isaac ROS 2.0.0.
+Update 2024-05-30: Update to be compatible with JetPack 6.0

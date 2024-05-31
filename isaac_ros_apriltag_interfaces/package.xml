@@ -11,17 +11,16 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>isaac_ros_apriltag_interfaces</name>
-  <version>2.1.0</version>
+  <version>3.0.0</version>
   <description>Interfaces for performing Isaac ROS AprilTag detection</description>
 
-  <maintainer email="hemals@nvidia.com">Hemal Shah</maintainer>
+  <maintainer email="isaac-ros-maintainers@nvidia.com">Isaac ROS Maintainers</maintainer>
   <license>NVIDIA Isaac ROS Software License</license>
   <url type="website">https://developer.nvidia.com/isaac-ros-gems/</url>
   <author>Arjun Bhorkar</author>
   <author>Hemal Shah</author>
 
   <build_depend>ament_cmake_auto</build_depend>
-  <build_depend>isaac_ros_common</build_depend>
   <build_depend>rosidl_default_generators</build_depend>
   <exec_depend>rosidl_default_runtime</exec_depend>
 

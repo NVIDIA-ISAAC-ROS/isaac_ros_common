@@ -11,15 +11,39 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
+ARG LIBREALSENSE_SOURCE_VERSION=v2.55.1
+ARG LIBREALSENSE_DEB_VERSION=2.55.1-0~realsense.12474
+ARG LIBREALSENSE_DKMS_DEB_VERSION=1.3.26-0ubuntu1
+ARG REALSENSE2_CAMERA_ROS_DEB_VERSION=4.54.1-1jammy.20240517.191635
+
+# Install realsense2-camera ROS package and librealsense from binaries for x86_64 only
+RUN --mount=type=cache,target=/var/cache/apt \
+    if [[ "$(uname -m)" == "x86_64" ]]; then \
+        mkdir -p /etc/apt/keyrings && \
+        curl -sSf https://librealsense.intel.com/Debian/librealsense.pgp | \
+        tee /etc/apt/keyrings/librealsense.pgp > /dev/null  && \
+        echo "deb [signed-by=/etc/apt/keyrings/librealsense.pgp] \
+        https://librealsense.intel.com/Debian/apt-repo `lsb_release -cs` main" | \
+        tee /etc/apt/sources.list.d/librealsense.list && apt-get update && \
+        apt-get install -y \
+        librealsense2-dkms=${LIBREALSENSE_DKMS_DEB_VERSION} \
+        librealsense2-utils=${LIBREALSENSE_DEB_VERSION} \
+        librealsense2-dev=${LIBREALSENSE_DEB_VERSION} \
+        ros-humble-realsense2-camera=${REALSENSE2_CAMERA_ROS_DEB_VERSION}; \
+    fi
+
 COPY scripts/build-librealsense.sh /opt/realsense/build-librealsense.sh
 COPY scripts/install-realsense-dependencies.sh /opt/realsense/install-realsense-dependencies.sh
 
-RUN chmod +x /opt/realsense/install-realsense-dependencies.sh && /opt/realsense/install-realsense-dependencies.sh
-RUN chmod +x /opt/realsense/build-librealsense.sh && /opt/realsense/build-librealsense.sh
+# Build librealsense from source for aarch64 only
+# The realsense2-camera ROS package will be built from source as part of the "RealSense Setup docs" for aarch64 only
+RUN if [[ $(uname -m) == "aarch64" ]]; then \
+        chmod +x /opt/realsense/install-realsense-dependencies.sh && \
+        /opt/realsense/install-realsense-dependencies.sh; \
+        chmod +x /opt/realsense/build-librealsense.sh && /opt/realsense/build-librealsense.sh -v ${LIBREALSENSE_SOURCE_VERSION}; \
+    fi
 
-# Copy hotplug script which will get invoked whenever a devices plugged or un-plugged
+# Copy hotplug script for udev rules/hotplug for RealSense
 RUN mkdir -p /opt/realsense/
 COPY scripts/hotplug-realsense.sh /opt/realsense/hotplug-realsense.sh
-
-# Copy custom udev rules file
 COPY udev_rules/99-realsense-libusb-custom.rules /etc/udev/rules.d/99-realsense-libusb-custom.rules
