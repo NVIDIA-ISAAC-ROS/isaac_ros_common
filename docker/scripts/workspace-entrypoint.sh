@@ -18,7 +18,10 @@ if [ "$ROS_DOMAIN_ID" != "null" ] && [ "$ROS_DOMAIN_ID" -lt "233" ] && [ "$ROS_D
     echo "export ROS_DOMAIN_ID=$ROS_DOMAIN_ID" >> ~/.bashrc
     echo "ROS_DOMAIN_ID is set to $ROS_DOMAIN_ID"
 else
+    export ROS_DOMAIN_ID=0
     echo "ROS_DOMAIN_ID is not set or out of range"
+    echo "ROS_DOMAIN_ID is set to $ROS_DOMAIN_ID"
+    echo "export ROS_DOMAIN_ID=$ROS_DOMAIN_ID" >> ~/.bashrc
 fi
 
 if [ "$ROS_NAMESPACE" == "null" ]; then
@@ -28,8 +31,8 @@ if [ "$ROS_NAMESPACE" == "null" ]; then
     echo "ROS_NAMESPACE is set to $ROS_NAMESPACE"
 else
     export ROS_NAMESPACE=$ROS_NAMESPACE
-    echo "export ROS_NAMESPACE=$ROS_NAMESPACE" >> ~/.bashrc
     echo "ROS_NAMESPACE is set to $ROS_NAMESPACE"
+    echo "export ROS_NAMESPACE=$ROS_NAMESPACE" >> ~/.bashrc
 fi
 
 # Get platform
@@ -179,7 +182,14 @@ else
     echo "Serial port is not available" &
 fi
 
-ros2 run image_publisher image_publisher_node /dev/video2 --ros-args -r image_raw:=image  -r __ns:=/${ROS_NAMESPACE} &
+# ros2 run image_publisher image_publisher_node /dev/video2 --ros-args -r image_raw:=image  -r __ns:=/${ROS_NAMESPACE} &
+ros2 run image_publisher image_publisher_node /dev/video2 --ros-args -r image_raw:=image -r __ns:=/${ROS_NAMESPACE} -p frame_id:=webcam &
+ros2 run image_publisher image_publisher_node /dev/video3 --ros-args -r image_raw:=image -r __ns:=/${ROS_NAMESPACE} -p frame_id:=external_cam &
+
+# ros2 run image_publisher image_publisher_node /dev/video2 --ros-args -r image_raw:=image -r __ns:=/${ROS_NAMESPACE} -p frame_id:=webcam &
+
+ros2 run image_publisher image_publisher_node /dev/video3 --ros-args -r image_raw:=image2 -r __ns:=/${ROS_NAMESPACE} &
+
 
 ros2 launch micro_ros_agent micro_ros_agent_launch.py namespace:=/${ROS_NAMESPACE} &
 

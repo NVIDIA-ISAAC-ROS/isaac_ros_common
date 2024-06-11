@@ -90,20 +90,20 @@ if [[ $? -ne 0 ]] ; then
 fi
 
 # Check if all LFS files are in place in the repository where this script is running from.
-echo $ROOT
-echo $ISAAC_ROS_DEV_DIR
-cd $ROOT
-git rev-parse &>/dev/null
-if [[ $? -eq 0 ]]; then
-    LFS_FILES_STATUS=$(cd $ISAAC_ROS_DEV_DIR && git lfs ls-files | cut -d ' ' -f2)
-    for (( i=0; i<${#LFS_FILES_STATUS}; i++ )); do
-        f="${LFS_FILES_STATUS:$i:1}"
-        if [[ "$f" == "-" ]]; then
-            print_error "LFS files are missing. Please re-clone the repo after installing git-lfs."
-            exit 1
-        fi
-    done
-fi
+# echo $ROOT
+# echo $ISAAC_ROS_DEV_DIR
+# cd $ROOT
+# git rev-parse &>/dev/null
+# if [[ $? -eq 0 ]]; then
+#     LFS_FILES_STATUS=$(cd $ISAAC_ROS_DEV_DIR && git lfs ls-files | cut -d ' ' -f2)
+#     for (( i=0; i<${#LFS_FILES_STATUS}; i++ )); do
+#         f="${LFS_FILES_STATUS:$i:1}"
+#         if [[ "$f" == "-" ]]; then
+#             print_error "LFS files are missing. Please re-clone the repo after installing git-lfs."
+#             exit 1
+#         fi
+#     done
+# fi
 
 PLATFORM="$(uname -m)"
 
