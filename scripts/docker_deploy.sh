@@ -35,7 +35,8 @@ INCLUDE_DIRS=()
 INCLUDE_TARBALLS=()
 SET_LAUNCH_CMD=0
 CUSTOM_APT_SOURCES=()
-VALID_ARGS=$(getopt -o w:d:b:n:s:f:p:i:t:a: --long ros_ws:include_dir:base_image_key:name:suffix_image_key:launch_file:launch_package:install_debians:include_tarball:custom_apt_source -- "$@")
+ADDITIONAL_DOCKER_ARGS=()
+VALID_ARGS=$(getopt -o w:d:b:n:s:f:p:i:t:a:c: --long ros_ws:,include_dir:,base_image_key:,name:,suffix_image_key:,launch_file:,launch_package:,install_debians:,include_tarball:,custom_apt_source:,docker_arg: -- "$@")
 eval set -- "$VALID_ARGS"
 while [ : ]; do
   case "$1" in
@@ -46,6 +47,10 @@ while [ : ]; do
     -b | --base_image_key)
         BASE_IMAGE_KEY="$2"
         shift 2
+        ;;
+    -c | --docker_arg)
+        ADDITIONAL_DOCKER_ARGS+=("--docker_arg $2")        
+        shift 2        
         ;;
     -d | --include_dir)
         INCLUDE_DIRS+=("$2")
@@ -164,6 +169,10 @@ for CUSTOM_APT_SOURCE in "${CUSTOM_APT_SOURCES[@]}"
 do
     print_info "Adding custom apt source: ${CUSTOM_APT_SOURCE}"
 done
+for DOCKER_ARG in "${ADDITIONAL_DOCKER_ARGS[@]}"
+do
+    print_info "Additional docker arg: ${DOCKER_ARG}"
+done
 print_info "Begin building deployable image"
 
 # Setup on-exit cleanup tasks
@@ -233,19 +242,19 @@ done
 
 # Build base image
 print_info "Building deploy base image: ${BASE_DEPLOY_IMAGE_NAME} with key ${BASE_IMAGE_KEY}"
-$ROOT/build_image_layers.sh --image_key "${BASE_IMAGE_KEY}" --image_name "${BASE_DEPLOY_IMAGE_NAME}" --build_arg "MODE=deploy"
+$ROOT/build_image_layers.sh --image_key "${BASE_IMAGE_KEY}" --image_name "${BASE_DEPLOY_IMAGE_NAME}" --build_arg "MODE=deploy" ${ADDITIONAL_DOCKER_ARGS[@]}
 
 # Install staged files and setup launch command
 print_info "Building install image with launch file ${LAUNCH_FILE} in package ${LAUNCH_PACKAGE}"
 $ROOT/build_image_layers.sh --image_key "deploy" --image_name "${INSTALLED_DEPLOY_IMAGE_NAME}" --base_image "${BASE_DEPLOY_IMAGE_NAME}" --context_dir "${TEMP_DIR}" \
-    --build_arg "MODE=deploy" --build_arg "SET_LAUNCH_CMD=${SET_LAUNCH_CMD}" --build_arg "LAUNCH_FILE=${LAUNCH_FILE}" --build_arg "LAUNCH_PACKAGE=${LAUNCH_PACKAGE}" --build_arg "INSTALL_DEBIANS_CSV=${INSTALL_DEBIANS_CSV}"
+    --build_arg "MODE=deploy" --build_arg "SET_LAUNCH_CMD=${SET_LAUNCH_CMD}" --build_arg "LAUNCH_FILE=${LAUNCH_FILE}" --build_arg "LAUNCH_PACKAGE=${LAUNCH_PACKAGE}" --build_arg "INSTALL_DEBIANS_CSV=${INSTALL_DEBIANS_CSV}" ${ADDITIONAL_DOCKER_ARGS[@]}
 
 # Optional, if ROS_WS, install rosdeps
 if [[ ! -z "${ROS_WS}" ]]; then
     print_info "Building ROS workspace image for path ${ROS_WS}"
     PREVIOUS_STAGE="${INSTALLED_DEPLOY_IMAGE_NAME}"
     INSTALLED_DEPLOY_IMAGE_NAME="${DEPLOY_IMAGE_NAME}-rosws"
-    $ROOT/build_image_layers.sh --image_key "deploy_ws" --image_name "${INSTALLED_DEPLOY_IMAGE_NAME}" --base_image "${PREVIOUS_STAGE}" --context_dir "${TEMP_DIR}" --build_arg "MODE=deploy ROS_WS=${ROS_WS_DEST}"
+    $ROOT/build_image_layers.sh --image_key "deploy_ws" --image_name "${INSTALLED_DEPLOY_IMAGE_NAME}" --base_image "${PREVIOUS_STAGE}" --context_dir "${TEMP_DIR}" --build_arg "MODE=deploy ROS_WS=${ROS_WS_DEST}" ${ADDITIONAL_DOCKER_ARGS[@]}
 fi
 
 # Optional, build suffix image if specified
@@ -253,7 +262,7 @@ if [[ ! -z "${SUFFIX_IMAGE_KEY}" ]]; then
     print_info "Building suffix deploy image for key ${SUFFIX_IMAGE_KEY}"
     PREVIOUS_STAGE="${INSTALLED_DEPLOY_IMAGE_NAME}"
     INSTALLED_DEPLOY_IMAGE_NAME="${DEPLOY_IMAGE_NAME}-suffix"
-    $ROOT/build_image_layers.sh --image_key "SUFFIX_IMAGE_KEY" --image_name "${INSTALLED_DEPLOY_IMAGE_NAME}" --base_image "${PREVIOUS_STAGE}" --build_arg "MODE=deploy"
+    $ROOT/build_image_layers.sh --image_key "SUFFIX_IMAGE_KEY" --image_name "${INSTALLED_DEPLOY_IMAGE_NAME}" --base_image "${PREVIOUS_STAGE}" --build_arg "MODE=deploy" ${ADDITIONAL_DOCKER_ARGS[@]}
 fi
 
 # Retag last image
