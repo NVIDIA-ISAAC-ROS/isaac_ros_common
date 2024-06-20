@@ -3,11 +3,16 @@
 # Set the machine identification
 MACHINE_CONFIG_PATH="/usr/config/good_machine_config.json"
 
+
 if [ -f "$MACHINE_CONFIG_PATH" ]; then
     CONFIG_ROUTE=".desired.machine_config.identification"
+    CONFIG_ROUTE2=".desired.machine_config.camera_config"
     MACHINE_ID=$(jq -r "$CONFIG_ROUTE.machine_id" $MACHINE_CONFIG_PATH)
     ROS_DOMAIN_ID=$(jq -r "$CONFIG_ROUTE.ros_domain_id" $MACHINE_CONFIG_PATH)
     ROS_NAMESPACE=$(jq -r "$CONFIG_ROUTE.ros_namespace" $MACHINE_CONFIG_PATH)
+    FRONT_CAMERA=$(jq -r '.desired.machine_config.advanced_features.front_camera' $MACHINE_CONFIG_PATH)
+    REAR_CAMERA=$(jq -r '.desired.machine_config.advanced_features.rear_camera' $MACHINE_CONFIG_PATH)
+    TOPIC_NAME=$(jq -r '.desired.machine_config.camera_config.color_image_topic' $MACHINE_CONFIG_PATH)
 else
     echo "Error: $MACHINE_CONFIG_PATH does not exist."
 fi
@@ -182,13 +187,22 @@ else
     echo "Serial port is not available" &
 fi
 
-# ros2 run image_publisher image_publisher_node /dev/video2 --ros-args -r image_raw:=image  -r __ns:=/${ROS_NAMESPACE} &
-ros2 run image_publisher image_publisher_node /dev/video2 --ros-args -r image_raw:=image -r __ns:=/${ROS_NAMESPACE} -p frame_id:=webcam &
-ros2 run image_publisher image_publisher_node /dev/video3 --ros-args -r image_raw:=image -r __ns:=/${ROS_NAMESPACE} -p frame_id:=external_cam &
+# Starting the cameras
+if [ "$FRONT_CAMERA" = true ]; then
+    # Start the front camera
+    echo "Starting front camera..."
+    ros2 run image_publisher image_publisher_node /dev/video1 --ros-args -r image_raw:="$TOPIC_NAME" -r __ns:=/${ROS_NAMESPACE} -p frame_id:=front_camera &
+else
+    echo "Front Camera is not configured on this device!"
+fi
 
-# ros2 run image_publisher image_publisher_node /dev/video2 --ros-args -r image_raw:=image -r __ns:=/${ROS_NAMESPACE} -p frame_id:=webcam &
-
-ros2 run image_publisher image_publisher_node /dev/video3 --ros-args -r image_raw:=image2 -r __ns:=/${ROS_NAMESPACE} &
+if [ "$REAR_CAMERA" = true ]; then
+    # Start the rear camera
+    echo "Starting rear camera..."
+    ros2 run image_publisher image_publisher_node /dev/video2 --ros-args -r image_raw:="$TOPIC_NAME" -r __ns:=/${ROS_NAMESPACE} -p frame_id:=rear_camera&
+else
+    echo "Rear Camera is not configured on this device!"
+fi
 
 
 ros2 launch micro_ros_agent micro_ros_agent_launch.py namespace:=/${ROS_NAMESPACE} &
@@ -206,3 +220,4 @@ ros2 run backend_ui_server server --ros-args -r __ns:=/${ROS_NAMESPACE} &
 # Task to catch the SIGTERM signal
 child=$! 
 wait "$child"
+
