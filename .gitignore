@@ -1,5 +1,6 @@
 # Ignore all pycache files
 **/__pycache__/**
-
+.vscode/
 # Ignore config files
 .isaac_ros_common-config
+get-pip.py
