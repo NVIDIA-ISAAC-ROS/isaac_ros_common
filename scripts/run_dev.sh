@@ -204,7 +204,7 @@ print_info "Launching Isaac ROS Dev container with image key ${BASE_IMAGE_KEY}: 
 # Build imag to launch
 if [[ $SKIP_IMAGE_BUILD -ne 1 ]]; then
     print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME"
-   $ROOT/build_image_layers.sh --image_key "$BASE_IMAGE_KEY" --image_name "$BASE_NAME"
+   $ROOT/build_image_layers.sh --image_key "$BASE_IMAGE_KEY" --image_name "$BASE_NAME" -r
 
     # Check result
     if [ $? -ne 0 ]; then
@@ -281,6 +281,10 @@ docker run -it --rm \
     --network host \
     ${DOCKER_ARGS[@]} \
     -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
+    -v $WORKSPACES_DIR/dds:/workspaces/dds \
+    -v $WORKSPACES_DIR/aerostack2_ws:/workspaces/aerostack2_ws \
+    -v $WORKSPACES_DIR/agipix_control:/workspaces/agipix_control \
+    -v $HOME/.profile:/home/admin/.profile \
     -v /etc/localtime:/etc/localtime:ro \
     --name "$CONTAINER_NAME" \
     --runtime nvidia \
