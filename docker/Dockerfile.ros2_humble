@@ -236,6 +236,14 @@ RUN --mount=type=cache,target=/var/cache/apt \
     && cd moveit_resources && bloom-generate rosdebian && fakeroot debian/rules binary \
     && cd .. && apt-get install -y ./*.deb && rm *.deb
 
+# Install py_bindings_tools from source.
+RUN --mount=type=cache,target=/var/cache/apt \
+    mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && git clone https://github.com/moveit/py_binding_tools.git -b ros2 \
+    && cd py_binding_tools && source ${ROS_ROOT}/setup.bash \
+    && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd ../ && apt-get install -y ./*.deb && rm ./*.deb
+
 # Install MoveIt task constructor from source.  The "demo" package depends on moveit_resources_panda_moveit_config,
 # installed from source above.
 RUN --mount=type=cache,target=/var/cache/apt \
