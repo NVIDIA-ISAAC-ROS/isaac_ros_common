@@ -5653,6 +5653,10 @@ proxsuite:
   ubuntu:
     focal: [ros-humble-proxsuite]
     jammy: [ros-humble-proxsuite]
+py_binding_tools:
+  ubuntu:
+    focal: [ros-humble-py-binding-tools]
+    jammy: [ros-humble-py-binding-tools]
 py_trees:
   ubuntu:
     focal: [ros-humble-py-trees]
