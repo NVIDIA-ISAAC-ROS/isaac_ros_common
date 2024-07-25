@@ -109,7 +109,7 @@ RUN python3 -m pip install -U \
         scikit-learn \
         ninja \
         networkx \
-        numpy \
+        "numpy<2" \
         numpy-quaternion \
         pyyaml \
         setuptools_scm>=6.2 \
