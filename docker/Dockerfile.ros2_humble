@@ -204,6 +204,7 @@ apt-get update && apt-get install -y \
     ros-humble-moveit-servo \
     ros-humble-moveit-visual-tools \
     ros-humble-pluginlib \
+    ros-humble-py-binding-tools \
     ros-humble-robot-state-publisher \
     ros-humble-ros2-control \
     ros-humble-rviz-visual-tools \
