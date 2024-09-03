@@ -18,7 +18,7 @@ echo "alias sorpx4='source /workspaces/aerostack2_ws/install/setup.bash'" >> ~/.
 echo "export AEROSTACK2_WORKSPACE=/workspaces/aerostack2_ws" >> ~/.bashrc
 echo "export PX4_FOLDER=/workspaces/aerostack2_ws/src/thirdparty/PX4-Autopilot" >> ~/.bashrc
 
-echo "alias runagi='cd /workspaces/agipix_control/src/px4_ros2_offboard/tmux/ && ./start.sh'" >> ~/.bashrc
+echo "alias runagi='cd /workspaces/agipix_control/src/px4_ros2_offboard/tmux/ && ./start.sh -s'" >> ~/.bashrc
 echo "alias sorcon='source /workspaces/agipix_control/install/setup.bash'" >> ~/.bashrc
 echo "alias bilcon='cd /workspaces/agipix_control && colcon build'" >> ~/.bashrc
 
