@@ -136,14 +136,14 @@ RUN python3 -m pip install -U \
     scikit-learn \
     ninja \
     networkx \
-    "numpy<2" \
+    "numpy>=1.24.4,<2" \
     numpy-quaternion \
     pyyaml \
-    setuptools_scm>=6.2 \
+    "setuptools_scm>=6.2" \
     trimesh \
-    yourdfpy>=0.0.53 \
-    warp-lang>=0.9.0 \
-    scipy>=1.7.0 \
+    "yourdfpy>=0.0.53" \
+    "warp-lang>=0.9.0" \
+    "scipy>=1.7.0" \
     tqdm \
     importlib_resources
 
@@ -202,7 +202,7 @@ apt-get update && apt-get install -y --no-install-recommends \
     libopenblas-dev \
     libarchive-dev
 
-RUN  --mount=type=cache,target=/var/cache/apt \
+RUN --mount=type=cache,target=/var/cache/apt \
     cd /opt \
     && wget https://github.com/triton-inference-server/server/releases/download/v2.40.0/tritonserver2.40.0-igpu.tar.gz \
     && tar -xzvf tritonserver2.40.0-igpu.tar.gz \
