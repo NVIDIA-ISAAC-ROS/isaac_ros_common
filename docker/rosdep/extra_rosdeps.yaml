@@ -2459,14 +2459,6 @@ gxf_isaac_video_buffer_utils:
   ubuntu:
     focal: [ros-humble-gxf-isaac-video-buffer-utils]
     jammy: [ros-humble-gxf-isaac-video-buffer-utils]
-h264_image_transport:
-  ubuntu:
-    focal: [ros-humble-h264-image-transport]
-    jammy: [ros-humble-h264-image-transport]
-h264_msgs:
-  ubuntu:
-    focal: [ros-humble-h264-msgs]
-    jammy: [ros-humble-h264-msgs]
 hardware_interface:
   ubuntu:
     focal: [ros-humble-hardware-interface]
@@ -3323,10 +3315,6 @@ isaac_ros_test:
   ubuntu:
     focal: [ros-humble-isaac-ros-test]
     jammy: [ros-humble-isaac-ros-test]
-isaac_ros_to_h264_msgs_packet:
-  ubuntu:
-    focal: [ros-humble-isaac-ros-to-h264-msgs-packet]
-    jammy: [ros-humble-isaac-ros-to-h264-msgs-packet]
 isaac_ros_triton:
   ubuntu:
     focal: [ros-humble-isaac-ros-triton]
@@ -3379,6 +3367,10 @@ isaac_ros_yolov8:
   ubuntu:
     focal: [ros-humble-isaac-ros-yolov8]
     jammy: [ros-humble-isaac-ros-yolov8]
+isaac_ros_zed:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-zed]
+    jammy: [ros-humble-isaac-ros-zed]
 isaac_ros_zed_test:
   ubuntu:
     focal: [ros-humble-isaac-ros-zed-test]
@@ -5653,6 +5645,10 @@ proxsuite:
   ubuntu:
     focal: [ros-humble-proxsuite]
     jammy: [ros-humble-proxsuite]
+py_binding_tools:
+  ubuntu:
+    focal: [ros-humble-py-binding-tools]
+    jammy: [ros-humble-py-binding-tools]
 py_trees:
   ubuntu:
     focal: [ros-humble-py-trees]
@@ -6629,10 +6625,6 @@ ros2_controllers_test_nodes:
   ubuntu:
     focal: [ros-humble-ros2-controllers-test-nodes]
     jammy: [ros-humble-ros2-controllers-test-nodes]
-ros2_h264_encoder:
-  ubuntu:
-    focal: [ros-humble-ros2-h264-encoder]
-    jammy: [ros-humble-ros2-h264-encoder]
 ros2_socketcan:
   ubuntu:
     focal: [ros-humble-ros2-socketcan]

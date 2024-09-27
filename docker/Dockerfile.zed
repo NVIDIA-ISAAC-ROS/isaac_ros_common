@@ -1,0 +1,41 @@
+# Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+ARG ZED_SDK_MAJOR=4
+ARG ZED_SDK_MINOR=0
+
+# zed-ros2-wrapper dependencies
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+    libgeographic-dev  \
+    ros-humble-geographic-info \
+    ros-humble-nmea-msgs \
+    ros-humble-robot-localization \
+    ros-humble-xacro
+
+# The zed installation script expects to be run as non-root user and needs the USER ENV variable to be set
+ENV USER=${USERNAME}
+USER ${USERNAME}
+
+COPY scripts/install-zed-x86_64.sh /opt/zed/install-zed-x86_64.sh
+COPY scripts/install-zed-aarch64.sh /opt/zed/install-zed-aarch64.sh
+
+RUN --mount=type=cache,target=/var/cache/apt \
+  if [ "$(uname -m)" = "x86_64" ]; then \
+    sudo chmod +x /opt/zed/install-zed-x86_64.sh; \
+    /opt/zed/install-zed-x86_64.sh; \
+  else \
+    sudo chmod +x /opt/zed/install-zed-aarch64.sh; \
+    /opt/zed/install-zed-aarch64.sh; \
+  fi
+
+# Revert to root user
+USER root

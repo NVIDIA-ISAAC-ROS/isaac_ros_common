@@ -321,6 +321,7 @@ def play_rosbag(bag_path: Any,
                 loop: Any = None,
                 rate: Any = None,
                 delay: Any = None,
+                shutdown_on_exit: bool = False,
                 additional_bag_play_args: Any = None,
                 condition: Substitution = None) -> Action:
     """ Add a process playing back a ros2bag to the launch graph. """
@@ -347,8 +348,10 @@ def play_rosbag(bag_path: Any,
             cmd.extend((bag_args_str).split())
 
         print("[play_rosbag]: Running the following command:", ' '.join(cmd))
-
-        bag_play_action = ExecuteProcess(cmd=cmd, output='screen', on_exit=Shutdown())
+        on_exit_func = None
+        if shutdown_on_exit:
+            on_exit_func = Shutdown()
+        bag_play_action = ExecuteProcess(cmd=cmd, output='screen', on_exit=on_exit_func)
         return [_add_delay_if_set(bag_play_action, delay_str)]
 
     return OpaqueFunction(function=impl, condition=condition)

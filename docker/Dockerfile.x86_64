@@ -104,19 +104,20 @@ RUN python3 -m pip install -U \
         flake8-docstrings \
         flake8-import-order \
         flake8-quotes \
+        gpustat==0.6.0 \
         onnx \
         pydocstyle \
         scikit-learn \
         ninja \
         networkx \
-        "numpy<2" \
+        "numpy>=1.24.4,<2" \
         numpy-quaternion \
         pyyaml \
-        setuptools_scm>=6.2 \
+        "setuptools_scm>=6.2" \
         trimesh \
-        yourdfpy>=0.0.53 \
-        warp-lang>=0.9.0 \
-        scipy>=1.7.0 \
+        "yourdfpy>=0.0.53" \
+        "warp-lang>=0.9.0" \
+        "scipy>=1.7.0" \
         tqdm \
         importlib_resources
 
