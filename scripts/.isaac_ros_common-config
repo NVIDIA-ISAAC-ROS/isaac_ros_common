@@ -1,0 +1,12 @@
+# run_dev.sh config
+CONFIG_IMAGE_KEY=ros2_humble.realsense
+CONFIG_DOCKER_SEARCH_DIRS=/home/vschorp/dev/orx/orx_middleware/isaac_ros_common/docker
+BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/isaac/ros")
+ISAAC_ROS_WS=/home/vschorp/dev/orx/orx_middleware/ros2_ws
+
+# docker_deply.sh config
+BASE_IMAGE_KEY=aarch64.ros2_humble.realsense
+DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-jetson-realsense
+ROS_WS=/home/vschorp/dev/orx/orx_middleware/ros2_ws
+LAUNCH_PACKAGE=realsense2_camera
+LAUNCH_FILE=rs_launch.py
