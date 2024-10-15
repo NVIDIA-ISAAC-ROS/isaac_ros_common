@@ -20,6 +20,10 @@ RUN chmod +x /opt/realsense/install-realsense-dependencies.sh && \
     /opt/realsense/install-realsense-dependencies.sh; \
     chmod +x /opt/realsense/build-librealsense.sh && /opt/realsense/build-librealsense.sh -v ${LIBREALSENSE_SOURCE_VERSION};
 
+# Install ROS2 Realsense packages
+RUN apt-get update && \
+    apt-get install -y ros-humble-realsense2-*
+
 # Copy hotplug script for udev rules/hotplug for RealSense
 RUN mkdir -p /opt/realsense/
 COPY scripts/hotplug-realsense.sh /opt/realsense/hotplug-realsense.sh

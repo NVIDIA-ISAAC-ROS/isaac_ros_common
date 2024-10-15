@@ -14,9 +14,8 @@ export CUDA_MINOR="$(nvcc --version | grep -o -P ' release .{0,4}' | cut -d. -f2
 sudo apt-get update -y || true
 sudo apt-get install --no-install-recommends lsb-release wget less udev sudo zstd build-essential cmake libpng-dev libgomp1 -y
 
-# TODO: Remove this when zed-ros2-wrapper has a compatible version with ZED_SDK 4.1 (which supports cuda 12.2).
-CUDA_MAJOR=12
-CUDA_MINOR=1
+# Install zed_ros_wrapper dependencies
+sudo apt-get install --no-install-recommends -y ros-humble-point-cloud-transport
 
 # Download zed SDK installation RUN file to /tmp directory
 cd /tmp
