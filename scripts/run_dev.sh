@@ -201,7 +201,7 @@ fi
 # Summarize launch
 print_info "Launching Isaac ROS Dev container with image key ${BASE_IMAGE_KEY}: ${ISAAC_ROS_DEV_DIR}"
 
-# Build imag to launch
+# Build image to launch
 if [[ $SKIP_IMAGE_BUILD -ne 1 ]]; then
     print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME"
    $ROOT/build_image_layers.sh --image_key "$BASE_IMAGE_KEY" --image_name "$BASE_NAME"
