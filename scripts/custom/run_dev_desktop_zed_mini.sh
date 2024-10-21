@@ -1,1 +1,0 @@
-./../run_dev.sh -i ros2_humble.zed -a "-v /home/vschorp/dev/orx/orx_middleware/orx_interface/config_gui/experiment_config/datahub_01/zed_mini_0:/zed_mini_ros_config.yaml" -b
