@@ -1,13 +1,13 @@
 # run_dev.sh config
-CONFIG_IMAGE_KEY=ros2_humble.zed
+CONFIG_IMAGE_KEY=ros2_humble.user.foxglove
 CONFIG_DOCKER_SEARCH_DIRS=/home/vschorp/dev/orx/orx_middleware/isaac_ros_common/docker
 BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/isaac/ros")
 ISAAC_ROS_WS=/home/vschorp/dev/orx/orx_middleware/ros2_ws
 
 # docker_deply.sh config
-BASE_IMAGE_KEY=aarch64.ros2_humble.zed
-# BASE_IMAGE_KEY=x86_64.ros2_humble.realsense
-DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-jetson-zed
-ROS_WS=/home/vschorp/dev/orx/orx_middleware/ros2_ws
-LAUNCH_PACKAGE=zed_wrapper
-LAUNCH_FILE=orx_zedm_camera.launch.py
+# BASE_IMAGE_KEY=aarch64.ros2_humble.zed
+BASE_IMAGE_KEY=x86_64.ros2_humble.user.foxglove
+DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-desktop-foxglove
+# ROS_WS=/home/vschorp/dev/orx/orx_middleware/ros2_ws
+LAUNCH_PACKAGE=foxglove_bridge
+LAUNCH_FILE=foxglove_bridge_launch.xml
