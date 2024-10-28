@@ -5,9 +5,9 @@ BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/isaac/ros")
 ISAAC_ROS_WS=/home/vschorp/dev/orx/orx_middleware/ros2_ws
 
 # docker_deply.sh config
-# BASE_IMAGE_KEY=aarch64.ros2_humble.zed
-BASE_IMAGE_KEY=x86_64.ros2_humble.user.foxglove
-DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-desktop-foxglove
+BASE_IMAGE_KEY=aarch64.ros2_humble.user.foxglove
+# BASE_IMAGE_KEY=x86_64.ros2_humble.user.foxglove
+DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-jetson-foxglove
 # ROS_WS=/home/vschorp/dev/orx/orx_middleware/ros2_ws
 LAUNCH_PACKAGE=foxglove_bridge
 LAUNCH_FILE=foxglove_bridge_launch.xml
