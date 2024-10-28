@@ -1,5 +1,19 @@
+#!/bin/bash
+
+# Set default absolute path for the config file
+default_config_path="/home/vschorp/dev/orx/data/experiment_config/datahub_01/zed_mini_0"
+
+# Use the first argument as the config path, or the specified default path
+config_path="${1:-$default_config_path}"
+
+# Check if the config file exists
+if [ ! -f "$config_path" ]; then
+    echo "Configuration file not found at: $config_path"
+    exit 1
+fi
+
 docker run --rm -it --gpus all --runtime=nvidia \
     -v /dev/input:/dev/input \
-    -v /home/vschorp/dev/orx/orx_middleware/orx_interface/config_gui/experiment_config/datahub_01/zed_mini_0:/zed_mini_ros_config.yaml \
+    -v "$config_path":/zed_mini_ros_config.yaml \
     --privileged \
     vschorp98/orx-middleware-isaac-ros-jetson-zed
