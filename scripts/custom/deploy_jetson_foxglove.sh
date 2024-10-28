@@ -4,6 +4,6 @@ docker run --rm -it --gpus all --runtime=nvidia \
     --privileged \
     -p 8765:8765 \
     --network host \
-    vschorp98/orx-middleware-isaac-ros-desktop-foxglove
+    vschorp98/orx-middleware-isaac-ros-jetson-foxglove
 
     # https://app.foxglove.dev/balgrist-orx/dashboard
