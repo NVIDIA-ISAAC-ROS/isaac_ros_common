@@ -10,5 +10,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e ROS_ROOT=/opt/ros/humble \
     --user admin \
     --workdir /home/admin \
-    vschorp98/orx-middleware-isaac-ros-desktop-ros2_humble \
-    bash
+    vschorp98/orx-middleware-isaac-ros-desktop-data_saver \
