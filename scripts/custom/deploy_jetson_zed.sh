@@ -13,6 +13,7 @@ if [ ! -f "$config_path" ]; then
 fi
 
 docker run --rm -it --gpus all --runtime=nvidia \
+    --network host \
     -v /dev/input:/dev/input \
     -v "$config_path":/zed_mini_ros_config.yaml \
     --privileged \

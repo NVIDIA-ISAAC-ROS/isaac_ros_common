@@ -13,6 +13,8 @@ if [ ! -f "$config_path" ]; then
 fi
 
 docker run --rm -it --gpus all --runtime=nvidia \
+    --network host \
+    -e ROS_DOMAIN_ID=1 \
     -v /dev/input:/dev/input \
     -v "$config_path":/intel_realsense_d405_ros_config.yaml \
     --privileged \
