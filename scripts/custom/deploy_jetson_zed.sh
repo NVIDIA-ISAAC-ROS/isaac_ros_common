@@ -13,9 +13,12 @@ if [ ! -f "$config_path" ]; then
 fi
 
 docker run --rm -it --gpus all --runtime=nvidia \
-    --network host \
     -e ROS_DOMAIN_ID=1 \
+    -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    --network host \
     -v /dev/input:/dev/input \
+    -v "/usr/local/zed/settings:/usr/local/zed/settings" \
+    -v "/usr/local/zed/resources:/usr/local/zed/resources" \
     -v "$config_path":/zed_mini_ros_config.yaml \
     --privileged \
     vschorp98/orx-middleware-isaac-ros-jetson-zed

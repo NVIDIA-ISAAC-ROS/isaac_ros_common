@@ -2,8 +2,9 @@ xhost +
 docker run --rm -it --gpus all --runtime=nvidia \
     --privileged \
     -e DISPLAY \
-    --network host \
     -e ROS_DOMAIN_ID=1 \
+    -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    --network host \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /home/vschorp/dev/orx/orx_middleware/ros2_ws:/home/admin/ros2_ws \
     -v /home/vschorp/dev/orx/data/data_saver_dump:/home/admin/data_saver_dump \
