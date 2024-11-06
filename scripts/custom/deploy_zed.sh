@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Determine platform architecture
+PLATFORM="$(uname -m)"
+if [[ $PLATFORM == "aarch64" ]]; then
+    PLATFORM_NAME="jetson"
+elif [[ $PLATFORM == "x86_64" ]]; then
+    PLATFORM_NAME="desktop"
+else
+    echo "Unsupported platform: $PLATFORM"
+    exit 1
+fi
+
 # Set default absolute path for the config file
 default_config_path="/home/vschorp/dev/orx/data/experiment_config/datahub_01/zed_mini_0"
 
@@ -23,4 +34,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v "/usr/local/zed/resources:/usr/local/zed/resources" \
     -v "$config_path":/zed_mini_ros_config.yaml \
     --privileged \
-    vschorp98/orx-middleware-isaac-ros-jetson-zed
+    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-zed

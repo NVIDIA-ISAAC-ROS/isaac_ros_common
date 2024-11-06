@@ -1,4 +1,18 @@
+#!/bin/bash
+
 xhost +
+
+# Determine platform architecture
+PLATFORM="$(uname -m)"
+if [[ $PLATFORM == "aarch64" ]]; then
+    PLATFORM_NAME="jetson"
+elif [[ $PLATFORM == "x86_64" ]]; then
+    PLATFORM_NAME="desktop"
+else
+    echo "Unsupported platform: $PLATFORM"
+    exit 1
+fi
+
 docker run --rm -it --gpus all --runtime=nvidia \
     --privileged \
     -e DISPLAY \
@@ -10,4 +24,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e ROS_ROOT=/opt/ros/humble \
     --user admin \
     --workdir /home/admin \
-    vschorp98/orx-middleware-isaac-ros-desktop-data_saver \
+    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-data_saver \

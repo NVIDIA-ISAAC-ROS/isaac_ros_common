@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Determine platform architecture
+PLATFORM="$(uname -m)"
+if [[ $PLATFORM == "aarch64" ]]; then
+    PLATFORM_NAME="jetson"
+elif [[ $PLATFORM == "x86_64" ]]; then
+    PLATFORM_NAME="desktop"
+else
+    echo "Unsupported platform: $PLATFORM"
+    exit 1
+fi
+
 # Set default absolute path for the config file
 default_config_path="/home/vschorp/dev/orx/data/experiment_config/datahub_01/intel_realsense_d405_0"
 
@@ -18,4 +29,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v /dev/input:/dev/input \
     -v "$config_path":/intel_realsense_d405_ros_config.yaml \
     --privileged \
-    vschorp98/orx-middleware-isaac-ros-jetson-realsense
+    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense
