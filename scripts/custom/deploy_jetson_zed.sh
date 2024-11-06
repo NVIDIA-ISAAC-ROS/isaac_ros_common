@@ -15,7 +15,9 @@ fi
 docker run --rm -it --gpus all --runtime=nvidia \
     -e ROS_DOMAIN_ID=1 \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    -e CYCLONEDDS_URI=/cyclone_profile.xml \
     --network host \
+    -v /home/vschorp/dev/cyclone_profile.xml:/cyclone_profile.xml \
     -v /dev/input:/dev/input \
     -v "/usr/local/zed/settings:/usr/local/zed/settings" \
     -v "/usr/local/zed/resources:/usr/local/zed/resources" \
