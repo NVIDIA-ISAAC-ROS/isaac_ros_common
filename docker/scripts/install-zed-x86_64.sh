@@ -14,13 +14,18 @@ export CUDA_MINOR="$(nvcc --version | grep -o -P ' release .{0,4}' | cut -d. -f2
 sudo apt-get update -y || true
 sudo apt-get install --no-install-recommends lsb-release wget less udev sudo zstd build-essential cmake libpng-dev libgomp1 -y
 
-# TODO: Remove this when zed-ros2-wrapper has a compatible version with ZED_SDK 4.1 (which supports cuda 12.2).
 CUDA_MAJOR=12
 CUDA_MINOR=1
 
 # Download zed SDK installation RUN file to /tmp directory
 cd /tmp
-wget -q -O ZED_SDK_Linux_Ubuntu${UBUNTU_RELEASE_YEAR}.run https://download.stereolabs.com/zedsdk/${ZED_SDK_MAJOR}.${ZED_SDK_MINOR}/cu${CUDA_MAJOR}${CUDA_MINOR%.*}/ubuntu${UBUNTU_RELEASE_YEAR}
+
+ZED_SDK_URL="https://download.stereolabs.com/zedsdk/${ZED_SDK_MAJOR}.${ZED_SDK_MINOR}/cu${CUDA_MAJOR}${CUDA_MINOR%.*}/ubuntu${UBUNTU_RELEASE_YEAR}"
+if [[ ${ZED_SDK_MINOR} -ge 2 ]]; then
+    ZED_SDK_URL="https://download.stereolabs.com/zedsdk/${ZED_SDK_MAJOR}.${ZED_SDK_MINOR}/cu${CUDA_MAJOR}/ubuntu${UBUNTU_RELEASE_YEAR}"
+fi
+
+wget -q -O ZED_SDK_Linux_Ubuntu${UBUNTU_RELEASE_YEAR}.run ${ZED_SDK_URL}
 chmod +x ZED_SDK_Linux_Ubuntu${UBUNTU_RELEASE_YEAR}.run ; ./ZED_SDK_Linux_Ubuntu${UBUNTU_RELEASE_YEAR}.run -- silent skip_od_module skip_python skip_cuda
 
 # Symlink required for zed SDK, based on 
