@@ -1,0 +1,1 @@
+ros2 topic pub /test std_msgs/msg/String "{data: 'salut!'}" 
