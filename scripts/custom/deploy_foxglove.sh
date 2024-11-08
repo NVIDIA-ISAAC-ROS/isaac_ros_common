@@ -12,13 +12,13 @@ else
 fi
 
 docker run --rm -it --gpus all --runtime=nvidia \
+    --privileged \
+    --network host \
     -e ROS_ROOT=/opt/ros/humble \
     -e ROS_DOMAIN_ID=1 \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
-    -e CYCLONEDDS_URI=/cyclone_profile.xml \
-    -v /home/vschorp/dev/cyclone_profile.xml:/cyclone_profile.xml \
-    --network host \
-    --privileged \
+    -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
+    -v /home/vschorp/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -p 8765:8765 \
     vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-foxglove
 

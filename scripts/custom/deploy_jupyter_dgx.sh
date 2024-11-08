@@ -18,11 +18,11 @@ echo "platform is $PLATFORM"
 sudo docker run --rm -it --gpus all --runtime=nvidia \
     --privileged \
     --network host \
-    -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
-    -e ROS_DOMAIN_ID=1 \
-    -e CYCLONEDDS_URI=/home/jovyan/cyclone_profile_dgx.xml \
     -e ROS_ROOT=/opt/ros/humble \
-    -v /home/adm_girf/cyclone_profile_dgx.xml:/home/jovyan/cyclone_profile_dgx.xml \
+    -e ROS_DOMAIN_ID=1 \
+    -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    -e CYCLONEDDS_URI=/home/jovyan/cyclone_profile.xml \
+    -v /home/adm_girf/dev/orx/cyclone_profile.xml:/home/jovyan/cyclone_profile.xml \
     -v /home/adm_girf/data:/home/jovyan/data \
     --user jovyan \
     --workdir /home/jovyan \

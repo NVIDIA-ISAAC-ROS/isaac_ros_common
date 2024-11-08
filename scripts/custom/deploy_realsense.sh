@@ -24,9 +24,12 @@ if [ ! -f "$config_path" ]; then
 fi
 
 docker run --rm -it --gpus all --runtime=nvidia \
+    --privileged \
     --network host \
     -e ROS_DOMAIN_ID=1 \
+    -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
+    -v /home/vschorp/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v /dev/input:/dev/input \
     -v "$config_path":/intel_realsense_d405_ros_config.yaml \
-    --privileged \
     vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense
