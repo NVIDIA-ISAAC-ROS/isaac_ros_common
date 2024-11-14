@@ -6,8 +6,8 @@ ISAAC_ROS_WS=/home/vschorp/dev/orx/orx_middleware/ros2_ws
 
 # docker_deply.sh config
 # BASE_IMAGE_KEY=aarch64.ros2_humble.user.foxglove
-BASE_IMAGE_KEY=x86_64.ros2_humble
-DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-desktop-rosbag_recorder
+BASE_IMAGE_KEY=x86_64.ros2_humble.dgx_user
+DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-dgx-data_saver
 ROS_WS=/home/vschorp/dev/orx/orx_middleware/ros2_ws
-LAUNCH_PACKAGE=rosbag_recorder
-LAUNCH_FILE=rosbag_recorder_launch.py
+LAUNCH_PACKAGE=data_saver
+LAUNCH_FILE=data_saver_launch.py
