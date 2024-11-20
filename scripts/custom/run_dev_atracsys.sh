@@ -1,0 +1,1 @@
+./../run_dev.sh -i ros2_humble -a "-v /home/vschorp/dev/orx/data/experiment_config/datahub_01/atracsys_fusion500_0:/home/admin/atracsys_fusion500_config"
