@@ -1,5 +1,5 @@
 # run_dev.sh config
-CONFIG_IMAGE_KEY=ros2_humble.user.hdmi_input
+CONFIG_IMAGE_KEY=ros2_humble.zed.ess
 CONFIG_DOCKER_SEARCH_DIRS=/home/vschorp/dev/orx/orx_middleware/isaac_ros_common/docker
 BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/isaac/ros")
 ISAAC_ROS_WS=/home/vschorp/dev/orx/orx_middleware/ros2_ws
