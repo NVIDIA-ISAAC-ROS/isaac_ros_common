@@ -23,7 +23,7 @@ if [ ! -f "$config_path" ]; then
     exit 1
 fi
 
-docker_name=$(basename ${config_path})_encoded
+docker_name=$(basename ${config_path})_decoder
 
 docker run --rm -it --gpus all --runtime=nvidia \
     --name $docker_name \
@@ -37,4 +37,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v "/usr/local/zed/settings:/usr/local/zed/settings" \
     -v "/usr/local/zed/resources:/usr/local/zed/resources" \
     -v "$config_path":/zed_mini_ros_config.yaml \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-zed-encoded
+    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-zed_decoder
