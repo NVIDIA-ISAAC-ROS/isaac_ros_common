@@ -25,7 +25,10 @@ fi
 DOCKER_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-rosbag_recorder
 echo "Running: $DOCKER_IMAGE_NAME with user $DOCKER_USER"
 
+docker_name="rosbag_recorder"
+
 docker run --rm -it --gpus all --runtime=nvidia \
+    --name $docker_name \
     --privileged \
     --network host \
     -e ROS_ROOT=/opt/ros/humble \

@@ -23,7 +23,10 @@ fi
 #     exit 1
 # fi
 
+docker_name=foxglove
+
 docker run --rm -it --gpus all --runtime=nvidia \
+    --name $docker_name \
     --privileged \
     --network host \
     -e ROS_DOMAIN_ID=1 \

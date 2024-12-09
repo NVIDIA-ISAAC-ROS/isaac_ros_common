@@ -23,7 +23,10 @@ if [ ! -f "$config_path" ]; then
     exit 1
 fi
 
+docker_name=$(basename ${config_path})
+
 docker run --rm -it --gpus all --runtime=nvidia \
+    --name $docker_name \
     --privileged \
     --network host \
     -e ROS_DOMAIN_ID=1 \
