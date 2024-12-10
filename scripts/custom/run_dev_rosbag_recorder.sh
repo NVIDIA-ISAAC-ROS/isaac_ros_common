@@ -1,0 +1,1 @@
+./../run_dev.sh -i ros2_humble -a "-v /home/vschorp/dev/orx/data:/home/admin/data -v /home/vschorp/dev/orx/orx_middleware/ros2_ws/src/rosbag_recorder/config:/home/admin/config --cpus=2" -b

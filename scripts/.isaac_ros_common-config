@@ -9,5 +9,5 @@ BASE_IMAGE_KEY=aarch64.ros2_humble.user.decoder
 # BASE_IMAGE_KEY=x86_64.ros2_humble
 DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-jetson-zed_decoder
 ROS_WS=/home/vschorp/dev/orx/orx_middleware/ros2_ws
-LAUNCH_PACKAGE=isaac_ros_h264_encoder_decoder 
-LAUNCH_FILE=decode_zed_input.launch.py 
+LAUNCH_PACKAGE=rosbag_recorder
+LAUNCH_FILE=rosbag_recorder_cli_launch.py
