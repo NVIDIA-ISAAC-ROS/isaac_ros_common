@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>isaac_ros_rosbag_utils</name>
+  <version>3.2.0</version>
+  <description>Utilities for working with ROS bags</description>
+  <maintainer email="isaac-ros-maintainers@nvidia.com">Isaac ROS Maintainers</maintainer>
+  <license>Apache-2.0</license>
+  <url type="website">https://developer.nvidia.com/isaac-ros-gems/</url>
+  <author>Lionel Gulich</author>
+  <build_depend>isaac_ros_common</build_depend>
+
+  <!-- NOTE: The following dependencies are needed but commented out -->
+  <!-- because bloom-generate cannot yet handle pip dependencies correctly. -->
+  <!-- For now the dependencies will have to be installed manually with the -->
+  <!-- provided requirements.txt file. -->
+  <!-- <depend>python3-av-pip</depend> -->
+  <!-- <depend>python3-numpy</depend> -->
+  <!-- <depend>python3-pandas</depend> -->
+  <!-- <depend>python3-pydantic-pip</depend> -->
+  <!-- <depend>python3-pytransform3d-pip</depend> -->
+  <!-- <depend>python3-rosbags-pip</depend> -->
+
+  <test_depend>isaac_ros_r2b_galileo</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

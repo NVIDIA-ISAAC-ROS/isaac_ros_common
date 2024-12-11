@@ -41,14 +41,20 @@ target_link_libraries(${PROJECT_NAME} vpi)
 ament_index_register_resource(isaac_ros_common_cmake_path CONTENT
     "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/cmake")
 list(APPEND ${PROJECT_NAME}_CONFIG_EXTRAS
+  cmake/isaac_ros_common-version-info.cmake
   cmake/isaac_ros_common-extras.cmake
   cmake/isaac_ros_common-extras-modules.cmake
   cmake/isaac_ros_common-extras-assets.cmake
 )
 
+ament_python_install_package(${PROJECT_NAME})
+
+ament_index_register_resource(isaac_ros_common_scripts_path CONTENT
+    "${CMAKE_INSTALL_PREFIX}/bin")
 install(
   DIRECTORY scripts/
   DESTINATION bin
+  USE_SOURCE_PERMISSIONS
 )
 
 if(BUILD_TESTING)
@@ -58,5 +64,10 @@ if(BUILD_TESTING)
   set(ament_cmake_copyright_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+
+# Embed versioning information into installed files
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/isaac_ros_common-version-info.cmake)
+generate_version_info(${PROJECT_NAME})
 
 ament_auto_package(INSTALL_TO_SHARE cmake)

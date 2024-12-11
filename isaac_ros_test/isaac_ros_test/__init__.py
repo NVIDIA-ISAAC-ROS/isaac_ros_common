@@ -20,6 +20,7 @@
 from .cpu_profiler import CPUProfiler
 from .isaac_ros_base_test import IsaacROSBaseTest
 from .json_conversion import JSONConversion
+from .mock_model_generator import MockModelGenerator
 from .pcd_loader import PCDLoader
 from .pose_utilities import PoseUtilities
 from .tegrastats_profiler import TegrastatsProfiler
@@ -28,7 +29,8 @@ __all__ = [
     'CPUProfiler',
     'IsaacROSBaseTest',
     'JSONConversion',
-    'TegrastatsProfiler',
+    'MockModelGenerator',
     'PCDLoader',
     'PoseUtilities',
+    'TegrastatsProfiler',
 ]

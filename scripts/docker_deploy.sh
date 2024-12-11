@@ -139,12 +139,6 @@ if [[ ! -z "${ROS_WS}" ]]; then
     INCLUDE_DIRS+=( "$ROS_WS/install:${ROS_WS_DEST}/install" )
 fi
 
-# Always suffix .user to base image
-# If the configured key does not have .user, append it last
-if [[ $BASE_IMAGE_KEY != *".user"* ]]; then
-    BASE_IMAGE_KEY="${BASE_IMAGE_KEY}.user"
-fi
-
 # Summarize final arguments for script
 print_info "Building deployable image ${DEPLOY_IMAGE_NAME}"
 print_info "Base image key: |${BASE_IMAGE_KEY}| / suffix image_key: |${SUFFIX_IMAGE_KEY}|"
@@ -262,7 +256,7 @@ if [[ ! -z "${SUFFIX_IMAGE_KEY}" ]]; then
     print_info "Building suffix deploy image for key ${SUFFIX_IMAGE_KEY}"
     PREVIOUS_STAGE="${INSTALLED_DEPLOY_IMAGE_NAME}"
     INSTALLED_DEPLOY_IMAGE_NAME="${DEPLOY_IMAGE_NAME}-suffix"
-    $ROOT/build_image_layers.sh --image_key "SUFFIX_IMAGE_KEY" --image_name "${INSTALLED_DEPLOY_IMAGE_NAME}" --base_image "${PREVIOUS_STAGE}" --build_arg "MODE=deploy" ${ADDITIONAL_DOCKER_ARGS[@]}
+    $ROOT/build_image_layers.sh --image_key "${SUFFIX_IMAGE_KEY}" --image_name "${INSTALLED_DEPLOY_IMAGE_NAME}" --base_image "${PREVIOUS_STAGE}" --build_arg "MODE=deploy" ${ADDITIONAL_DOCKER_ARGS[@]}
 fi
 
 # Retag last image

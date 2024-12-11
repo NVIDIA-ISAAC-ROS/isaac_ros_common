@@ -30,9 +30,10 @@ namespace common
 rclcpp::QoS AddQosParameter(
   rclcpp::Node & node,
   std::string default_qos = "SYSTEM_DEFAULT",
-  std::string parameter_name = "qos");
+  std::string parameter_name = "qos",
+  const int default_depth = 0);
 
-rclcpp::QoS ParseQosString(const std::string & str);
+rclcpp::QoS ParseQosString(const std::string & str, const int depth = 0);
 
 }  // namespace common
 }  // namespace isaac_ros

@@ -1,0 +1,7 @@
+Package: ros-humble-cuda-python-placeholder
+Version: 0.0.0-0jammy
+Architecture: all
+Maintainer: Isaac ROS Maintainers <isaac-ros-maintainers@nvidia.com>
+Section: misc
+Priority: optional
+Description: Placeholder package to satisfy dependency for cuda-python

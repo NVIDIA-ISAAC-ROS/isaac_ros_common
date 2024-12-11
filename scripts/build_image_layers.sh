@@ -25,7 +25,7 @@ ADDITIONAL_BUILD_ARGS=()
 ADDITIONAL_DOCKER_ARGS=()
 DOCKER_SEARCH_DIRS=(${DOCKER_DIR})
 SKIP_REGISTRY_CHECK=0
-BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/isaac/ros")
+BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/nvidia/isaac/ros")
 
 # Read and parse config file if exists
 #
@@ -276,9 +276,12 @@ fi
 
 # Arguments for docker build
 BUILD_ARGS+=("--build-arg" "USERNAME="admin"")
-BUILD_ARGS+=("--build-arg" "USER_UID=`id -u`")
-BUILD_ARGS+=("--build-arg" "USER_GID=`id -g`")
-BUILD_ARGS+=("--build-arg" "PLATFORM=$PLATFORM")
+
+if [[ $PLATFORM == "x86_64" ]]; then
+    BUILD_ARGS+=("--build-arg" "PLATFORM=amd64")
+else
+    BUILD_ARGS+=("--build-arg" "PLATFORM=arm64")
+fi
 
 for BUILD_ARG in ${ADDITIONAL_BUILD_ARGS[@]}
 do
