@@ -5,6 +5,9 @@
 # and any modifications thereto.  Any use, reproduction, disclosure or
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# Reformat this file with `yq 'sort_keys(.)' -i <path/to/this/file>`
+
 aandd_ekew_driver_py:
   ubuntu:
     focal: [ros-humble-aandd-ekew-driver-py]
@@ -1087,6 +1090,10 @@ create_robot:
   ubuntu:
     focal: [ros-humble-create-robot]
     jammy: [ros-humble-create-robot]
+cuda_python:
+  ubuntu:
+    focal: [ros-humble-cuda-python-placeholder]
+    jammy: [ros-humble-cuda-python-placeholder]
 cudnn_cmake_module:
   ubuntu:
     focal: [ros-humble-cudnn-cmake-module]
@@ -2759,14 +2766,42 @@ irobot_create_toolbox_dbgsym:
   ubuntu:
     focal: [ros-humble-irobot-create-toolbox-dbgsym]
     jammy: [ros-humble-irobot-create-toolbox-dbgsym]
+isaac_common:
+  ubuntu:
+    focal: [ros-humble-isaac-common]
+    jammy: [ros-humble-isaac-common]
+isaac_common_py:
+  ubuntu:
+    focal: [ros-humble-isaac-common-py]
+    jammy: [ros-humble-isaac-common-py]
 isaac_manipulator_bringup:
   ubuntu:
     focal: [ros-humble-isaac-manipulator-bringup]
     jammy: [ros-humble-isaac-manipulator-bringup]
-isaac_mapping_and_localization:
+isaac_manipulator_interfaces:
   ubuntu:
-    focal: [ros-humble-isaac-mapping-and-localization]
-    jammy: [ros-humble-isaac-mapping-and-localization]
+    focal: [ros-humble-isaac-manipulator-interfaces]
+    jammy: [ros-humble-isaac-manipulator-interfaces]
+isaac_manipulator_pick_and_place:
+  ubuntu:
+    focal: [ros-humble-isaac-manipulator-pick-and-place]
+    jammy: [ros-humble-isaac-manipulator-pick-and-place]
+isaac_manipulator_ros_python_utils:
+  ubuntu:
+    focal: [ros-humble-isaac-manipulator-ros-python-utils]
+    jammy: [ros-humble-isaac-manipulator-ros-python-utils]
+isaac_manipulator_servers:
+  ubuntu:
+    focal: [ros-humble-isaac-manipulator-servers]
+    jammy: [ros-humble-isaac-manipulator-servers]
+isaac_mapping_and_localization_ros:
+  ubuntu:
+    focal: [ros-humble-isaac-mapping-and-localization-ros]
+    jammy: [ros-humble-isaac-mapping-and-localization-ros]
+isaac_mapping_ros:
+  ubuntu:
+    focal: [ros-humble-isaac-mapping-ros]
+    jammy: [ros-humble-isaac-mapping-ros]
 isaac_ros_apriltag:
   ubuntu:
     focal: [ros-humble-isaac-ros-apriltag]
@@ -2815,10 +2850,10 @@ isaac_ros_bi3d_msgs:
   ubuntu:
     focal: [ros-noetic-isaac-ros-bi3d-msgs]
     jammy: [ros-noetic-isaac-ros-bi3d-msgs]
-isaac_ros_camera_localization:
+isaac_ros_calibration_validation:
   ubuntu:
-    focal: [ros-humble-isaac-ros-camera-localization]
-    jammy: [ros-humble-isaac-ros-camera-localization]
+    focal: [ros-humble-isaac-ros-calibration-validation]
+    jammy: [ros-humble-isaac-ros-calibration-validation]
 isaac_ros_centerpose:
   ubuntu:
     focal: [ros-humble-isaac-ros-centerpose]
@@ -2843,10 +2878,22 @@ isaac_ros_cumotion_examples:
   ubuntu:
     focal: [ros-humble-isaac-ros-cumotion-examples]
     jammy: [ros-humble-isaac-ros-cumotion-examples]
+isaac_ros_cumotion_interfaces:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-cumotion-interfaces]
+    jammy: [ros-humble-isaac-ros-cumotion-interfaces]
 isaac_ros_cumotion_moveit:
   ubuntu:
     focal: [ros-humble-isaac-ros-cumotion-moveit]
     jammy: [ros-humble-isaac-ros-cumotion-moveit]
+isaac_ros_cumotion_object_attachment:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-cumotion-object-attachment]
+    jammy: [ros-humble-isaac-ros-cumotion-object-attachment]
+isaac_ros_cumotion_python_utils:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-cumotion-python-utils]
+    jammy: [ros-humble-isaac-ros-cumotion-python-utils]
 isaac_ros_cumotion_robot_description:
   ubuntu:
     focal: [ros-humble-isaac-ros-cumotion-robot-description]
@@ -2867,6 +2914,10 @@ isaac_ros_data_validation:
   ubuntu:
     focal: [ros-humble-isaac-ros-data-validation]
     jammy: [ros-humble-isaac-ros-data-validation]
+isaac_ros_deepmap_data_converter:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-deepmap-data-converter]
+    jammy: [ros-humble-isaac-ros-deepmap-data-converter]
 isaac_ros_deepmap_data_converter:
   ubuntu:
     focal: [ros-humble-isaac-ros-deepmap-data-converter]
@@ -2903,6 +2954,10 @@ isaac_ros_dope_benchmark:
   ubuntu:
     focal: [ros-humble-isaac-ros-dope-benchmark]
     jammy: [ros-humble-isaac-ros-dope-benchmark]
+isaac_ros_esdf_visualizer:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-esdf-visualizer]
+    jammy: [ros-humble-isaac-ros-esdf-visualizer]
 isaac_ros_ess:
   ubuntu:
     focal: [ros-humble-isaac-ros-ess]
@@ -2923,18 +2978,6 @@ isaac_ros_examples:
   ubuntu:
     focal: [ros-humble-isaac-ros-examples]
     jammy: [ros-humble-isaac-ros-examples]
-isaac_ros_goal_setter_interfaces:
-  ubuntu:
-    focal: [ros-humble-isaac-ros-goal-setter-interfaces]
-    jammy: [ros-humble-isaac-ros-goal-setter-interfaces]
-isaac_ros_usb_cam:
-  ubuntu:
-    focal: [ros-humble-isaac-ros-usb-cam]
-    jammy: [ros-humble-isaac-ros-usb-cam]
-isaac_ros_realsense:
-  ubuntu:
-    focal: [ros-humble-isaac-ros-realsense]
-    jammy: [ros-humble-isaac-ros-realsense]
 isaac_ros_foundationpose:
   ubuntu:
     focal: [ros-humble-isaac-ros-foundationpose]
@@ -2943,6 +2986,22 @@ isaac_ros_foundationpose_benchmark:
   ubuntu:
     focal: [ros-humble-isaac-ros-foundationpose-benchmark]
     jammy: [ros-humble-isaac-ros-foundationpose-benchmark]
+isaac_ros_franka_cumotion_benchmark:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-franka-cumotion-benchmark]
+    jammy: [ros-humble-isaac-ros-franka-cumotion-benchmark]
+isaac_ros_franka_ompl_benchmark:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-franka-ompl-benchmark]
+    jammy: [ros-humble-isaac-ros-franka-ompl-benchmark]
+isaac_ros_goal_setter_interfaces:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-goal-setter-interfaces]
+    jammy: [ros-humble-isaac-ros-goal-setter-interfaces]
+isaac_ros_ground_calibration:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-ground-calibration]
+    jammy: [ros-humble-isaac-ros-ground-calibration]
 isaac_ros_gxf:
   ubuntu:
     focal: [ros-humble-isaac-ros-gxf]
@@ -3023,6 +3082,10 @@ isaac_ros_launch_utils:
   ubuntu:
     focal: [ros-humble-isaac-ros-launch-utils]
     jammy: [ros-humble-isaac-ros-launch-utils]
+isaac_ros_lidar_camera_projection:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-lidar-camera-projection]
+    jammy: [ros-humble-isaac-ros-lidar-camera-projection]
 isaac_ros_managed_nitros:
   ubuntu:
     focal: [ros-humble-isaac-ros-managed-nitros]
@@ -3031,6 +3094,10 @@ isaac_ros_mission_client:
   ubuntu:
     focal: [ros-humble-isaac-ros-mission-client]
     jammy: [ros-humble-isaac-ros-mission-client]
+isaac_ros_moveit_benchmark:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-moveit-benchmark]
+    jammy: [ros-humble-isaac-ros-moveit-benchmark]
 isaac_ros_moveit_goal_setter:
   ubuntu:
     focal: [ros-humble-isaac-ros-moveit-goal-setter]
@@ -3039,18 +3106,10 @@ isaac_ros_mqtt_bridge:
   ubuntu:
     focal: [ros-humble-isaac-ros-mqtt-bridge]
     jammy: [ros-humble-isaac-ros-mqtt-bridge]
-isaac_ros_nav_goal_generator:
-  ubuntu:
-    focal: [ros-humble-isaac-ros-nav-goal-generator]
-    jammy: [ros-humble-isaac-ros-nav-goal-generator]
 isaac_ros_nitros:
   ubuntu:
     focal: [ros-humble-isaac-ros-nitros]
     jammy: [ros-humble-isaac-ros-nitros]
-isaac_ros_nitros_april_tag_detection_array_type:
-  ubuntu:
-    focal: [ros-humble-isaac-ros-nitros-april-tag-detection-array-type]
-    jammy: [ros-humble-isaac-ros-nitros-april-tag-detection-array-type]
 isaac_ros_nitros_battery_state_type:
   ubuntu:
     focal: [ros-humble-isaac-ros-nitros-battery-state-type]
@@ -3123,10 +3182,6 @@ isaac_ros_nitros_imu_type:
   ubuntu:
     focal: [ros-humble-isaac-ros-nitros-imu-type]
     jammy: [ros-humble-isaac-ros-nitros-imu-type]
-isaac_ros_nitros_interfaces:
-  ubuntu:
-    focal: [ros-humble-isaac-ros-nitros-interfaces]
-    jammy: [ros-humble-isaac-ros-nitros-interfaces]
 isaac_ros_nitros_msgs:
   ubuntu:
     focal: [ros-noetic-isaac-ros-nitros-msgs]
@@ -3167,10 +3222,18 @@ isaac_ros_nitros_twist_type:
   ubuntu:
     focal: [ros-humble-isaac-ros-nitros-twist-type]
     jammy: [ros-humble-isaac-ros-nitros-twist-type]
+isaac_ros_nova:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-nova]
+    jammy: [ros-humble-isaac-ros-nova]
 isaac_ros_nova_interfaces:
   ubuntu:
     focal: [ros-humble-isaac-ros-nova-interfaces]
     jammy: [ros-humble-isaac-ros-nova-interfaces]
+isaac_ros_nova_recorder:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-nova-recorder]
+    jammy: [ros-humble-isaac-ros-nova-recorder]
 isaac_ros_nvblox:
   ubuntu:
     focal: [ros-humble-isaac-ros-nvblox]
@@ -3199,18 +3262,22 @@ isaac_ros_owl:
   ubuntu:
     focal: [ros-humble-isaac-ros-owl]
     jammy: [ros-humble-isaac-ros-owl]
+isaac_ros_peoplenet_models_install:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-peoplenet-models-install]
+    jammy: [ros-humble-isaac-ros-peoplenet-models-install]
 isaac_ros_peoplesemseg_models_install:
   ubuntu:
     focal: [ros-humble-isaac-ros-peoplesemseg-models-install]
     jammy: [ros-humble-isaac-ros-peoplesemseg-models-install]
-isaac_ros_perceptor_constants:
-  ubuntu:
-    focal: [ros-humble-isaac-ros-perceptor-constants]
-    jammy: [ros-humble-isaac-ros-perceptor-constants]
 isaac_ros_perceptor_bringup:
   ubuntu:
     focal: [ros-humble-isaac-ros-perceptor-bringup]
     jammy: [ros-humble-isaac-ros-perceptor-bringup]
+isaac_ros_perceptor_python_utils:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-perceptor-python-utils]
+    jammy: [ros-humble-isaac-ros-perceptor-python-utils]
 isaac_ros_perceptor_nova_benchmark:
   ubuntu:
     focal: [ros-humble-isaac-ros-perceptor-nova-benchmark]
@@ -3231,6 +3298,22 @@ isaac_ros_pointcloud_utils:
   ubuntu:
     focal: [ros-humble-isaac-ros-pointcloud-utils]
     jammy: [ros-humble-isaac-ros-pointcloud-utils]
+isaac_ros_pose_proc:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-pose-proc]
+    jammy: [ros-humble-isaac-ros-pose-proc]
+isaac_ros_pynitros:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-pynitros]
+    jammy: [ros-humble-isaac-ros-pynitros]
+isaac_ros_r2b_galileo:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-r2b-galileo]
+    jammy: [ros-humble-isaac-ros-r2b-galileo]
+isaac_ros_realsense:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-realsense]
+    jammy: [ros-humble-isaac-ros-realsense]
 isaac_ros_realsense_ess_benchmark:
   ubuntu:
     focal: [ros-humble-isaac-ros-realsense-ess-benchmark]
@@ -3247,6 +3330,10 @@ isaac_ros_ros2_converter:
   ubuntu:
     focal: [ros-humble-isaac-ros-ros2-converter]
     jammy: [ros-humble-isaac-ros-ros2-converter]
+isaac_ros_rosbag_utils:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-rosbag-utils]
+    jammy: [ros-humble-isaac-ros-rosbag-utils]
 isaac_ros_rtdetr:
   ubuntu:
     focal: [ros-humble-isaac-ros-rtdetr]
@@ -3315,6 +3402,10 @@ isaac_ros_test:
   ubuntu:
     focal: [ros-humble-isaac-ros-test]
     jammy: [ros-humble-isaac-ros-test]
+isaac_ros_test_cmake:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-test-cmake]
+    jammy: [ros-humble-isaac-ros-test-cmake]
 isaac_ros_triton:
   ubuntu:
     focal: [ros-humble-isaac-ros-triton]
@@ -3331,6 +3422,18 @@ isaac_ros_unet_benchmark:
   ubuntu:
     focal: [ros-humble-isaac-ros-unet-benchmark]
     jammy: [ros-humble-isaac-ros-unet-benchmark]
+isaac_ros_ur5_cumotion_benchmark:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-ur5-cumotion-benchmark]
+    jammy: [ros-humble-isaac-ros-ur5-cumotion-benchmark]
+isaac_ros_ur5_ompl_benchmark:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-ur5-ompl-benchmark]
+    jammy: [ros-humble-isaac-ros-ur5-ompl-benchmark]
+isaac_ros_usb_cam:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-usb-cam]
+    jammy: [ros-humble-isaac-ros-usb-cam]
 isaac_ros_vda5050_nav2_client:
   ubuntu:
     focal: [ros-humble-isaac-ros-vda5050-nav2-client]
@@ -3339,6 +3442,10 @@ isaac_ros_vda5050_nav2_client_bringup:
   ubuntu:
     focal: [ros-humble-isaac-ros-vda5050-nav2-client-bringup]
     jammy: [ros-humble-isaac-ros-vda5050-nav2-client-bringup]
+isaac_ros_visual_global_localization:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-visual-global-localization]
+    jammy: [ros-humble-isaac-ros-visual-global-localization]
 isaac_ros_visual_slam:
   ubuntu:
     focal: [ros-humble-isaac-ros-visual-slam]
@@ -3355,6 +3462,18 @@ isaac_ros_visual_slam_msgs:
   ubuntu:
     focal: [ros-noetic-isaac-ros-visual-slam-msgs]
     jammy: [ros-noetic-isaac-ros-visual-slam-msgs]
+isaac_ros_wifi_common:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-wifi-common]
+    jammy: [ros-humble-isaac-ros-wifi-common]
+isaac_ros_wifi_localizer:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-wifi-localizer]
+    jammy: [ros-humble-isaac-ros-wifi-localizer]
+isaac_ros_wifi_mapping:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-wifi-mapping]
+    jammy: [ros-humble-isaac-ros-wifi-mapping]
 isaac_ros_wifi_scan:
   ubuntu:
     focal: [ros-humble-isaac-ros-wifi-scan]
@@ -4109,6 +4228,10 @@ mimick_vendor:
   ubuntu:
     focal: [ros-humble-mimick-vendor]
     jammy: [ros-humble-mimick-vendor]
+mission_monitor:
+  ubuntu:
+    focal: [ros-humble-mission-monitor]
+    jammy: [ros-humble-mission-monitor]
 mobileye_560_660_msgs:
   ubuntu:
     focal: [ros-humble-mobileye-560-660-msgs]
@@ -4741,38 +4864,6 @@ navigation2:
   ubuntu:
     focal: [ros-humble-navigation2]
     jammy: [ros-humble-navigation2]
-navperf:
-  ubuntu:
-    focal: [ros-humble-navperf]
-    jammy: [ros-humble-navperf]
-navperf_bringup:
-  ubuntu:
-    focal: [ros-humble-navperf-bringup]
-    jammy: [ros-humble-navperf-bringup]
-navperf_compute_monitor:
-  ubuntu:
-    focal: [ros-humble-navperf-compute-monitor]
-    jammy: [ros-humble-navperf-compute-monitor]
-navperf_commander:
-  ubuntu:
-    focal: [ros-humble-navperf-commander]
-    jammy: [ros-humble-navperf-commander]
-navperf_evaluator:
-  ubuntu:
-    focal: [ros-humble-navperf-evaluator]
-    jammy: [ros-humble-navperf-evaluator]
-navperf_msgs:
-  ubuntu:
-    focal: [ros-humble-navperf-msgs]
-    jammy: [ros-humble-navperf-msgs]
-mission_monitor:
-  ubuntu:
-    focal: [ros-humble-mission-monitor]
-    jammy: [ros-humble-mission-monitor]
-navperf_utils:
-  ubuntu:
-    focal: [ros-humble-navperf-utils]
-    jammy: [ros-humble-navperf-utils]
 negotiated:
   ubuntu:
     focal: [ros-humble-negotiated]
@@ -4853,14 +4944,14 @@ nova_carter_docking:
   ubuntu:
     focal: [ros-humble-nova-carter-docking]
     jammy: [ros-humble-nova-carter-docking]
-nova_carter_navigation:
-  ubuntu:
-    focal: [ros-humble-nova-carter-navigation]
-    jammy: [ros-humble-nova-carter-navigation]
 nova_carter_example_data:
   ubuntu:
     focal: [ros-humble-nova-carter-example-data]
     jammy: [ros-humble-nova-carter-example-data]
+nova_carter_navigation:
+  ubuntu:
+    focal: [ros-humble-nova-carter-navigation]
+    jammy: [ros-humble-nova-carter-navigation]
 nova_developer_kit_bringup:
   ubuntu:
     focal: [ros-humble-nova-developer-kit-bringup]
@@ -4969,6 +5060,10 @@ nvblox_test:
   ubuntu:
     focal: [ros-humble-nvblox-test]
     jammy: [ros-humble-nvblox-test]
+nvblox_test_data:
+  ubuntu:
+    focal: [ros-humble-nvblox-test-data]
+    jammy: [ros-humble-nvblox-test-data]
 object_recognition_msgs:
   ubuntu:
     focal: [ros-humble-object-recognition-msgs]
@@ -5641,6 +5736,10 @@ position_controllers_dbgsym:
   ubuntu:
     focal: [ros-humble-position-controllers-dbgsym]
     jammy: [ros-humble-position-controllers-dbgsym]
+posix_ipc:
+  ubuntu:
+    focal: [python3-posix-ipc]
+    jammy: [python3-posix-ipc]
 proxsuite:
   ubuntu:
     focal: [ros-humble-proxsuite]
@@ -5677,10 +5776,34 @@ pybind11_vendor:
   ubuntu:
     focal: [ros-humble-pybind11-vendor]
     jammy: [ros-humble-pybind11-vendor]
+python3-av-pip:
+  ubuntu:
+    focal:
+      pip:
+        packages: [av]
+    jammy:
+      pip:
+        packages: [av]
+python3-pydantic-pip:
+  ubuntu:
+    focal:
+      pip:
+        packages: [pydantic]
+    jammy:
+      pip:
+        packages: [pydantic]
 python3-pymupdf:
   ubuntu:
     focal: [python3-fitz]
     jammy: [python3-fitz]
+python3-pytransform3d-pip:
+  ubuntu:
+    focal:
+      pip:
+        packages: [pytransform3d]
+    jammy:
+      pip:
+        packages: [pytransform3d]
 python_cmake_module:
   ubuntu:
     focal: [ros-humble-python-cmake-module]
@@ -6517,6 +6640,38 @@ rmw_implementation_dbgsym:
   ubuntu:
     focal: [ros-humble-rmw-implementation-dbgsym]
     jammy: [ros-humble-rmw-implementation-dbgsym]
+roboeval:
+  ubuntu:
+    focal: [ros-humble-roboeval]
+    jammy: [ros-humble-roboeval]
+roboeval_bringup:
+  ubuntu:
+    focal: [ros-humble-roboeval-bringup]
+    jammy: [ros-humble-roboeval-bringup]
+roboeval_commander:
+  ubuntu:
+    focal: [ros-humble-roboeval-commander]
+    jammy: [ros-humble-roboeval-commander]
+roboeval_compute_monitor:
+  ubuntu:
+    focal: [ros-humble-roboeval-compute-monitor]
+    jammy: [ros-humble-roboeval-compute-monitor]
+roboeval_evaluator:
+  ubuntu:
+    focal: [ros-humble-roboeval-evaluator]
+    jammy: [ros-humble-roboeval-evaluator]
+roboeval_interfaces:
+  ubuntu:
+    focal: [ros-humble-roboeval-interfaces]
+    jammy: [ros-humble-roboeval-interfaces]
+roboeval_runner:
+  ubuntu:
+    focal: [ros-humble-roboeval-runner]
+    jammy: [ros-humble-roboeval-runner]
+roboeval_utils:
+  ubuntu:
+    focal: [ros-humble-roboeval-utils]
+    jammy: [ros-humble-roboeval-utils]
 robot_calibration:
   ubuntu:
     focal: [ros-humble-robot-calibration]
@@ -7129,6 +7284,10 @@ rospy:
   ubuntu:
     focal: [ros-noetic-rospy]
     jammy: [ros-noetic-rospy]
+rosx_introspection:
+  ubuntu:
+    focal: [ros-humble-rosx-introspection]
+    jammy: [ros-humble-rosx-introspection]
 rot_conv:
   ubuntu:
     focal: [ros-humble-rot-conv]
@@ -8737,6 +8896,14 @@ ur_robot_driver:
   ubuntu:
     focal: [ros-humble-ur-robot-driver]
     jammy: [ros-humble-ur-robot-driver]
+ur5_gripper_moveit_config:
+  ubuntu:
+    focal: [ros-humble-ur5-gripper-moveit-config]
+    jammy: [ros-humble-ur5-gripper-moveit-config]
+ur5_robotiq_85_description:
+  ubuntu:
+    focal: [ros-humble-ur5-robotiq-85-description]
+    jammy: [ros-humble-ur5-robotiq-85-description]
 ur_robot_driver_dbgsym:
   ubuntu:
     focal: [ros-humble-ur-robot-driver-dbgsym]
@@ -9081,3 +9248,11 @@ zstd_vendor_dbgsym:
   ubuntu:
     focal: [ros-humble-zstd-vendor-dbgsym]
     jammy: [ros-humble-zstd-vendor-dbgsym]
+nodejs:
+  ubuntu:
+    focal: [nodejs]
+    jammy: [nodejs]
+yarnpkg:
+  ubuntu:
+    focal: [yarn]
+    jammy: [yarn]

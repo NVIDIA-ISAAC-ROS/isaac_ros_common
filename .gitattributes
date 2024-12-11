@@ -23,6 +23,10 @@
 **/resources/**/*.zstd filter=lfs diff=lfs merge=lfs -text
 **/resources/**/*.db3 filter=lfs diff=lfs merge=lfs -text
 **/resources/**/*.yaml filter=lfs diff=lfs merge=lfs -text
+**/resources/**/*.bag filter=lfs diff=lfs merge=lfs -text
+
+# DNN Model files
+*.onnx filter=lfs diff=lfs merge=lfs -text
 
 # trtexec
 trtexec_x86_64 filter=lfs diff=lfs merge=lfs -text

@@ -33,9 +33,11 @@ const std::unordered_map<std::string, uint32_t> g_str_to_vpi_backend({
         {"CPU", VPI_BACKEND_CPU},
         {"CUDA", VPI_BACKEND_CUDA},
         {"PVA", VPI_BACKEND_PVA},
+        {"OFA", VPI_BACKEND_OFA},
         {"VIC", VPI_BACKEND_VIC},
         {"NVENC", VPI_BACKEND_NVENC},
         {"TEGRA", VPI_BACKEND_TEGRA},
+        {"ORIN", VPI_BACKEND_OFA | VPI_BACKEND_PVA | VPI_BACKEND_VIC},
         {"ALL", VPI_BACKEND_ALL},
       });
 

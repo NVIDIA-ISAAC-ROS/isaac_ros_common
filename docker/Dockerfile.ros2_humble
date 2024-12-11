@@ -6,7 +6,7 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
-ARG BASE_IMAGE
+ARG BASE_IMAGE=ubuntu:22.04
 FROM $BASE_IMAGE
 
 # Store list of packages (must be first)
@@ -14,7 +14,7 @@ RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidi
 
 # disable terminal interaction for apt
 ENV DEBIAN_FRONTEND=noninteractive
-ENV SHELL /bin/bash
+ENV SHELL=/bin/bash
 SHELL ["/bin/bash", "-c"]
 
 # Env setup
@@ -66,6 +66,7 @@ RUN python3 -m pip install -U \
         matplotlib \
         pandas \
         rosbags \
+        boto3 \
         setuptools==65.7.0
 
 # Install ROS 2 Humble
@@ -131,7 +132,6 @@ COPY rosdep/extra_rosdeps.yaml /etc/ros/rosdep/sources.list.d/nvidia-isaac.yaml
 RUN --mount=type=cache,target=/var/cache/apt \
     rosdep init \
     && echo "yaml file:///etc/ros/rosdep/sources.list.d/nvidia-isaac.yaml" | tee /etc/ros/rosdep/sources.list.d/00-nvidia-isaac.list \
-    && sed -i 's|gbpdistro https://raw.githubusercontent.com/ros/rosdistro/master/releases/fuerte.yaml fuerte||g' /etc/ros/rosdep/sources.list.d/20-default.list \
     && rosdep update
 
 ####### -- Install updated packages over installed debians
@@ -216,8 +216,14 @@ apt-get update && apt-get install -y \
     ros-humble-tf2-geometry-msgs \
     ros-humble-tf2-ros \
     ros-humble-topic-based-ros2-control \
+    ros-humble-ur \
+    ros-humble-ur-bringup \
+    ros-humble-ur-calibration \
+    ros-humble-ur-client-library \
+    ros-humble-ur-controllers \
     ros-humble-ur-description \
     ros-humble-ur-moveit-config \
+    ros-humble-ur-robot-driver \
     ros-humble-ur-msgs \
     ros-humble-xacro
 
@@ -275,11 +281,49 @@ RUN --mount=type=cache,target=/var/cache/apt \
 RUN python3 -m pip install -U \
         paho-mqtt==1.6.1
 
+# Install cuda-python for isaac_ros_pynitros
+RUN python3 -m pip install \
+        cuda-python
+# Install fake cuda-python Debian package to satisfy apt install check
+COPY rosdep/ros-humble-cuda-python-placeholder /tmp/ros-humble-cuda-python-placeholder
+RUN --mount=type=cache,target=/var/cache/apt \
+    cd /tmp && source ${ROS_ROOT}/setup.bash \
+    && dpkg-deb --build ros-humble-cuda-python-placeholder && apt-get install -y ./ros-humble-cuda-python-placeholder.deb \
+    && rm -f ./ros-humble-cuda-python-placeholder.deb
+
 # Patch gtest to make it work with CXX 17
 RUN sudo sed -i '917i #ifdef GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL' /usr/src/googletest/googletest/include/gtest/internal/gtest-internal.h \
     && sudo sed -i '920i #endif' /usr/src/googletest/googletest/include/gtest/internal/gtest-internal.h \
     && sudo sed -i '2392i #if defined(GTEST_INTERNAL_CPLUSPLUS_LANG) && \\\n    GTEST_INTERNAL_CPLUSPLUS_LANG < 201703L\n#define GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL 1\n#endif' \
     /usr/src/googletest/googletest/include/gtest/internal/gtest-port.h
 
+# Install MCAP CLI
+ARG TARGETPLATFORM
+RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+        wget https://github.com/foxglove/mcap/releases/download/releases%2Fmcap-cli%2Fv0.0.47/mcap-linux-amd64 && \
+        chmod +x mcap-linux-amd64 && \
+        mv mcap-linux-amd64 /opt/ros/humble/bin/mcap; \
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+        wget https://github.com/foxglove/mcap/releases/download/releases%2Fmcap-cli%2Fv0.0.47/mcap-linux-arm64 && \
+        chmod +x mcap-linux-arm64 && \
+        mv mcap-linux-arm64 /opt/ros/humble/bin/mcap; \
+    else \
+        echo "Unknown architecture, can't install MCAP CLI" && \
+        exit -1; \
+    fi
+
+# Install custom vcstool with --delay flag to be robust against
+# GitHub rate-limiting (nvbugs/4872446)
+RUN mkdir -p /opt/ros/humble && cd /opt/ros/humble \
+    && git clone https://github.com/andrewbest-tri/vcstool.git -b andrewbest/delay \
+    && echo 'source /opt/ros/humble/vcstool/setup.sh' | tee --append /etc/bash.bashrc
+
+# Make sure that the workspace is always sourced
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" | sudo tee --append /etc/bash.bashrc
+
+# Colcon auto complete
+RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" | sudo tee --append /etc/bash.bashrc
+
 # Store list of packages (must be last)
 RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/ros2_humble-end-packages.csv
+

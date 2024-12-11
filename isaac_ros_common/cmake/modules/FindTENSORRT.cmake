@@ -28,6 +28,8 @@
 # is recommended instead in CMake.
 # [1] https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#config-file-packages
 # [2] https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#find-module-packages
+#
+# From: https://github.com/nvidia-holoscan/holoscan-sdk/blob/main/cmake/modules/FindTensorRT.cmake
 
 # Find headers
 find_path(TENSORRT_INCLUDE_DIR NAMES NvInferVersion.h REQUIRED)
@@ -35,14 +37,14 @@ mark_as_advanced(TENSORRT_INCLUDE_DIR)
 
 # Find version
 function(read_version name str)
-    string(REGEX MATCH "${name} ([0-9]\\d*)" _ ${str})
+    string(REGEX MATCH "${name} ([0-9]+)" _ "${str}")
     set(${name} ${CMAKE_MATCH_1} PARENT_SCOPE)
 endfunction()
 
 file(READ "${TENSORRT_INCLUDE_DIR}/NvInferVersion.h" _TRT_VERSION_FILE)
-read_version(NV_TENSORRT_MAJOR ${_TRT_VERSION_FILE})
-read_version(NV_TENSORRT_MINOR ${_TRT_VERSION_FILE})
-read_version(NV_TENSORRT_PATCH ${_TRT_VERSION_FILE})
+read_version(NV_TENSORRT_MAJOR "${_TRT_VERSION_FILE}")
+read_version(NV_TENSORRT_MINOR "${_TRT_VERSION_FILE}")
+read_version(NV_TENSORRT_PATCH "${_TRT_VERSION_FILE}")
 set(TENSORRT_VERSION "${NV_TENSORRT_MAJOR}.${NV_TENSORRT_MINOR}.${NV_TENSORRT_PATCH}")
 unset(_TRT_VERSION_FILE)
 
@@ -59,9 +61,7 @@ endmacro()
 
 find_trt_library(nvinfer)
 find_trt_library(nvinfer_plugin)
-find_trt_library(nvcaffe_parser)
 find_trt_library(nvonnxparser)
-find_trt_library(nvparsers)
 
 # Generate TENSORRT_FOUND
 include(FindPackageHandleStandardArgs)

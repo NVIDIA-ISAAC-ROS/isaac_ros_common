@@ -34,7 +34,8 @@ ament_auto_find_build_dependencies()
 find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   msg/NitrosBridgeImage.msg
-  DEPENDENCIES std_msgs
+  msg/NitrosBridgeTensorList.msg
+  DEPENDENCIES std_msgs isaac_ros_tensor_list_interfaces
 )
 ament_export_dependencies(rosidl_default_runtime)
 
@@ -42,5 +43,11 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+
+# Embed versioning information into installed files
+ament_index_get_resource(ISAAC_ROS_COMMON_CMAKE_PATH isaac_ros_common_cmake_path isaac_ros_common)
+include("${ISAAC_ROS_COMMON_CMAKE_PATH}/isaac_ros_common-version-info.cmake")
+generate_version_info(${PROJECT_NAME})
 
 ament_auto_package()

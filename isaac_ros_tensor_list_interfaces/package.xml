@@ -13,7 +13,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>isaac_ros_tensor_list_interfaces</name>
-  <version>3.1.0</version>
+  <version>3.2.0</version>
   <description>Interfaces for Isaac ROS tensor list</description>
 
   <maintainer email="isaac-ros-maintainers@nvidia.com">Isaac ROS Maintainers</maintainer>
@@ -28,6 +28,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
   <build_depend>rosidl_default_generators</build_depend>
+  <build_depend>isaac_ros_common</build_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

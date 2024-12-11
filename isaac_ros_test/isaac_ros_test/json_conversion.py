@@ -100,7 +100,7 @@ class JSONConversion:
         camera_info.r = camera_info_json['R']
         camera_info.p = camera_info_json['P']
 
-        if(desired_size):
+        if desired_size:
             camera_info.width = desired_size[0]
             camera_info.height = desired_size[1]
         return camera_info

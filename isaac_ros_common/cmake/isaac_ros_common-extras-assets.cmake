@@ -47,8 +47,26 @@ function(install_isaac_ros_asset TARGET_NAME)
 
   # Hook the command up with a target
   add_custom_target("${TARGET_NAME}" ALL DEPENDS ${OUTPUT_PATHS})
+
+  # Register the install script as an ament resource such that it can
+  # be retrieved by other packages.
+  message(STATUS "Registering ament resource: ${INSTALL_SCRIPT} as ${TARGET_NAME}")
+  ament_index_register_resource("${TARGET_NAME}" CONTENT "${INSTALL_SCRIPT}")
+
 endfunction()
 
 
-
-
+# Return the install script path registered when installing the asset.
+#
+# :param VAR: The the output variable that will hold the path.
+# :type VAR: string
+# :param SCRIPT_NAME: The name of the script installed with install_isaac_ros_asset()
+# :type VAR: string
+# :param PACKAGE_NAME: The ROS2 package that installed the asset.
+# :type VAR: string
+function(get_isaac_ros_asset_install_script_path VAR SCRIPT_NAME PACKAGE_NAME)
+  # Retrieve the script path from the ament index, under the name registered
+  # during install_isaac_ros_asset().
+  ament_index_get_resource(SCRIPT_PATH "${SCRIPT_NAME}" "${PACKAGE_NAME}")
+  set(${VAR} ${SCRIPT_PATH} PARENT_SCOPE)
+endfunction()

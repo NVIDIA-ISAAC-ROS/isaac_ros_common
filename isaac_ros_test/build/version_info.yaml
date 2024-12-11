@@ -1,0 +1,7 @@
+build_datetime: '2024-11-12T18:11:11.201185'
+git_branch: jaiveers/mock-model-generator
+git_commit_date: 2024-11-12 17:53:00 -0800
+git_commit_hash: 8aa2e9f4334d988223e9c11665cd5634f59158e9
+git_commit_message: Working with full support for dynamic axes
+git_workspace_dirty: 'Yes'
+version: 3.2.0

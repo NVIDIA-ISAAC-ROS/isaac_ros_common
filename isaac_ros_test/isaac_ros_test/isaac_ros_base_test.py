@@ -261,12 +261,21 @@ class IsaacROSBaseTest(unittest.TestCase):
 
             return callback
 
-        subscriptions = [self.node.create_subscription(
-            msg_type,
-            self.namespaces[topic] if use_namespace_lookup else topic,
-            make_callback(topic),
-            qos_profile,
-        ) for topic, msg_type in subscription_requests]
+        try:
+            subscriptions = [
+                self.node.create_subscription(
+                    msg_type,
+                    self.namespaces[topic] if use_namespace_lookup else topic,
+                    make_callback(topic),
+                    qos_profile,
+                ) for topic, msg_type in subscription_requests
+            ]
+        except Exception as e:
+            # Silent failures have been observed here. We print and raise to make sure that a
+            # trace ends up at the console.
+            print('Failed to create subscriptions:')
+            print(e)
+            raise
 
         return subscriptions
 

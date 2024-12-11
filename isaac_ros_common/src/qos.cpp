@@ -30,39 +30,43 @@ namespace common
 rclcpp::QoS AddQosParameter(
   rclcpp::Node & node,
   std::string default_qos,
-  std::string parameter_name)
+  std::string parameter_name,
+  const int default_depth)
 {
-  return ParseQosString(node.declare_parameter<std::string>(parameter_name, default_qos));
+  std::string qos_str = node.declare_parameter<std::string>(parameter_name, default_qos);
+  const int depth = node.declare_parameter<int>(parameter_name + "_depth", default_depth);
+  return ParseQosString(qos_str, depth);
 }
 
-rclcpp::QoS ParseQosString(const std::string & str)
+
+rclcpp::QoS ParseQosString(const std::string & str, const int depth)
 {
   std::string profile = str;
   // Convert to upper case.
   std::transform(profile.begin(), profile.end(), profile.begin(), ::toupper);
 
+  rmw_qos_profile_t rmw_qos = rmw_qos_profile_default;
+
   if (profile == "SYSTEM_DEFAULT") {
-    return rclcpp::QoS(rclcpp::SystemDefaultsQoS());
+    rmw_qos = rmw_qos_profile_system_default;
+  } else if (profile == "DEFAULT") {
+    rmw_qos = rmw_qos_profile_default;
+  } else if (profile == "PARAMETER_EVENTS") {
+    rmw_qos = rmw_qos_profile_parameter_events;
+  } else if (profile == "SERVICES_DEFAULT") {
+    rmw_qos = rmw_qos_profile_services_default;
+  } else if (profile == "PARAMETERS") {
+    rmw_qos = rmw_qos_profile_parameters;
+  } else if (profile == "SENSOR_DATA") {
+    rmw_qos = rmw_qos_profile_sensor_data;
+  } else {
+    RCLCPP_WARN_STREAM(
+      rclcpp::get_logger("parseQoSString"),
+      "Unknown QoS profile: " << profile << ". Returning profile: DEFAULT");
   }
-  if (profile == "DEFAULT") {
-    return rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_default));
-  }
-  if (profile == "PARAMETER_EVENTS") {
-    return rclcpp::QoS(rclcpp::ParameterEventsQoS());
-  }
-  if (profile == "SERVICES_DEFAULT") {
-    return rclcpp::QoS(rclcpp::ServicesQoS());
-  }
-  if (profile == "PARAMETERS") {
-    return rclcpp::QoS(rclcpp::ParametersQoS());
-  }
-  if (profile == "SENSOR_DATA") {
-    return rclcpp::QoS(rclcpp::SensorDataQoS());
-  }
-  RCLCPP_WARN_STREAM(
-    rclcpp::get_logger("parseQoSString"),
-    "Unknown QoS profile: " << profile << ". Returning profile: DEFAULT");
-  return rclcpp::QoS(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_default));
+  auto qos_init = depth ==
+    0 ? rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_default) : rclcpp::KeepLast(depth);
+  return rclcpp::QoS(qos_init, rmw_qos);
 }
 
 }  // namespace common
