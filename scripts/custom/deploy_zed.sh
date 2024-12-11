@@ -34,6 +34,7 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v /dev/input:/dev/input \
+    -v /tmp/:/tmp/ \
     -v "/usr/local/zed/settings:/usr/local/zed/settings" \
     -v "/usr/local/zed/resources:/usr/local/zed/resources" \
     -v "$config_path":/zed_mini_ros_config.yaml \
