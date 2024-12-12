@@ -12,7 +12,7 @@ else
 fi
 
 # Set default absolute path for the config file
-default_config_path="/home/vschorp/dev/orx/data/experiment_config/datahub_01/zed_mini_0"
+default_config_path="/home/vschorp/dev/orx/data/experiment_config/datahub_01/intel_realsense_d405_0"
 
 # Use the first argument as the config path, or the specified default path
 config_path="${1:-$default_config_path}"
@@ -23,7 +23,7 @@ if [ ! -f "$config_path" ]; then
     exit 1
 fi
 
-docker_name=$(basename ${config_path})_encoded
+docker_name=$(basename ${config_path})
 
 docker run --rm -it --gpus all --runtime=nvidia \
     --name $docker_name \
@@ -35,7 +35,5 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v /dev/input:/dev/input \
-    -v "/usr/local/zed/settings:/usr/local/zed/settings" \
-    -v "/usr/local/zed/resources:/usr/local/zed/resources" \
-    -v "$config_path":/zed_mini_ros_config.yaml \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-zed-encoded
+    -v "$config_path":/intel_realsense_d405_ros_config.yaml \
+    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense-encoded
