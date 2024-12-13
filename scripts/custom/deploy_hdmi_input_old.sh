@@ -11,19 +11,19 @@ else
     exit 1
 fi
 
-# Set default absolute path for the config file
-default_config_path="/home/vschorp/dev/orx/data/experiment_config/datahub_01/hdmi_input_0"
+# # Set default absolute path for the config file
+# default_config_path="/home/vschorp/dev/orx/data/experiment_config/datahub_01/hdmi_input_0"
 
-# Use the first argument as the config path, or the specified default path
-config_path="${1:-$default_config_path}"
+# # Use the first argument as the config path, or the specified default path
+# config_path="${1:-$default_config_path}"
 
-# Check if the config file exists
-if [ ! -f "$config_path" ]; then
-    echo "Configuration file not found at: $config_path"
-    exit 1
-fi
+# # Check if the config file exists
+# if [ ! -f "$config_path" ]; then
+#     echo "Configuration file not found at: $config_path"
+#     exit 1
+# fi
 
-docker_name=$(basename ${config_path})
+docker_name=hdmi_input
 
 docker run --rm -it --gpus all --runtime=nvidia \
     --name $docker_name \
@@ -34,5 +34,5 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v /dev:/dev \
-    -v "$config_path":/hdmi_input_config.yaml \
+    -e DATAHUB_NAME=datahub_01 \
     vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-hdmi_input
