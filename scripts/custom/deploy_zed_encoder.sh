@@ -23,7 +23,7 @@ if [ ! -f "$config_path" ]; then
     exit 1
 fi
 
-docker_name=$(basename ${config_path})_decoder
+docker_name=$(basename ${config_path})_encoder
 
 docker run --rm -it --gpus all --runtime=nvidia \
     --name $docker_name \
@@ -34,4 +34,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v "$config_path":/zed_mini_ros_config.yaml \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-zed_decoder
+    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-zed_encoder
