@@ -22,8 +22,8 @@ sudo docker run --rm -it --gpus all --runtime=nvidia \
     -e ROS_DOMAIN_ID=1 \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
     -e CYCLONEDDS_URI=/home/jovyan/cyclone_profile.xml \
-    -v /home/adm_girf/dev/orx/cyclone_profile.xml:/home/jovyan/cyclone_profile.xml \
-    -v /home/adm_girf/data:/home/jovyan/data \
+    -v /home/$USER/dev/orx/cyclone_profile.xml:/home/jovyan/cyclone_profile.xml \
+    -v /home/$USER/data:/home/jovyan/data \
     --user jovyan \
     --workdir /home/jovyan \
     vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-jupyter \

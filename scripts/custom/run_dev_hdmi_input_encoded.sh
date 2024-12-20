@@ -1,1 +1,1 @@
-./../run_dev.sh -i ros2_humble.hdmi_input.encoder -a "-v /home/vschorp/dev/orx/data/experiment_config/datahub_01/hdmi_input_0:/hdmi_input_config.yaml"
+./../run_dev.sh -i ros2_humble.hdmi_input.encoder -a "-v /home/$USER/dev/orx/data/experiment_config/datahub_01/hdmi_input_0:/hdmi_input_config.yaml"

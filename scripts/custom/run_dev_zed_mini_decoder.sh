@@ -1,1 +1,1 @@
-./../run_dev.sh -i ros2_humble.user.decoder -a "-v /home/vschorp/dev/orx/data/experiment_config/datahub_01/zed_mini_0:/zed_mini_ros_config.yaml" -b
+./../run_dev.sh -i ros2_humble.user.decoder -a "-v /home/$USER/dev/orx/data/experiment_config/datahub_01/zed_mini_0:/zed_mini_ros_config.yaml" -b
