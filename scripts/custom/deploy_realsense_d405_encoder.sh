@@ -23,7 +23,7 @@ if [ ! -f "$config_path" ]; then
     exit 1
 fi
 
-docker_name=$(basename ${config_path})
+docker_name=$(basename ${config_path})_encoder
 
 docker run --rm -it --gpus all --runtime=nvidia \
     --name $docker_name \
@@ -36,4 +36,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v /dev/input:/dev/input \
     -v "$config_path":/intel_realsense_d405_ros_config.yaml \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense
+    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense_d405_encoder

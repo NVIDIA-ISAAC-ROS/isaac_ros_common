@@ -1,1 +1,1 @@
-./../run_dev.sh -i ros2_humble.realsense -a "-v /home/$USER/dev/orx/orx_middleware/orx_interface/config_gui/experiment_config/datahub_01/intel_realsense_d405_0:/intel_realsense_d405_ros_config.yaml"
+./../run_dev.sh -i ros2_humble.realsense -a "-v /home/$USER/dev/orx/data/experiment_config/datahub_01/intel_realsense_d405_0:/intel_realsense_d405_ros_config.yaml"

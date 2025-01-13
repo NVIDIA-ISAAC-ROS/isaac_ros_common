@@ -13,16 +13,18 @@ FROM ${BASE_IMAGE}
 
 ARG LIBREALSENSE_SOURCE_VERSION=v2.55.1
 
+ENV CACHE_BREAK=1
+
 COPY scripts/build-librealsense.sh /opt/realsense/build-librealsense.sh
 COPY scripts/install-realsense-dependencies.sh /opt/realsense/install-realsense-dependencies.sh
 
 RUN chmod +x /opt/realsense/install-realsense-dependencies.sh && \
-    /opt/realsense/install-realsense-dependencies.sh; \
-    chmod +x /opt/realsense/build-librealsense.sh && /opt/realsense/build-librealsense.sh -v ${LIBREALSENSE_SOURCE_VERSION};
+    /opt/realsense/install-realsense-dependencies.sh;
+RUN chmod +x /opt/realsense/build-librealsense.sh && /opt/realsense/build-librealsense.sh -v ${LIBREALSENSE_SOURCE_VERSION} -j 8;
 
 # Install ROS2 Realsense packages
-RUN apt-get update && \
-    apt-get install -y ros-humble-realsense2-*
+# RUN apt-get update && \
+#     apt-get install -y ros-humble-realsense2-*
 
 # Copy hotplug script for udev rules/hotplug for RealSense
 RUN mkdir -p /opt/realsense/
