@@ -10,4 +10,14 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 RUN apt-get update && apt-get install -y \
-    ros-humble-isaac-ros-h264-decoder
+    ros-humble-gxf-isaac-messages\
+    ros-humble-gxf-isaac-tensorops\
+    ros-humble-isaac-ros-common\
+    ros-humble-isaac-ros-gxf\
+    ros-humble-isaac-ros-image-proc\
+    ros-humble-isaac-ros-nitros\
+    ros-humble-isaac-ros-nitros-image-type\
+    ros-humble-isaac-ros-nitros-compressed-image-type\
+    ros-humble-magic-enum
+
+# ros-humble-isaac-ros-h264-decoder
