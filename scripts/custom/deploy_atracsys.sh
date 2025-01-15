@@ -12,7 +12,7 @@ else
 fi
 
 # Set default absolute path for the config file
-default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/atracsys_fusion500_0"
+default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/atracsys_fusion_500_0"
 
 # Use the first argument as the config path, or the specified default path
 config_path="${1:-$default_config_path}"
@@ -33,5 +33,5 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
-    -v "$config_path":/home/admin/atracsys_fusion500_config/ \
+    -v "$config_path":/home/admin/atracsys_fusion_500_config/ \
     vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-atracsys

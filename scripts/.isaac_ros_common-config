@@ -1,13 +1,13 @@
 # run_dev.sh config
-CONFIG_IMAGE_KEY=ros2_humble.user.encoder
+CONFIG_IMAGE_KEY=ros2_humble.user
 CONFIG_DOCKER_SEARCH_DIRS=/home/orx/dev/orx/orx_middleware/isaac_ros_common/docker
 BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/isaac/ros")
 ISAAC_ROS_WS=/home/orx/dev/orx/orx_middleware/ros2_ws
 
 # docker_deply.sh config
-BASE_IMAGE_KEY=aarch64.ros2_humble.user.decoder
+BASE_IMAGE_KEY=aarch64.ros2_humble.user
 # BASE_IMAGE_KEY=x86_64.ros2_humble.dgx_user.bag_data_extractor
-DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-jetson-realsense_d405_decoder
+DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-jetson-atracsys
 ROS_WS=/home/orx/dev/orx/orx_middleware/ros2_ws
-LAUNCH_PACKAGE=isaac_ros_h264_encoder_decoder
-LAUNCH_FILE=intel_realsense_d405_decoder.launch.py
+LAUNCH_PACKAGE=atracsys
+LAUNCH_FILE=orx_fusion_500_interface.launch.py
