@@ -13,14 +13,12 @@ FROM ${BASE_IMAGE}
 
 ARG LIBREALSENSE_SOURCE_VERSION=v2.55.1
 
-ENV CACHE_BREAK=1
-
 COPY scripts/build-librealsense.sh /opt/realsense/build-librealsense.sh
 COPY scripts/install-realsense-dependencies.sh /opt/realsense/install-realsense-dependencies.sh
 
 RUN chmod +x /opt/realsense/install-realsense-dependencies.sh && \
     /opt/realsense/install-realsense-dependencies.sh;
-RUN chmod +x /opt/realsense/build-librealsense.sh && /opt/realsense/build-librealsense.sh -v ${LIBREALSENSE_SOURCE_VERSION} -j 8;
+RUN chmod +x /opt/realsense/build-librealsense.sh && /opt/realsense/build-librealsense.sh -v ${LIBREALSENSE_SOURCE_VERSION};
 
 # Install ROS2 Realsense packages
 # RUN apt-get update && \
