@@ -146,11 +146,16 @@ apt-get update && apt-get install -y \
 RUN python3 -m pip install -U \
 setuptools==65.7.0
 
-# Python3 (PIP)
+# Python3 PIP buildtools
+RUN python3 -m pip install -U \
+        Cython \
+        ninja \
+        wheel
+
+# Python3 PIP packages
 RUN python3 -m pip install -U \
         argcomplete \
         autopep8 \
-        Cython \
         flake8 \
         flake8-blind-except \
         flake8-builtins \
@@ -163,7 +168,6 @@ RUN python3 -m pip install -U \
         gpustat==0.6.0 \
         importlib_resources \
         networkx \
-        ninja \
         "numpy>=1.24.4,<2" \
         numpy-quaternion \
         onnx \
@@ -177,7 +181,6 @@ RUN python3 -m pip install -U \
         tqdm \
         trimesh \
         "warp-lang>=0.9.0" \
-        wheel \
         "yourdfpy>=0.0.53"
 
 # Add MQTT binaries and libraries
@@ -364,7 +367,7 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/tritonserver/lib"
 # Current libboost-dev apt packages are < 1.78, so install from tar.gz
 RUN --mount=type=cache,target=/var/cache/apt \
     wget -O /tmp/boost.tar.gz \
-    https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz \
+    https://archives.boost.io/release/1.80.0/source/boost_1_80_0.tar.gz \
     && (cd /tmp && tar xzf boost.tar.gz) \
     && cd /tmp/boost_1_80_0 \
     && ./bootstrap.sh --prefix=/usr \
