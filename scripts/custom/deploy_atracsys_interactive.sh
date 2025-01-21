@@ -23,7 +23,7 @@ if [ ! -d "$config_path" ]; then
     exit 1
 fi
 
-docker_name=$(basename ${config_path})
+docker_name=$(basename ${config_path})_interactive
 
 docker run --rm -it --gpus all --runtime=nvidia \
     --name $docker_name \
