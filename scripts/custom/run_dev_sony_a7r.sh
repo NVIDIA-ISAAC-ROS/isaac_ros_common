@@ -1,0 +1,1 @@
+./../run_dev.sh -i ros2_humble -a "-v /home/fred/Documents/config_middleware:/home/admin/config" -a "-v /dev/input:/dev/input" -b
