@@ -1,1 +1,1 @@
-./../run_dev.sh -i ros2_humble -a "-v /home/fred/Documents/config_middleware:/home/admin/fri_kuka_config" -b
+./../run_dev.sh -i ros2_humble -a "-v /home/$USER/dev/orx/data/experiment_config/datahub_01/:/home/admin/fri_kuka_config" -b

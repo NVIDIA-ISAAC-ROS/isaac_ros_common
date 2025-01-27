@@ -12,7 +12,7 @@ else
 fi
 
 # Set default absolute path for the config file
-default_config_path="/home/fred/Documents/config_middleware"
+default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/"
 
 # Use the first argument as the config path, or the specified default path
 config_path="${1:-$default_config_path}"
@@ -30,5 +30,8 @@ docker run --rm -it --gpus all --runtime=nvidia \
     --privileged \
     --network host \
     -e ROS_DOMAIN_ID=1 \
+    -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
+    -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v "$config_path":/home/admin/fri_kuka_config \
-    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-fri-kuka
+    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-fri_kuka
