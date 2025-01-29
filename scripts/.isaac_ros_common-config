@@ -1,14 +1,14 @@
 # run_dev.sh config
-CONFIG_IMAGE_KEY=ros2_humble.user
+CONFIG_IMAGE_KEY=ros2_humble.sony_a7r.user
 CONFIG_DOCKER_SEARCH_DIRS=/home/orx/dev/orx/orx_middleware/isaac_ros_common/docker
 BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/isaac/ros")
 ISAAC_ROS_WS=/home/orx/dev/orx/orx_middleware/ros2_ws
 
 # docker_deply.sh config
-BASE_IMAGE_KEY=aarch64.ros2_humble.user
+BASE_IMAGE_KEY=aarch64.ros2_humble.sony_a7r.user
 # BASE_IMAGE_KEY=x86_64.ros2_humble.dgx_user.bag_data_extractor
 # BASE_IMAGE_KEY=x86_64.ros2_humble.user.bag_data_extractor
-DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-jetson-fri_kuka
+DEPLOY_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-jetson-sony_a7r
 ROS_WS=/home/${USER}/dev/orx/orx_middleware/ros2_ws
-LAUNCH_PACKAGE=fri_kuka
-LAUNCH_FILE=orx_fri_kuka.launch.py
+LAUNCH_PACKAGE=sony_a7r
+LAUNCH_FILE=orx_sony_a7r.launch.py

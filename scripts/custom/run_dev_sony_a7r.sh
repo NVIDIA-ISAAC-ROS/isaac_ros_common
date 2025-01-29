@@ -1,1 +1,1 @@
-./../run_dev.sh -i ros2_humble -a "-v /home/fred/Documents/config_middleware:/home/admin/config" -a "-v /dev/input:/dev/input" -b
+./../run_dev.sh -i ros2_humble -a "-v /home/$USER/dev/orx/data/experiment_config/datahub_01:/home/admin/sony_a7r_config" -a "-v /dev/input:/dev/input" -b
