@@ -105,7 +105,7 @@ RUN python3 -m pip install -U \
         flake8-import-order \
         flake8-quotes \
         gpustat==0.6.0 \
-        onnx \
+        onnx>=1.17.0 \
         pydocstyle \
         scikit-learn \
         ninja \
@@ -171,6 +171,18 @@ apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
 && apt-get update && apt-get install -y \
         mosquitto \
         mosquitto-clients
+
+# Patch vulnerabilities from base image
+# Remove Triton DALI backend
+RUN rm -rf /opt/tritonserver/backends/dali
+
+# Upgrade system packages for security patches
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+        nghttp2=1.43.0-1ubuntu0.2 \
+        openssh-client=1:8.9p1-3ubuntu0.10 \
+        libcurl3-gnutls=7.81.0-1ubuntu1.20 \
+        libc-bin=2.35-0ubuntu3.8
 
 # Store list of packages (must be last)
 RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/x86_64-end-packages.csv
