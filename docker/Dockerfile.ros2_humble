@@ -299,12 +299,13 @@ RUN sudo sed -i '917i #ifdef GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL' /usr/
 
 # Install MCAP CLI
 ARG TARGETPLATFORM
+ARG MCAP_VERSION=v0.0.51
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-        wget https://github.com/foxglove/mcap/releases/download/releases%2Fmcap-cli%2Fv0.0.47/mcap-linux-amd64 && \
+        wget https://github.com/foxglove/mcap/releases/download/releases%2Fmcap-cli%2F${MCAP_VERSION}/mcap-linux-amd64 && \
         chmod +x mcap-linux-amd64 && \
         mv mcap-linux-amd64 /opt/ros/humble/bin/mcap; \
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-        wget https://github.com/foxglove/mcap/releases/download/releases%2Fmcap-cli%2Fv0.0.47/mcap-linux-arm64 && \
+        wget https://github.com/foxglove/mcap/releases/download/releases%2Fmcap-cli%2F${MCAP_VERSION}/mcap-linux-arm64 && \
         chmod +x mcap-linux-arm64 && \
         mv mcap-linux-arm64 /opt/ros/humble/bin/mcap; \
     else \
