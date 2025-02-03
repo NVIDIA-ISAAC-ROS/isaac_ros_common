@@ -37,4 +37,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v /home/"$USER"/dev/orx/bag_data_extractor_config:/home/"$DOCKER_USER"/config \
     --user $DOCKER_USER \
     --workdir /home/"$DOCKER_USER" \
-    $DOCKER_IMAGE_NAME \
+    $DOCKER_IMAGE_NAME
