@@ -18,15 +18,12 @@ default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/atrac
 config_path="${1:-$default_config_path}"
 
 # Check if the config dir exists
-if [ ! -d "$config_path" ]; then
-    echo "Configuration dir not found at: $config_path"
-    exit 1
-fi
-
-docker_name=$(basename ${config_path})_interactive
+# if [ ! -d "$config_path" ]; then
+#     echo "Configuration dir not found at: $config_path"
+#     exit 1
+# fi
 
 docker run --rm -it --gpus all --runtime=nvidia \
-    --name $docker_name \
     --privileged \
     --network host \
     -it \
@@ -36,5 +33,6 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
+    -v /home/"$USER"/dev/orx/data:/home/admin/data \
     -v "$config_path":/home/admin/atracsys_fusion_500_config/ \
     vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-atracsys bash
