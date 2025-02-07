@@ -33,6 +33,17 @@ if [[ -f ~/.isaac_ros_common-config ]]; then
     . ~/.isaac_ros_common-config
 fi
 
+# Override with config from project directory if exists (and is defined)
+if [[ ! -z "${PROJECT_ROOT}" ]]; then
+    print_info "Sourcing project config at: ${PROJECT_ROOT}"
+    if [[ -f "${PROJECT_ROOT}/.isaac_ros_common-config" ]]; then
+        . "${PROJECT_ROOT}/.isaac_ros_common-config"
+    fi
+
+    # Make the project root available to nested scripts, eg. build_image_layers.sh
+    export PROJECT_ROOT="${PROJECT_ROOT}"
+fi
+
 # Parse command-line args
 IMAGE_KEY=ros2_humble
 
