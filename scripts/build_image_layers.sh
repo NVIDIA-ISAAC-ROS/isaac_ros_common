@@ -40,6 +40,14 @@ if [[ -f ~/.isaac_ros_common-config ]]; then
     . ~/.isaac_ros_common-config
 fi
 
+# Override with config from project directory if exists (and is defined)
+if [[ ! -z "${PROJECT_ROOT}" ]]; then
+    print_info "Sourcing project config at: ${PROJECT_ROOT}"
+    if [[ -f "${PROJECT_ROOT}/.isaac_ros_common-config" ]]; then
+        . "${PROJECT_ROOT}/.isaac_ros_common-config"
+    fi
+fi
+
 # Prepend configured docker search dirs
 if [ ${#CONFIG_DOCKER_SEARCH_DIRS[@]} -gt 0 ]; then
     for (( i=${#CONFIG_DOCKER_SEARCH_DIRS[@]}-1 ; i>=0 ; i-- )); do
