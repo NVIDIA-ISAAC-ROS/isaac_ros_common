@@ -51,8 +51,8 @@ apt-get update && apt-get install -y \
 # Add Isaac apt repository
 RUN --mount=type=cache,target=/var/cache/apt \
     wget -qO - https://isaac.download.nvidia.com/isaac-ros/repos.key | apt-key add - && \
-    grep -qxF "deb https://isaac.download.nvidia.com/isaac-ros/release-3 $(lsb_release -cs) release-3.0" /etc/apt/sources.list || \
-    echo "deb https://isaac.download.nvidia.com/isaac-ros/release-3 $(lsb_release -cs) release-3.0" | tee -a /etc/apt/sources.list \
+    grep -qxF "deb https://isaac.download.nvidia.com/isaac-ros/release-3 $(lsb_release -cs) legacy-release-3.1" /etc/apt/sources.list || \
+    echo "deb https://isaac.download.nvidia.com/isaac-ros/release-3 $(lsb_release -cs) legacy-release-3.1" | tee -a /etc/apt/sources.list \
     && apt-get update
 
 # Setup Jetson debian repositories
@@ -128,13 +128,16 @@ apt-get update && apt-get install -y \
     python3-opencv=4.5.4+dfsg-9ubuntu4 \
     python3-scipy
 
-# Additional Python dependencies
+# Python buildtools
 RUN python3 -m pip install -U \
     Cython \
-    pymongo \
     wheel \
+    ninja 
+
+# Additional Python dependencies
+RUN python3 -m pip install -U \
+    pymongo \
     scikit-learn \
-    ninja \
     networkx \
     "numpy>=1.24.4,<2" \
     numpy-quaternion \
@@ -216,7 +219,7 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/tritonserver/lib"
 # Current libboost-dev apt packages are < 1.78, so install from tar.gz
 RUN --mount=type=cache,target=/var/cache/apt \
     wget -O /tmp/boost.tar.gz \
-    https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz \
+    https://archives.boost.io/release/1.80.0/source/boost_1_80_0.tar.gz \
     && (cd /tmp && tar xzf boost.tar.gz) \
     && cd /tmp/boost_1_80_0 \
     && ./bootstrap.sh --prefix=/usr \
@@ -241,6 +244,12 @@ apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
 # Install jtop
 RUN python3 -m pip install -U \
     jetson-stats
+
+# Patch vulnerabilities from base image
+# Upgrade system packages for security patches
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+        nghttp2=1.43.0-1ubuntu0.2
 
 # Store list of packages (must be last)
 RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/aarch64-end-packages.csv
