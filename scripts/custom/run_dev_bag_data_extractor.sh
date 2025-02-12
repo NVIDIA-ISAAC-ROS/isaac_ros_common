@@ -1,1 +1,0 @@
-./../run_dev.sh -i ros2_humble.dgx_user.bag_data_extractor -a "-v /home/"$USER"/dev/orx/data:/home/admin/data -v /home/"$USER"/dev/orx/bag_data_extractor_config:/home/admin/config"

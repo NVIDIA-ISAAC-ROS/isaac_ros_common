@@ -10,5 +10,5 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
 USER ${USERNAME}
-RUN python3 -m pip install open3d pyav
+RUN python3 -m pip install open3d pyav reportlab
 USER root
