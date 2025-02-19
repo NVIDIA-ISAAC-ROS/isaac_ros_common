@@ -1,1 +1,1 @@
-./../run_dev.sh -i ros2_humble -a "-v /home/$USER/dev/orx/data/experiment_config/datahub_01/:/home/admin/fri_kuka_config" -b
+./../run_dev.sh -i ros2_humble -a "-v /home/$USER/dev/orx/data/experiment_config/datahub_01/fri_config:/home/admin/fri_kuka_config/fri_config.yaml -e ROS_DOMAIN_ID=1 -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml" -b

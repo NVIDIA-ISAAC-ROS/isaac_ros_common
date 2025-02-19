@@ -12,13 +12,13 @@ else
 fi
 
 # Set default absolute path for the config file
-default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/"
+default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/fri_config"
 
 # Use the first argument as the config path, or the specified default path
 config_path="${1:-$default_config_path}"
 
 # Check if the config dir exists
-if [ ! -d "$config_path" ]; then
+if [ ! -f "$config_path" ]; then
     echo "Configuration dir not found at: $config_path"
     exit 1
 fi
@@ -33,5 +33,5 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
-    -v "$config_path":/home/admin/fri_kuka_config \
+    -v "$config_path":/home/admin/fri_kuka_config/fri_config.yaml \
     vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-fri_kuka
