@@ -12,14 +12,14 @@ else
 fi
 
 # Set default absolute path for the config file
-default_config_path="/home/orx/dev/orx/data/experiment_config/datahub_01/"
+default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/sony_a7r_0"
 
 # Use the first argument as the config path, or the specified default path
 config_path="${1:-$default_config_path}"
 
-# Check if the config dir exists
-if [ ! -d "$config_path" ]; then
-    echo "Configuration dir not found at: $config_path"
+# Check if the config file exists
+if [ ! -f "$config_path" ]; then
+    echo "Configuration file not found at: $config_path"
     exit 1
 fi
 
@@ -34,5 +34,5 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v /dev/input:/dev/input \
-    -v "$config_path":/home/admin/sony_a7r_config \
+    -v "$config_path":/home/admin/sony_a7r_config/sony_a7r_config.yaml \
     vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-sony_a7r
