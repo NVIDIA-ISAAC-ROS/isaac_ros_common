@@ -25,6 +25,8 @@ fi
 
 docker_name=$(basename ${config_path})
 
+bash /home/balgrist/dev/orx/restart_zed_daemon.sh
+
 docker run --rm -it --gpus all --runtime=nvidia \
     --name $docker_name \
     --privileged \
