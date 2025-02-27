@@ -15,7 +15,7 @@ RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidi
 
 # Disable terminal interaction for apt
 ENV DEBIAN_FRONTEND=noninteractive
-ENV SHELL /bin/bash
+ENV SHELL=/bin/bash
 SHELL ["/bin/bash", "-c"]
 
 # Ensure we have universe
