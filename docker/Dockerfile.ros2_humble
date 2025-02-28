@@ -53,6 +53,9 @@ apt-get update && apt-get install -y \
         python3-vcstool \
         quilt
 
+# Upgrade system setuptools
+RUN python3 -m pip install --upgrade --force-reinstall --target=/usr/lib/python3/dist-packages setuptools==65.7.0
+
 # ROS Python fundamentals
 RUN python3 -m pip install -U \
         flake8-blind-except \
