@@ -1,0 +1,1 @@
+./../run_dev.sh -i ros2_humble.user -a "-e ROS_DOMAIN_ID=1 -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml -v /home/fred/orx_middleware/orx_interface/datahub_setup/cyclone_dds_configs/cyclone_profile_example.xml:/home/admin/cyclone_profile.xml" -b
