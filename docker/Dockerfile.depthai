@@ -1,0 +1,5 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+RUN wget -qO- https://docs.luxonis.com/install_dependencies.sh | bash
+RUN apt install -y libusb-1.0-0-dev
