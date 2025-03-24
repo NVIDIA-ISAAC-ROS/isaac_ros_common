@@ -31,6 +31,8 @@ docker run --rm -it --gpus all --runtime=nvidia \
     --name $docker_name \
     --privileged \
     --network host \
+    --group-add 1009 \
+    -e USERNAME=$DOCKER_USER \
     -e ROS_ROOT=/opt/ros/humble \
     -e ROS_DOMAIN_ID=1 \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
