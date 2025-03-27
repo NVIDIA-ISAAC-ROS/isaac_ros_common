@@ -1,0 +1,34 @@
+ARG BASE_IMAGE=ubuntu:22.04
+FROM $BASE_IMAGE
+
+
+# Ubuntu dependencies
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update && apt-get install -y \
+    libzmq3-dev
+
+# ROS dependencies
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update && apt-get install -y \
+    ros-humble-behaviortree-cpp-v3
+
+# Isaac ROS dependencies
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update && apt-get install -y \
+    ros-humble-isaac-common \
+    ros-humble-isaac-ros-gxf \
+    ros-humble-isaac-ros-managed-nitros \
+    ros-humble-isaac-ros-nitros-image-type \
+    ros-humble-isaac-ros-visual-slam-interfaces \
+    ros-humble-isaac-ros-h264-decoder \
+    ros-humble-isaac-ros-launch-utils \
+    ros-humble-isaac-ros-test \
+    ros-humble-isaac-ros-dnn-image-encoder \
+    ros-humble-isaac-ros-triton \
+    ros-humble-isaac-ros-unet \ 
+    ros-humble-isaac-ros-detectnet \
+    ros-humble-isaac-ros-peoplesemseg-models-install \
+    ros-humble-isaac-ros-peoplenet-models-install \
+    ros-humble-isaac-ros-test-cmake
+
+# Livox Lidar dependencies
