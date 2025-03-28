@@ -39,7 +39,7 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e CYCLONEDDS_URI=/home/"$DOCKER_USER"/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/"$DOCKER_USER"/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/data:/home/"$DOCKER_USER"/data \
-    -v /mnt/ntap_poc/orx_experiment_landing:/home/"$DOCKER_USER"/orx_experiment_landing \
+    -v /home/"$USER"/dev/orx/orx_experiment_landing:/home/"$DOCKER_USER"/orx_experiment_landing \
     -v /home/"$USER"/dev/orx/rosbag_recorder_config:/home/"$DOCKER_USER"/config \
     --user $DOCKER_USER \
     --workdir /home/"$DOCKER_USER" \
