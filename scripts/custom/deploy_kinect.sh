@@ -12,7 +12,7 @@ else
 fi
 
 # Set default absolute path for the config file
-default_config_path="/home/balgrist/dev/orx/data/experiment_config/datahub_01/azure_kinect_0"
+default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/azure_kinect_0"
 
 # Use the first argument as the config path, or the specified default path
 config_path="${1:-$default_config_path}"

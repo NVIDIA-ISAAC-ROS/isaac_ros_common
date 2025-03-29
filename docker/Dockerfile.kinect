@@ -24,6 +24,7 @@ COPY scripts/install-kinect-aarch64.sh /opt/kinect/install-kinect-aarch64.sh
 
 # To use Azure Kinect tools without root
 COPY udev_rules/99-k4a.rules /etc/udev/rules.d/99-k4a.rules
+# RUN udevadm control --reload-rules && udevadm trigger
 
 RUN --mount=type=cache,target=/var/cache/apt \
   if [ "$(uname -m)" = "x86_64" ]; then \
@@ -34,6 +35,11 @@ RUN --mount=type=cache,target=/var/cache/apt \
     /opt/kinect/install-kinect-aarch64.sh; \
   fi
 
-WORKDIR /workspaces/isaac_ros-dev/src
-RUN . /opt/ros/humble/setup.sh && colcon build
+WORKDIR /workspaces/isaac_ros-dev
+RUN . /opt/ros/humble/setup.sh && colcon build && source install/setup.bash
+
+# # Change permissions so the container user can access Kinect
+# RUN sudo chown -R admin:admin /workspaces/isaac_ros-dev/install/azure_kinect_ros_driver && \
+#     chmod -R 755 /workspaces/isaac_ros-dev/install/azure_kinect_ros_driver
+    
 USER root

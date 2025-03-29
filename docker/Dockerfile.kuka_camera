@@ -1,0 +1,11 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+WORKDIR /workspaces/isaac_ros-dev
+
+COPY /calib-board /workspaces/isaac_ros-dev/src/calib-board
+COPY /calib-commons /workspaces/isaac_ros-dev/src/calib-commons
+
+# Now you can run the pip install
+RUN pip install /workspaces/isaac_ros-dev/src/calib-commons
+RUN pip install /workspaces/isaac_ros-dev/src/calib-board
