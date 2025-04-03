@@ -1,1 +1,1 @@
-./../run_dev.sh -i ros2_humble -d /home/orx/dev/orx/US_kuka -a "-v /home/$USER/dev/orx/data/experiment_config/datahub_01/fri_config:/home/admin/fri_kuka_config/fri_config.yaml" -b
+./../run_dev.sh -i ros2_humble -a "-v /home/$USER/dev/orx/data/experiment_config/datahub_01/fri_kuka_0:/home/admin/fri_kuka_config/fri_config.yaml"
