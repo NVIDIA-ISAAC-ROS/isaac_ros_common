@@ -291,7 +291,7 @@ RUN python3 -m pip install \
 COPY rosdep/ros-humble-cuda-python-placeholder /tmp/ros-humble-cuda-python-placeholder
 RUN --mount=type=cache,target=/var/cache/apt \
     cd /tmp && source ${ROS_ROOT}/setup.bash \
-    && dpkg-deb --build ros-humble-cuda-python-placeholder && apt-get install -y ./ros-humble-cuda-python-placeholder.deb \
+    && dpkg-deb --nocheck --build ros-humble-cuda-python-placeholder && apt-get install -y ./ros-humble-cuda-python-placeholder.deb \
     && rm -f ./ros-humble-cuda-python-placeholder.deb
 
 # Patch gtest to make it work with CXX 17
