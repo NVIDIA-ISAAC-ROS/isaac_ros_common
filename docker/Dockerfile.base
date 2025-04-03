@@ -180,7 +180,10 @@ RUN python3 -m pip install -U \
     tqdm \
     trimesh \
     "warp-lang>=0.9.0" \
-    "yourdfpy>=0.0.53"
+    "yourdfpy>=0.0.53" \
+    opentelemetry-api==1.28.1 \
+    opentelemetry-sdk==1.28.1 \
+    opentelemetry-exporter-otlp
 
 # Add MQTT binaries and libraries
 RUN --mount=type=cache,target=/var/cache/apt \
@@ -476,3 +479,7 @@ COPY middleware_profile[s]/*profile.xml /usr/local/share/middleware_profiles/
 
 # Store list of packages (must be last)
 RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/base-end-packages.csv
+
+# Install yq
+RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq \
+&& chmod +x /usr/local/bin/yq

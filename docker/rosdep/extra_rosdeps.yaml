@@ -4124,6 +4124,14 @@ mcap_vendor_dbgsym:
   ubuntu:
     focal: [ros-humble-mcap-vendor-dbgsym]
     jammy: [ros-humble-mcap-vendor-dbgsym]
+isaac_ros_mega_controller:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-mega-controller]
+    jammy: [ros-humble-isaac-ros-mega-controller]
+isaac_ros_mega_node_monitor:
+  ubuntu:
+    focal: [ros-humble-isaac-ros-mega-node-monitor]
+    jammy: [ros-humble-isaac-ros-mega-node-monitor]
 menge_vendor:
   ubuntu:
     focal: [ros-humble-menge-vendor]
@@ -7964,6 +7972,10 @@ spacenav_dbgsym:
   ubuntu:
     focal: [ros-humble-spacenav-dbgsym]
     jammy: [ros-humble-spacenav-dbgsym]
+spatio_temporal_voxel_layer:
+  ubuntu:
+    focal: [ros-humble-spatio-temporal-voxel-layer]
+    jammy: [ros-humble-spatio-temporal-voxel-layer]
 spdlog_vendor:
   ubuntu:
     focal: [ros-humble-spdlog-vendor]
