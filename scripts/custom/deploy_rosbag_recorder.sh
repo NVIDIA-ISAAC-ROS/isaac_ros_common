@@ -22,6 +22,18 @@ else
     exit 1
 fi
 
+# Set default absolute path for the config file
+default_config_path="/home/$USER/dev/orx/rosbag_recorder_config"
+
+# Use the first argument as the config path, or the specified default path
+config_path="${1:-$default_config_path}"
+
+# Check if the config dir exists
+if [ ! -d "$config_path" ]; then
+    echo "Configuration dir not found at: $config_path"
+    exit 1
+fi
+
 DOCKER_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-rosbag_recorder
 echo "Running: $DOCKER_IMAGE_NAME with user $DOCKER_USER"
 
@@ -40,7 +52,7 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/"$DOCKER_USER"/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/data:/home/"$DOCKER_USER"/data \
     -v /home/"$USER"/dev/orx/orx_experiment_landing:/home/"$DOCKER_USER"/orx_experiment_landing \
-    -v /home/"$USER"/dev/orx/rosbag_recorder_config:/home/"$DOCKER_USER"/config \
+    -v $config_path:/home/"$DOCKER_USER"/config \
     --user $DOCKER_USER \
     --workdir /home/"$DOCKER_USER" \
     $DOCKER_IMAGE_NAME \

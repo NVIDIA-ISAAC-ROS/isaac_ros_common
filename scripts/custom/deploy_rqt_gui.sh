@@ -44,4 +44,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     --user $DOCKER_USER \
     --workdir /home/"$DOCKER_USER" \
     $DOCKER_IMAGE_NAME \
-    bash -c "ros2 run rqt_gui rqt_gui --perspective-file /home/admin/data/experiment_config/rqt_config/orx_demo.perspective"
+    bash -c "ros2 run rqt_gui rqt_gui --perspective-file /home/admin/data/experiment_config/rqt_gui/orx_demo.perspective"
