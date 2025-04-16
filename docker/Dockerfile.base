@@ -152,7 +152,7 @@ RUN python3 -m pip install -U \
     wheel
 
 # Python3 PIP packages
-RUN python3 -m pip install -U \
+RUN python3 -m pip install \
     argcomplete \
     autopep8 \
     flake8 \
@@ -179,11 +179,13 @@ RUN python3 -m pip install -U \
     "setuptools_scm>=6.2" \
     tqdm \
     trimesh \
-    "warp-lang>=0.9.0" \
-    "yourdfpy>=0.0.53" \
+    "warp-lang==0.11.0" \
+    packaging==24.2 \
+    "mapbox_earcut==1.0.1" \
+    "yourdfpy==0.0.53" \
     opentelemetry-api==1.28.1 \
     opentelemetry-sdk==1.28.1 \
-    opentelemetry-exporter-otlp
+    opentelemetry-exporter-otlp==1.28.1
 
 # Add MQTT binaries and libraries
 RUN --mount=type=cache,target=/var/cache/apt \
