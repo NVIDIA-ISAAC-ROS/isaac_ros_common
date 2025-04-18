@@ -146,6 +146,8 @@ fi
 
 # Check if all LFS files are in place in the repository where this script is running from.
 cd $ROOT
+ print_info $ROOT
+ git status
 git rev-parse &>/dev/null
 if [[ $? -eq 0 ]]; then
     LFS_FILES_STATUS=$(cd $ISAAC_ROS_DEV_DIR && git lfs ls-files | cut -d ' ' -f2)
