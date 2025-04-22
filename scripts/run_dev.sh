@@ -146,8 +146,6 @@ fi
 
 # Check if all LFS files are in place in the repository where this script is running from.
 cd $ROOT
- print_info $ROOT
- git status
 git rev-parse &>/dev/null
 if [[ $? -eq 0 ]]; then
     LFS_FILES_STATUS=$(cd $ISAAC_ROS_DEV_DIR && git lfs ls-files | cut -d ' ' -f2)
@@ -194,6 +192,26 @@ if [ "$(docker ps -a --quiet --filter status=running --filter name=$CONTAINER_NA
     print_info "Attaching to running container: $CONTAINER_NAME"
     ISAAC_ROS_WS=$(docker exec $CONTAINER_NAME printenv ISAAC_ROS_WS)
     print_info "Docker workspace: $ISAAC_ROS_WS"
+
+
+
+
+
+    # ✅ rtabmap_ros 자동 colcon 빌드
+    docker exec -u admin $CONTAINER_NAME bash -c "\
+        source /opt/ros/humble/setup.bash && \
+        if [ -d /workspaces/isaac_ros-dev/src/rtabmap_ros ] && [ ! -d /workspaces/isaac_ros-dev/install/rtabmap_ros ]; then \
+            echo '[INFO] rtabmap_ros detected. Building with colcon...'; \
+            cd /workspaces/isaac_ros-dev && \
+            colcon build --symlink-install --cmake-args -DWITH_CUDA=ON; \
+            echo '[INFO] Build finished.'; \
+        fi"
+
+
+
+
+
+
     docker exec -i -t -u admin --workdir $ISAAC_ROS_WS $CONTAINER_NAME /bin/bash $@
     exit 0
 fi
