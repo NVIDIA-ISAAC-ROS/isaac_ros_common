@@ -1,0 +1,26 @@
+# Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# Dockerfile for setting up Oak Cameras
+#  https://docs.luxonis.com/software/ros/depthai-ros/build/
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+# From the depthai dockerfile
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+   && apt-get -y install --no-install-recommends software-properties-common git libusb-1.0-0-dev wget zsh python3-colcon-common-extensions
+
+ENV DEBIAN_FRONTEND=dialog
+RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+
+# Dependencies from rosdep 
+RUN apt-get update \
+   && apt-get -y install --no-install-recommends ros-humble-depthai ros-humble-ffmpeg-image-transport-msgs ros-humble-foxglove-msgs ros-humble-rviz-imu-plugin
+
