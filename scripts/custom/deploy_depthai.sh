@@ -12,30 +12,27 @@ else
 fi
 
 # Set default absolute path for the config file
-# default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/zed_mini_0"
+default_config_path="/home/$USER/git/orx_middleware/orx_interface/device_config_gui/example_config/datahub_03/depthai_cam"
 
 # Use the first argument as the config path, or the specified default path
-# config_path="${1:-$default_config_path}"
+config_path="${1:-$default_config_path}"
+Check if the config file exists
+if [ ! -f "$config_path" ]; then
+    echo "Configuration file not found at: $config_path"
+    exit 1
+fi
 
-# Check if the config file exists
-# if [ ! -f "$config_path" ]; then
-#     echo "Configuration file not found at: $config_path"
-#     exit 1
-# fi
-
-# docker_name=$(basename ${config_path})
-docker_name=depthai
-
+docker_name=$(basename ${config_path})
 
 docker run --rm -it\
     --name $docker_name \
     --privileged \
     --network host \
     -e ROS_DOMAIN_ID=1 \
-    -v /dev/input:/dev/input \
+    -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
+    -v /home/$USER/git/orx_middleware/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
+    -v "$config_path":/home/admin/depthai_cam.yaml \
     -v /dev/:/dev/ \
-    pzhang/orx-middleware-isaac-ros-"$PLATFORM_NAME"-depthai
+    peetzha/orx-middleware-isaac-ros-"$PLATFORM_NAME"-depthai \
 
-    # -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
-    # -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
-    # -v /home/$USER/git/orx_middleware/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
