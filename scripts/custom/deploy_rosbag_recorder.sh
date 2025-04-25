@@ -34,7 +34,7 @@ if [ ! -d "$config_path" ]; then
     exit 1
 fi
 
-DOCKER_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-rosbag_recorder
+DOCKER_IMAGE_NAME=girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-rosbag_recorder
 echo "Running: $DOCKER_IMAGE_NAME with user $DOCKER_USER"
 
 docker_name="rosbag_recorder"

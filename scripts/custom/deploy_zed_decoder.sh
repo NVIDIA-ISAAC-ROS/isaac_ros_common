@@ -34,4 +34,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v "$config_path":/zed_mini_ros_config.yaml \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-zed_decoder
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-zed_decoder

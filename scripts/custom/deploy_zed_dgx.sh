@@ -38,4 +38,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v "/home/"$USER"/dev/orx/zed/settings:/usr/local/zed/settings" \
     -v "/home/"$USER"/dev/orx/zed/resources:/usr/local/zed/resources" \
     -v "$config_path":/zed_mini_ros_config.yaml \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-zed
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-zed

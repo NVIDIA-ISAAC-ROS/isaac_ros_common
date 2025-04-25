@@ -23,6 +23,6 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/$USER/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -p 8765:8765 \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-foxglove
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-foxglove
 
     # https://app.foxglove.dev/balgrist-orx/dashboard

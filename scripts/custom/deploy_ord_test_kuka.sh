@@ -34,4 +34,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-ord-test-kuka
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-ord-test-kuka

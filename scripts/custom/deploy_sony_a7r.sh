@@ -35,4 +35,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v /dev/input:/dev/input \
     -v "$config_path":/home/admin/sony_a7r_config \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-sony_a7r
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-sony_a7r

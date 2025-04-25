@@ -34,4 +34,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v "$config_path":/home/admin/atracsys_fusion_500_config/ \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-atracsys
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-atracsys
