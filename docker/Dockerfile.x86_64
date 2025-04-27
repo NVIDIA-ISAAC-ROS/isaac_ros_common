@@ -176,14 +176,5 @@ apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
 # Remove Triton DALI backend
 RUN rm -rf /opt/tritonserver/backends/dali
 
-# Upgrade system packages for security patches
-RUN --mount=type=cache,target=/var/cache/apt \
-apt-get update && apt-get install -y \
-        nghttp2=1.43.0-1ubuntu0.2 \
-        openssh-client=1:8.9p1-3ubuntu0.10 \
-        libcurl3-gnutls=7.81.0-1ubuntu1.20 \
-        glibc-tools \
-        rpcbind
-
 # Store list of packages (must be last)
 RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/x86_64-end-packages.csv
