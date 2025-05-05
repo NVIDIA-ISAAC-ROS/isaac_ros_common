@@ -1,0 +1,20 @@
+# Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+#
+# NVIDIA CORPORATION and its licensors retain all intellectual property
+# and proprietary rights in and to this software, related documentation
+# and any modifications thereto.  Any use, reproduction, disclosure or
+# distribution of this software and related documentation without an express
+# license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+
+RUN pip install cv_bridge
+
+RUN wget https://ssd.mathworks.com/supportfiles/downloads/R2024a/Release/4/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2024a_Update_4_glnxa64.zip && \
+    mkdir matlab_Runtime && \
+    unzip MATLAB_Runtime_R2024a_Update_4_glnxa64.zip -d matlab_Runtime && \
+    rm MATLAB_Runtime_R2024a_Update_4_glnxa64.zip && \
+    matlab_Runtime/install -agreeToLicense yes && \
+    rm -rf matlab_Runtime

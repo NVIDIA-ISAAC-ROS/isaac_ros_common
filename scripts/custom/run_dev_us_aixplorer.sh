@@ -1,0 +1,1 @@
+./../run_dev.sh -i ros2_humble.us_aixplorer -a "-v /home/fred/US_kuka/config/us_aixplorer:/home/admin/us_aixplorer"
