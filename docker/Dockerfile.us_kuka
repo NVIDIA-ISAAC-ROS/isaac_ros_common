@@ -12,3 +12,15 @@ FROM ${BASE_IMAGE}
 RUN apt-get update \
  && apt-get remove -y python3-blinker \
  && pip install open3d pyrealsense2 cv_bridge
+
+# Install Jupyter and Bash kernel
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    bash \
+    && pip3 install --no-cache-dir \
+    notebook \
+    bash_kernel \
+    && python3 -m bash_kernel.install
+
+# Expose Jupyter Notebook port
+EXPOSE 8888
