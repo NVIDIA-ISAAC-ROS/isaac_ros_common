@@ -11,16 +11,14 @@ FROM ${BASE_IMAGE}
 
 RUN apt-get update \
  && apt-get remove -y python3-blinker \
- && pip install open3d pyrealsense2 cv_bridge
+ && pip install open3d pyrealsense2 cv_bridge av
 
-# Install Jupyter and Bash kernel
-RUN apt-get update && apt-get install -y \
-    python3-pip \
-    bash \
-    && pip3 install --no-cache-dir \
-    notebook \
-    bash_kernel \
-    && python3 -m bash_kernel.install
+# Install the MATLAB Runtime
 
-# Expose Jupyter Notebook port
-EXPOSE 8888
+RUN wget https://ssd.mathworks.com/supportfiles/downloads/R2024a/Release/4/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2024a_Update_4_glnxa64.zip && \
+ mkdir -p /home/tmp && \
+ unzip MATLAB_Runtime_R2024a_Update_4_glnxa64.zip -d /home/tmp && \
+ rm MATLAB_Runtime_R2024a_Update_4_glnxa64.zip && \
+ mkdir -p /home/matlab_runtime && \
+ /home/tmp/install -agreeToLicense yes -destinationFolder /home/matlab_runtime && \
+ rm -rf /home/tmp
