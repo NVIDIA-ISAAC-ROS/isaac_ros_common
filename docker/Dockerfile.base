@@ -155,7 +155,7 @@ RUN python3 -m pip install -U \
     wheel
 
 # Python3 PIP packages
-RUN python3 -m pip install -U \
+RUN python3 -m pip install \
     argcomplete \
     autopep8 \
     flake8 \
@@ -188,7 +188,7 @@ RUN python3 -m pip install -U \
     "yourdfpy>=0.0.53" \
     opentelemetry-api==1.28.1 \
     opentelemetry-sdk==1.28.1 \
-    opentelemetry-exporter-otlp
+    opentelemetry-exporter-otlp==1.28.1
 
 # Add MQTT binaries and libraries
 RUN --mount=type=cache,target=/var/cache/apt \
