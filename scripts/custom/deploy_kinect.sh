@@ -12,7 +12,7 @@ else
 fi
 
 # Set default absolute path for the config file
-default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/azure_kinect_0"
+default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/azure_kinect_1"
 
 # Use the first argument as the config path, or the specified default path
 config_path="${1:-$default_config_path}"
@@ -34,8 +34,9 @@ docker run -it --rm --gpus 'all' --runtime=nvidia \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
-    -v "$config_path":/azure_kinect_0 \
+    -e CONFIG_PATH=/azure_kinect_1 \
+    -v "$config_path":/azure_kinect_1 \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     --name $docker_name \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-kinect
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-kinect
