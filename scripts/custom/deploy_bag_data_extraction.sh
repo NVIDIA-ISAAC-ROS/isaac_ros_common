@@ -1,7 +1,5 @@
 #!/bin/bash
 
-xhost +
-
 # Determine platform architecture
 PLATFORM="$(uname -m)"
 USER_ID=$(id -u)
@@ -11,7 +9,7 @@ if [[ $PLATFORM == "aarch64" ]]; then
     PLATFORM_NAME="jetson"
 elif [[ $PLATFORM == "x86_64" ]]; then
     if [[ $USER_ID == 1001 ]]; then
-        PLATFORM_NAME="desktop"
+    PLATFORM_NAME="desktop"
     elif [[ $USER_ID == 1003 ]]; then
         PLATFORM_NAME="dgx"
         DOCKER_USER="orx_user"
@@ -24,24 +22,23 @@ else
     exit 1
 fi
 
-DOCKER_IMAGE_NAME=girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-ros2_humble
+DOCKER_IMAGE_NAME=girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-bag_data_extractor
 echo "Running: $DOCKER_IMAGE_NAME with user $DOCKER_USER"
 
-docker_name=rqt_gui
+docker_name="bag_data_extraction"
 
 docker run --rm -it --gpus all --runtime=nvidia \
-    --name rqt_gui \
+    --name $docker_name \
     --privileged \
     --network host \
-    -e DISPLAY \
+    -e USERNAME=$DOCKER_USER \
     -e ROS_ROOT=/opt/ros/humble \
     -e ROS_DOMAIN_ID=1 \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
     -e CYCLONEDDS_URI=/home/"$DOCKER_USER"/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/"$DOCKER_USER"/cyclone_profile.xml \
-    -v /home/"$USER"/dev/orx/data:/home/"$DOCKER_USER"/data \
-    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v /home/"$USER"/dev/orx/orx_experiment_landing:/home/"$DOCKER_USER"/orx_experiment_landing \
+    -v /home/"$USER"/dev/orx/bag_data_extraction_config:/home/"$DOCKER_USER"/config \
     --user $DOCKER_USER \
     --workdir /home/"$DOCKER_USER" \
-    $DOCKER_IMAGE_NAME \
-    bash -c "ros2 run rqt_gui rqt_gui --perspective-file /home/admin/data/experiment_config/rqt_gui/orx_demo.perspective"
+    $DOCKER_IMAGE_NAME

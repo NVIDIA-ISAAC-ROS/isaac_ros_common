@@ -22,7 +22,7 @@ else
     exit 1
 fi
 
-DOCKER_IMAGE_NAME=vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-data_saver
+DOCKER_IMAGE_NAME=girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-data_saver
 echo "Running: $DOCKER_IMAGE_NAME with user $DOCKER_USER"
 
 docker run --rm -it --gpus all --runtime=nvidia \

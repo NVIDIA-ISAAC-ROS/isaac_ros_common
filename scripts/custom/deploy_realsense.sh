@@ -40,4 +40,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v /dev/input:/dev/input \
     -v "$d405_config_path":/intel_realsense_d405_ros_config.yaml \
     -v "$d435_config_path":/intel_realsense_d435_ros_config.yaml \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense_d405 bash
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense_d405 bash
