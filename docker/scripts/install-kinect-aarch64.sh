@@ -27,13 +27,16 @@ rm k4a-tools_1.4.2_arm64.deb
 
 # source /opt/ros/humble/setup.bash
 # git clone https://github.com/microsoft/Azure_Kinect_ROS_Driver.git -b humble
+# NEW: Custom driver for Kinect instead:
+# git clone https://github.com/nlouman/azure_kinect_ros_driver_extended.git
+
 # pip3 install xacro
 # sudo apt install ros-humble-joint-state-publisher
-# cd Azure_Kinect_ROS_Driver
+# cd Azure_Kinect_ROS_Driver OR cd azure_kinect_ros_driver_extended
 # colcon build 
 # source install/setup.bash
 
 # Test your installation by trying to run
 # ros2 launch azure_kinect_ros_driver driver.launch.py
 # Or to test just the SDK
-# k4arecorder -l 5 out.mkv
+# k4aviewer
