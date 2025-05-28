@@ -24,3 +24,5 @@ RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh
 RUN apt-get update \
    && apt-get -y install --no-install-recommends ros-humble-depthai ros-humble-ffmpeg-image-transport-msgs ros-humble-foxglove-msgs ros-humble-rviz-imu-plugin
 
+# To use depthai wihout root
+COPY udev_rules/80-movidius.rules /etc/udev/rules.d/80-movidius.rules

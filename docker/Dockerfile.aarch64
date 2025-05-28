@@ -241,6 +241,9 @@ apt-add-repository ppa:mosquitto-dev/mosquitto-ppa \
         mosquitto \
         mosquitto-clients
 
+# Upgrade pip, setuptools, and packaging
+RUN python3 -m pip install --upgrade pip setuptools packaging
+
 # Install jtop
 RUN python3 -m pip install -U \
     jetson-stats
