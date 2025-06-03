@@ -26,5 +26,5 @@ sudo docker run --rm -it --gpus all --runtime=nvidia \
     -v /home/$USER/data:/home/jovyan/data \
     --user jovyan \
     --workdir /home/jovyan \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-jupyter \
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-jupyter \
     bash

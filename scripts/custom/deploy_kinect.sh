@@ -12,7 +12,7 @@ else
 fi
 
 # Set default absolute path for the config file
-default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/intel_realsense_d405_0"
+default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/azure_kinect_1"
 
 # Use the first argument as the config path, or the specified default path
 config_path="${1:-$default_config_path}"
@@ -23,16 +23,20 @@ if [ ! -f "$config_path" ]; then
     exit 1
 fi
 
-docker_name=$(basename ${config_path})_resizer
+docker_name=$(basename ${config_path})
 
-docker run --rm -it --gpus all --runtime=nvidia \
-    --name $docker_name \
+docker run -it --rm --gpus 'all' --runtime=nvidia \
     --privileged \
     --network host \
+    --cpus 4 \
     -e ROS_DOMAIN_ID=1 \
-    -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    -v /dev:/dev \
     -e CYCLONEDDS_URI=/home/admin/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
-    -v /dev/input:/dev/input \
-    -v "$config_path":/intel_realsense_d405_ros_config.yaml \
-    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense_d405_resizer
+    -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    -e CONFIG_PATH=/azure_kinect_1 \
+    -v "$config_path":/azure_kinect_1 \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    --name $docker_name \
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-kinect

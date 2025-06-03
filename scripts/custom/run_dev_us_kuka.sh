@@ -1,1 +1,1 @@
-./../run_dev.sh -i ros2_humble.user.us_kuka -d /home/orx/dev/orx/US_kuka -b
+./../run_dev.sh -i ros2_humble.user.us_kuka -d /home/fred/US_kuka

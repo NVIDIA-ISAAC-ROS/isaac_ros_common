@@ -2,7 +2,7 @@
 CONFIG_IMAGE_KEY=ros2_humble.user.depthai
 CONFIG_DOCKER_SEARCH_DIRS=/home/${USER}/dev/orx/orx_middleware/isaac_ros_common/docker
 BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/isaac/ros")
-ISAAC_ROS_WS=/home/${USER}/dev/orx/orx_middleware/ros2_ws
+ISAAC_ROS_WS=/home/fred/orx_middleware/ros2_ws
 
 # docker_deply.sh config
 # BASE_IMAGE_KEY=aarch64.ros2_humble.user

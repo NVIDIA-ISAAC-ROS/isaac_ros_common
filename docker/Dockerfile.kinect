@@ -1,0 +1,45 @@
+# Dockerfile for setting up Kinect driver
+# https://github.com/juancarlosmiranda/azure_kinect_notes
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+## Install Azure Kinect SDK
+
+# Install base packages
+RUN --mount=type=cache,target=/var/cache/apt \
+apt-get update && apt-get install -y \
+    build-essential  \
+    cmake \
+    libgtk2.0-dev \
+    libusb-1.0 \
+    usbutils \
+    ffmpeg \
+    mlocate \
+    locate
+
+# Install Azure Kinect SDK based on system architecture
+COPY scripts/install-kinect-x86_64.sh /opt/kinect/install-kinect-x86_64.sh
+COPY scripts/install-kinect-aarch64.sh /opt/kinect/install-kinect-aarch64.sh
+
+# To use Azure Kinect tools without root
+COPY udev_rules/99-k4a.rules /etc/udev/rules.d/99-k4a.rules
+# RUN udevadm control --reload-rules && udevadm trigger
+
+RUN --mount=type=cache,target=/var/cache/apt \
+  if [ "$(uname -m)" = "x86_64" ]; then \
+    sudo chmod +x /opt/kinect/install-kinect-x86_64.sh; \
+    /opt/kinect/install-kinect-x86_64.sh; \
+  else \
+    sudo chmod +x /opt/kinect/install-kinect-aarch64.sh; \
+    /opt/kinect/install-kinect-aarch64.sh; \
+  fi
+
+WORKDIR /workspaces/isaac_ros-dev
+RUN . /opt/ros/humble/setup.sh && colcon build && source install/setup.bash
+
+# # Change permissions so the container user can access Kinect
+# RUN sudo chown -R admin:admin /workspaces/isaac_ros-dev/install/azure_kinect_ros_driver && \
+#     chmod -R 755 /workspaces/isaac_ros-dev/install/azure_kinect_ros_driver
+    
+USER root

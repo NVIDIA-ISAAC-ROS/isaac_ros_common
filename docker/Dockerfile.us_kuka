@@ -9,4 +9,16 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-RUN pip install open3d pyrealsense2 cv_bridge
+RUN apt-get update \
+ && apt-get remove -y python3-blinker \
+ && pip install open3d pyrealsense2 cv_bridge av
+
+# Install the MATLAB Runtime
+
+RUN wget https://ssd.mathworks.com/supportfiles/downloads/R2024a/Release/4/deployment_files/installer/complete/glnxa64/MATLAB_Runtime_R2024a_Update_4_glnxa64.zip && \
+ mkdir -p /home/tmp && \
+ unzip MATLAB_Runtime_R2024a_Update_4_glnxa64.zip -d /home/tmp && \
+ rm MATLAB_Runtime_R2024a_Update_4_glnxa64.zip && \
+ mkdir -p /home/matlab_runtime && \
+ /home/tmp/install -agreeToLicense yes -destinationFolder /home/matlab_runtime && \
+ rm -rf /home/tmp

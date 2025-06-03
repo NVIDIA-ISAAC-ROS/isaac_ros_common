@@ -35,4 +35,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v /dev:/dev \
     -v "$config_path":/hdmi_input_config.yaml \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-hdmi_input_encoder
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-hdmi_input_encoder

@@ -36,4 +36,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v /dev/input:/dev/input \
     -v "$config_path":/intel_realsense_d435_ros_config.yaml \
-    vschorp98/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense_d435
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense_d435

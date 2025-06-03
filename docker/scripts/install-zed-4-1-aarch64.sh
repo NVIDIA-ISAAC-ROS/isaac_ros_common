@@ -4,6 +4,14 @@
 sudo apt-get update -y || true
 sudo apt-get install --no-install-recommends lsb-release wget less zstd udev sudo apt-transport-https -y
 
+# Install zed ros wrapper dependencies
+sudo apt-get update && apt-get install -y \
+  libgeographic-dev  \
+  ros-humble-geographic-info \
+  ros-humble-nmea-msgs \
+  ros-humble-robot-localization \
+  ros-humble-xacro
+
 # Install zed_ros_wrapper dependencies
 sudo apt-get install --no-install-recommends -y ros-humble-point-cloud-transport
 
