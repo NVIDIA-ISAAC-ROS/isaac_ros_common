@@ -31,6 +31,7 @@ ENV PYTHONWARNINGS=ignore:::setuptools.command.install,ignore:::setuptools.comma
 RUN echo "Warning: Using the PYTHONWARNINGS environment variable to silence setup.py and easy_install deprecation warnings caused by colcon"
 
 # Add ROS 2 apt repository
+# Key last updated from `rosdistro` commit: eb71c289f4495a0327cd03a29205a2c411cd8129
 RUN --mount=type=cache,target=/var/cache/apt \
     curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null \
