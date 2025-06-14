@@ -33,6 +33,17 @@ if [[ -f ~/.isaac_ros_common-config ]]; then
     . ~/.isaac_ros_common-config
 fi
 
+# Override with config from project directory if exists (and is defined)
+if [[ ! -z "${PROJECT_ROOT}" ]]; then
+    print_info "Sourcing project config at: ${PROJECT_ROOT}"
+    if [[ -f "${PROJECT_ROOT}/.isaac_ros_common-config" ]]; then
+        . "${PROJECT_ROOT}/.isaac_ros_common-config"
+    fi
+
+    # Make the project root available to nested scripts, eg. build_image_layers.sh
+    export PROJECT_ROOT="${PROJECT_ROOT}"
+fi
+
 # Parse command-line args
 IMAGE_KEY=ros2_humble
 
@@ -202,7 +213,7 @@ print_info "Launching Isaac ROS Dev container with image key ${BASE_IMAGE_KEY}: 
 # Build image to launch
 if [[ $SKIP_IMAGE_BUILD -ne 1 ]]; then
     print_info "Building $BASE_IMAGE_KEY base as image: $BASE_NAME"
-   $ROOT/build_image_layers.sh --image_key "$BASE_IMAGE_KEY" --image_name "$BASE_NAME"
+   $ROOT/build_image_layers.sh --image_key "$BASE_IMAGE_KEY" --image_name "$BASE_NAME" -d "--progress=plain" # -d "--no-cache"
 
     # Check result
     if [ $? -ne 0 ]; then
