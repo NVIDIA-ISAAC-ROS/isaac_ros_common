@@ -14,6 +14,9 @@ sudo -u admin ./ZED_SDK_Linux.run silent skip_od_module skip_python skip_drivers
 # https://github.com/stereolabs/zed-docker/blob/fd514606174d8bb09f21a229f1099205b284ecb6/4.X/l4t/devel/Dockerfile#L27C5-L27C95
 sudo ln -sf /usr/lib/aarch64-linux-gnu/tegra/libv4l2.so.0 /usr/lib/aarch64-linux-gnu/libv4l2.so
 
+# Install zed-ros2-wrapper dependencies
+sudo apt update && sudo apt-get install --no-install-recommends ros-humble-zed-msgs ros-humble-cob-srvs -y
+
 # Cleanup
 sudo rm -rf /usr/local/zed/resources/*
 rm -rf ZED_SDK_Linux.run
