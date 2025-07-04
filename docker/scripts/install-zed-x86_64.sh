@@ -24,6 +24,9 @@ chmod +x ZED_SDK_Linux_Ubuntu${UBUNTU_RELEASE_YEAR}.run ; sudo -u admin ./ZED_SD
 # https://github.com/stereolabs/zed-docker/blob/fd514606174d8bb09f21a229f1099205b284ecb6/4.X/ubuntu/devel/Dockerfile#L24
 sudo ln -sf /lib/x86_64-linux-gnu/libusb-1.0.so.0 /usr/lib/x86_64-linux-gnu/libusb-1.0.so
 
+# Install zed-ros2-wrapper dependencies
+sudo apt update && sudo apt-get install --no-install-recommends ros-humble-zed-msgs ros-humble-cob-srvs -y
+
 # Cleanup
 rm ZED_SDK_Linux_Ubuntu${UBUNTU_RELEASE_YEAR}.run
 sudo rm -rf /var/lib/apt/lists/*
