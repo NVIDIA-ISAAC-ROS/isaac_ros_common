@@ -74,6 +74,7 @@ RUN python3 -m pip install -U \
         setuptools==65.7.0
 
 # Install ROS 2 Humble
+# Last updated: 2025-07-09
 RUN --mount=type=cache,target=/var/cache/apt \
 apt-get update && apt-get install -y \
     ros-humble-ros-base \
