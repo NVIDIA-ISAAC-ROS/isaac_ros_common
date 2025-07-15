@@ -5,8 +5,8 @@ To do, that first attempt is to keep the modification points to a minimum.
 
 Currently we use the following files:
 
-IRDC Docker File Package Manifest: https://github.com/robosoft-ai/isaac_ros_common/blob/main/docker/Dockerfile.ros2_humble
-run_dev.sh: https://github.com/robosoft-ai/isaac_ros_common/blob/main/scripts/run_dev.sh
+-IRDC Docker File Package Manifest: https://github.com/robosoft-ai/isaac_ros_common/blob/main/docker/Dockerfile.ros2_humble
+-run_dev.sh: https://github.com/robosoft-ai/isaac_ros_common/blob/main/scripts/run_dev.sh
 
 Need to make this thing stop deleting the container every time you turn the computer off.
 
