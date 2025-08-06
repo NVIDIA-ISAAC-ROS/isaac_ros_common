@@ -1,3 +1,32 @@
+# # Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
+# #
+# # NVIDIA CORPORATION and its licensors retain all intellectual property
+# # and proprietary rights in and to this software, related documentation
+# # and any modifications thereto.  Any use, reproduction, disclosure or
+# # distribution of this software and related documentation without an express
+# # license agreement from NVIDIA CORPORATION is strictly prohibited.
+
+# # Dockerfile for setting up Oak Cameras
+# #  https://docs.luxonis.com/software/ros/depthai-ros/build/
+
+# ARG BASE_IMAGE
+# FROM ${BASE_IMAGE}
+
+# # From the depthai dockerfile
+# ENV DEBIAN_FRONTEND=noninteractive
+# RUN apt-get update \
+#    && apt-get -y install --no-install-recommends software-properties-common git libusb-1.0-0-dev wget zsh python3-colcon-common-extensions
+
+# ENV DEBIAN_FRONTEND=dialog
+# RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
+
+# # Dependencies from rosdep 
+# RUN apt-get update \
+#    && apt-get -y install --no-install-recommends ros-humble-depthai ros-humble-ffmpeg-image-transport-msgs ros-humble-foxglove-msgs ros-humble-rviz-imu-plugin
+
+# # To use depthai wihout root
+# COPY udev_rules/80-movidius.rules /etc/udev/rules.d/80-movidius.rules
+
 # Copyright (c) 2023, NVIDIA CORPORATION.  All rights reserved.
 #
 # NVIDIA CORPORATION and its licensors retain all intellectual property
@@ -7,22 +36,49 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 # Dockerfile for setting up Oak Cameras
-#  https://docs.luxonis.com/software/ros/depthai-ros/build/
+# https://docs.luxonis.com/software/ros/depthai-ros/build/
 
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-# From the depthai dockerfile
+# Switch apt to non-interactive mode for automation
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update \
-   && apt-get -y install --no-install-recommends software-properties-common git libusb-1.0-0-dev wget zsh python3-colcon-common-extensions
 
+# Base dependencies for depthai-ros
+RUN apt-get update && \
+    apt-get -y install --no-install-recommends \
+        software-properties-common \
+        git \
+        libusb-1.0-0-dev \
+        wget \
+        zsh \
+        python3-colcon-common-extensions \
+        curl \
+        gnupg2 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install oh-my-zsh
 ENV DEBIAN_FRONTEND=dialog
 RUN sh -c "$(wget https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"
 
-# Dependencies from rosdep 
-RUN apt-get update \
-   && apt-get -y install --no-install-recommends ros-humble-depthai ros-humble-ffmpeg-image-transport-msgs ros-humble-foxglove-msgs ros-humble-rviz-imu-plugin
+# --- FIX ROS GPG KEY EXPIRATION ---
+# Remove old key & fetch the latest ROS 2 apt key
+RUN rm -f /etc/apt/trusted.gpg.d/ros.gpg && \
+    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+        -o /usr/share/keyrings/ros-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
+    http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" \
+    > /etc/apt/sources.list.d/ros2.list
 
-# To use depthai wihout root
+# --- Install ROS DepthAI + extra packages ---
+RUN apt-get update && \
+    apt-get -y install --no-install-recommends \
+        ros-humble-depthai \
+        ros-humble-ffmpeg-image-transport-msgs \
+        ros-humble-foxglove-msgs \
+        ros-humble-rviz-imu-plugin && \
+    rm -rf /var/lib/apt/lists/*
+
+# Udev rules to use DepthAI devices without root
 COPY udev_rules/80-movidius.rules /etc/udev/rules.d/80-movidius.rules
+
