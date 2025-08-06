@@ -38,39 +38,39 @@ RUN --mount=type=cache,target=/var/cache/apt \
 
 # ROS fundamentals
 RUN --mount=type=cache,target=/var/cache/apt \
-apt-get update && apt-get install -y \
-        devscripts \
-        dh-make \
-        fakeroot \
-        libxtensor-dev \
-        python3-bloom \
-        python3-colcon-common-extensions \
-        python3-pip \
-        python3-pybind11 \
-        python3-pytest-cov \
-        python3-rosdep \
-        python3-rosinstall-generator \
-        python3-vcstool \
-        quilt
+    apt-get update && apt-get install -y \
+    devscripts \
+    dh-make \
+    fakeroot \
+    libxtensor-dev \
+    python3-bloom \
+    python3-colcon-common-extensions \
+    python3-pip \
+    python3-pybind11 \
+    python3-pytest-cov \
+    python3-rosdep \
+    python3-rosinstall-generator \
+    python3-vcstool \
+    quilt
 
 # ROS Python fundamentals
 RUN python3 -m pip install -U \
-        flake8-blind-except \
-        flake8-builtins \
-        flake8-class-newline \
-        flake8-comprehensions \
-        flake8-deprecated \
-        flake8-docstrings \
-        flake8-import-order \
-        flake8-quotes \
-        matplotlib \
-        pandas \
-        rosbags \
-        setuptools==65.7.0
+    flake8-blind-except \
+    flake8-builtins \
+    flake8-class-newline \
+    flake8-comprehensions \
+    flake8-deprecated \
+    flake8-docstrings \
+    flake8-import-order \
+    flake8-quotes \
+    matplotlib \
+    pandas \
+    rosbags \
+    setuptools==65.7.0
 
 # Install ROS 2 Humble
 RUN --mount=type=cache,target=/var/cache/apt \
-apt-get update && apt-get install -y \
+    apt-get update --allow-releaseinfo-change && apt-get install -y \
     ros-humble-ros-base \
     ros-humble-angles \
     ros-humble-apriltag \
@@ -182,7 +182,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
 
 # Install Moveit 2 ROS packages
 RUN --mount=type=cache,target=/var/cache/apt \
-apt-get update && apt-get install -y \
+    apt-get update && apt-get install -y \
     ros-humble-ament-cmake \
     ros-humble-ament-cmake-gtest \
     ros-humble-control-msgs \
@@ -260,7 +260,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
 
 # MoveIt 2's hybrid planning package depends on moveit_resources_panda_moveit_config, installed from source above.
 RUN --mount=type=cache,target=/var/cache/apt \
-apt-get update && apt-get install -y \
+    apt-get update && apt-get install -y \
     ros-humble-moveit-hybrid-planning
 
 # Install moveit2_tutorials from source (depends on moveit_hybrid_planning).
@@ -273,7 +273,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
 
 # Install paho-mqtt for isaac_ros_mission_client
 RUN python3 -m pip install -U \
-        paho-mqtt==1.6.1
+    paho-mqtt==1.6.1
 
 # Patch gtest to make it work with CXX 17
 RUN sudo sed -i '917i #ifdef GTEST_INTERNAL_NEED_REDUNDANT_CONSTEXPR_DECL' /usr/src/googletest/googletest/include/gtest/internal/gtest-internal.h \
