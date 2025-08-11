@@ -393,7 +393,7 @@ RUN python3 -m pip install -U \
 RUN apt-get install yasm && wget https://ffmpeg.org/releases/ffmpeg-4.4.2.tar.bz2 && tar xjvf ffmpeg-4.4.2.tar.bz2 && cd ffmpeg-4.4.2 && \
     ./configure --prefix=/usr --toolchain=hardened --enable-shared \
     --libdir=/usr/lib/aarch64-linux-gnu --incdir=/usr/include/aarch64-linux-gnu --arch=arm64 \
-    --disable-stripping && make -j 4 && make install
+    --disable-stripping && make -j"$(nproc)" && make install
 
 # --------------------------------------------------------------------------------------------------
 
@@ -424,7 +424,7 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/opt/tritonserver/lib"
 RUN apt-get install -y yasm && wget https://ffmpeg.org/releases/ffmpeg-4.4.2.tar.bz2 && tar xjvf ffmpeg-4.4.2.tar.bz2 && cd ffmpeg-4.4.2 && \
     ./configure --prefix=/usr --toolchain=hardened --enable-shared \
     --libdir=/usr/lib/x86_64-linux-gnu --incdir=/usr/include/x86_64-linux-gnu --arch=amd64 \
-    --disable-stripping && make -j 4 && make install
+    --disable-stripping && make -j"$(nproc)" && make install
 
 # Install yq
 RUN wget -nv https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq \
@@ -441,7 +441,7 @@ RUN git clone https://github.com/ceres-solver/ceres-solver.git && \
     mkdir build && \
     cd build && \
     cmake .. -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF -DBUILD_BENCHMARKS=OFF -DUSE_CUDA=ON -Dcudss_DIR=$CUDSS_DIR && \
-    make -j 4 && \
+    make -j"$(nproc)" && \
     make install && \
     sed -i 's/find_dependency(cudss 0.3.0)/find_dependency(cudss)/' /usr/local/lib/cmake/Ceres/CeresConfig.cmake
 
@@ -450,15 +450,15 @@ RUN git clone https://github.com/ceres-solver/ceres-solver.git && \
 RUN git clone https://github.com/protocolbuffers/protobuf.git -b v5.26.0 && \
     cd protobuf && \
     git submodule update --init --recursive && \
-    mkdir build && \
-    cd build && \
+    mkdir build && cd build && \
     cmake .. \
-    -Dprotobuf_BUILD_TESTS=OFF \
-    -Dprotobuf_MSVC_STATIC_RUNTIME=OFF \
-    -DABSL_PROPAGATE_CXX_STD=ON \
-    -Dprotobuf_BUILD_SHARED_LIBS=ON \
-    -DCMAKE_POSITION_INDEPENDENT_CODE=ON && \
-    cmake --build . --config Release && \
+      -DCMAKE_BUILD_TYPE=Release \
+      -Dprotobuf_BUILD_TESTS=OFF \
+      -Dprotobuf_MSVC_STATIC_RUNTIME=OFF \
+      -DABSL_PROPAGATE_CXX_STD=ON \
+      -Dprotobuf_BUILD_SHARED_LIBS=ON \
+      -DCMAKE_POSITION_INDEPENDENT_CODE=ON && \
+    make -j"$(nproc)" && \
     make install
 
 # Specify non-root admin user for container
