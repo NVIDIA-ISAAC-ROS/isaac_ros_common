@@ -130,12 +130,17 @@ apt-get update && apt-get install -y \
 
 # Additional Python dependencies
 RUN python3 -m pip install -U \
+    pip \  
+    setuptools \  
+    wheel \
+    packaging>=24.0 \
+    scikit-build-core>=0.8.0 \
+    cmake>3.26 \
     ninja
 
 RUN python3 -m pip install -U \
     Cython \
     pymongo \
-    wheel \
     scikit-learn \
     networkx \
     "numpy>=1.24.4,<2" \
