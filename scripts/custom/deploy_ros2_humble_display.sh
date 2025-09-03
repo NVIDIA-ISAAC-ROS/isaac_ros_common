@@ -10,7 +10,7 @@ DOCKER_USER="admin"
 if [[ $PLATFORM == "aarch64" ]]; then
     PLATFORM_NAME="jetson"
 elif [[ $PLATFORM == "x86_64" ]]; then
-    if [[ $USER_ID == 1001 ]]; then
+    if [[ $USER_ID == 1001 || $USER_ID == 1000 ]]; then
         PLATFORM_NAME="desktop"
     elif [[ $USER_ID == 1003 ]]; then
         PLATFORM_NAME="dgx"
