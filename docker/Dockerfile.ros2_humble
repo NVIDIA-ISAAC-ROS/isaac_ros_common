@@ -30,11 +30,31 @@ ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 ENV PYTHONWARNINGS=ignore:::setuptools.command.install,ignore:::setuptools.command.easy_install,ignore:::pkg_resources,ignore:::setuptools.command.develop
 RUN echo "Warning: Using the PYTHONWARNINGS environment variable to silence setup.py and easy_install deprecation warnings caused by colcon"
 
-# Add ROS 2 apt repository
+# Clean any old ROS sources & lists first (avoid mixed keys/suites)
+RUN rm -f /etc/apt/sources.list.d/ros*.list \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install prerequisites for key handling (if not already)
 RUN --mount=type=cache,target=/var/cache/apt \
-    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null \
+    apt-get update && apt-get install -y --no-install-recommends curl ca-certificates gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# Add ROS 2 apt repository (dearmored keyring + signed-by)
+RUN set -e \
+    && curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+       | gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg \
+    && . /etc/os-release \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu ${UBUNTU_CODENAME} main" \
+       > /etc/apt/sources.list.d/ros2.list \
+    && rm -rf /var/lib/apt/lists/* \
     && apt-get update
+
+# # Add ROS 2 apt repository
+# RUN --mount=type=cache,target=/var/cache/apt \
+#     curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg \
+#     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null \
+#     && apt-get update
 
 # ROS fundamentals
 RUN --mount=type=cache,target=/var/cache/apt \
