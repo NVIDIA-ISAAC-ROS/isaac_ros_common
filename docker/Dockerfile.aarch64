@@ -135,6 +135,7 @@ RUN python3 -m pip install -U \
     ninja 
 
 # Additional Python dependencies
+RUN python3 -m pip install --upgrade pip setuptools packaging
 RUN python3 -m pip install -U \
     pymongo \
     scikit-learn \
