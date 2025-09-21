@@ -52,7 +52,8 @@ apt-get update && apt-get install -y \
         python3-rosdep \
         python3-rosinstall-generator \
         python3-vcstool \
-        quilt
+        quilt \
+        gdb # this line was incorporated for debug
 
 # Upgrade system setuptools
 RUN python3 -m pip install --upgrade --force-reinstall --target=/usr/lib/python3/dist-packages setuptools==65.7.0
