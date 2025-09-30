@@ -488,3 +488,8 @@ COPY middleware_profile[s]/*profile.xml /usr/local/share/middleware_profiles/
 
 # Store list of packages (must be last)
 RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/base-end-packages.csv
+
+
+# ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+# ENV FASTRTPS_DEFAULT_PROFILES_FILE=/workspaces/isaac_ros-dev/fastdds.xml
+# RUN pip3 uninstall -y numpy && pip3 install numpy==1.24.4

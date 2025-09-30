@@ -280,12 +280,14 @@ print_info "Running $CONTAINER_NAME"
 if [[ $VERBOSE -eq 1 ]]; then
     set -x
 fi
-docker run -it --rm \
+docker run -it \
     --privileged \
     --network host \
     --ipc=host \
     ${DOCKER_ARGS[@]} \
     -v $ISAAC_ROS_DEV_DIR:/workspaces/isaac_ros-dev \
+    -v $CONFIG_IMAGE_KEY=ros2_humble.user.gxf \
+    -v $CONFIG_DOCKER_SEARCH_DIRS=/workspaces/isaac_ros-dev/src/gxf/docker \
     -v /etc/localtime:/etc/localtime:ro \
     --name "$CONTAINER_NAME" \
     --runtime nvidia \

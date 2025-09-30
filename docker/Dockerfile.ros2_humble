@@ -333,3 +333,8 @@ RUN echo "source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.bash" | s
 # Store list of packages (must be last)
 RUN mkdir -p /opt/nvidia/isaac_ros_dev_base && dpkg-query -W | sort > /opt/nvidia/isaac_ros_dev_base/ros2_humble-end-packages.csv
 
+
+ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ENV FASTRTPS_DEFAULT_PROFILES_FILE=/workspaces/isaac_ros-dev/src/isaac_ros_common/dds_config/fastdds.xml
+RUN pip3 uninstall -y numpy && pip3 install numpy==1.24.4
+
