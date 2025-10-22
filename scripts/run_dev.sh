@@ -138,8 +138,7 @@ if [[ -z "$(docker ps)" ]] ;  then
 fi
 
 # Check if git-lfs is installed.
-git lfs &>/dev/null
-if [[ $? -ne 0 ]] ; then
+if ! git lfs &>/dev/null; then
     print_error "git-lfs is not insalled. Please make sure git-lfs is installed before you clone the repo."
     exit 1
 fi
