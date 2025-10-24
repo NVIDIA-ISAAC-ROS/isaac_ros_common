@@ -6,9 +6,92 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
+
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-USER ${USERNAME}
-RUN python3 -m pip install open3d av reportlab
+USER root
+
+# ----------------------------------------------------------
+# Install build dependencies including nasm
+# ----------------------------------------------------------
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    pkg-config \
+    git \
+    nasm \
+    yasm \
+    cmake \
+    libtool \
+    autoconf \
+    automake \
+    libdrm-dev \
+    libva-dev \
+    libvdpau-dev \
+    libxcb1-dev \
+    libxcb-shm0-dev \
+    libxcb-xfixes0-dev \
+    libssl-dev \
+    libx264-dev \
+    libx265-dev \
+    libnuma-dev \
+    libfdk-aac-dev \
+    libvpx-dev \
+    libass-dev \
+    libopus-dev \
+    libtheora-dev \
+    libmp3lame-dev \
+    python3-dev \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# ----------------------------------------------------------
+# Build and install FFmpeg with NVIDIA codec support
+# ----------------------------------------------------------
+WORKDIR /opt/ffmpeg
+RUN git clone --depth=1 https://github.com/FFmpeg/FFmpeg.git .
+
+# ----------------------------------------------------------
+# Install NVIDIA Video Codec SDK headers (required for NVENC/NVDEC)
+# ----------------------------------------------------------
+RUN git clone https://github.com/FFmpeg/nv-codec-headers.git /tmp/nv-codec-headers && \
+    make -C /tmp/nv-codec-headers install && \
+    rm -rf /tmp/nv-codec-headers
+
+
+RUN ./configure \
+    --enable-nonfree \
+    --enable-cuda-nvcc \
+    --enable-libnpp \
+    --enable-cuda \
+    --enable-cuvid \
+    --enable-nvenc \
+    --enable-nvdec \
+    --enable-libx264 \
+    --enable-libx265 \
+    --enable-libfdk-aac \
+    --enable-libvpx \
+    --enable-libass \
+    --enable-libopus \
+    --enable-libtheora \
+    --enable-libmp3lame \
+    --enable-shared \
+    --disable-static \
+    --disable-debug \
+    --enable-gpl \
+    --extra-cflags=-I/usr/local/cuda/include \
+    --extra-ldflags=-L/usr/local/cuda/lib64
+
+RUN make -j"$(nproc)" && make install && ldconfig
+
+# ----------------------------------------------------------
+# Build PyAV against the custom FFmpeg
+# ----------------------------------------------------------
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel Cython && \
+    pip install --no-cache-dir --ignore-installed --no-binary av av && \
+    pip install --no-cache-dir --ignore-installed open3d reportlab && \
+    \
+    # ✅ Upgrade OpenCV to a NumPy-2-compatible version with GUI/X11 support
+    pip install --no-cache-dir --upgrade "opencv-python>=4.10.0.84"
+
 USER root
