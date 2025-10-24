@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: NVIDIA CORPORATION & AFFILIATES
-// Copyright (c) 2021-2024 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// Copyright (c) 2021-2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ const std::unordered_map<std::string, uint32_t> g_str_to_vpi_backend({
         {"PVA", VPI_BACKEND_PVA},
         {"OFA", VPI_BACKEND_OFA},
         {"VIC", VPI_BACKEND_VIC},
-        {"NVENC", VPI_BACKEND_NVENC},
         {"TEGRA", VPI_BACKEND_TEGRA},
         {"ORIN", VPI_BACKEND_OFA | VPI_BACKEND_PVA | VPI_BACKEND_VIC},
         {"ALL", VPI_BACKEND_ALL},
@@ -78,7 +77,7 @@ uint32_t DeclareVPIBackendParameter(rclcpp::Node * node, uint32_t default_backen
           os << entry.first << std::endl;
         });
 
-      RCLCPP_ERROR(node->get_logger(), os.str().c_str());
+      RCLCPP_ERROR(node->get_logger(), "%s", os.str().c_str());
 
       // Return default backends due to error
       return default_backends;

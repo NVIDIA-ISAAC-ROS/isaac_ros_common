@@ -19,5 +19,18 @@ import pytest
 @pytest.mark.copyright
 @pytest.mark.linter
 def test_copyright():
-    rc = main(argv=['.', 'test'])
+    rc = main(argv=['.',
+                    '--exclude',
+                    'external/**/*',
+                    'external/**/**/*',
+                    'external/**/**/**/*',
+                    'external/**/**/**/**/*',
+                    'external/**/**/**/**/**/*',
+                    'external/**/**/**/**/**/**/*',
+                    'external/**/**/**/**/**/**/**/*'
+                    ])
     assert rc == 0, 'Found errors'
+
+
+if __name__ == '__main__':
+    raise SystemExit(pytest.main([__file__]))

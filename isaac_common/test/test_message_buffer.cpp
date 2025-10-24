@@ -60,7 +60,7 @@ TEST_F(MessageBufferTest, TestPushAndPop) {
   ASSERT_FALSE(msg_buffer.IsEmpty());
   EXPECT_EQ(msg_buffer.Size(), static_cast<size_t>(5));
 
-  auto msg = msg_buffer.Pop();
+  msg_buffer.Pop();
   ASSERT_FALSE(msg_buffer.IsEmpty());
   EXPECT_EQ(msg_buffer.Size(), static_cast<size_t>(4));
   msg_buffer.Pop();
@@ -89,7 +89,7 @@ TEST_F(MessageBufferTest, TestTimestamps) {
   EXPECT_EQ(msg_buffer.GetNextTimeStamp(), 1);
   EXPECT_EQ(msg_buffer.GetCurrentTimeStamp(), 5);
 
-  auto msg = msg_buffer.Pop();
+  msg_buffer.Pop();
 
   // Checking timestamps after pop
   EXPECT_EQ(msg_buffer.GetLastTimeStamp(), 1);

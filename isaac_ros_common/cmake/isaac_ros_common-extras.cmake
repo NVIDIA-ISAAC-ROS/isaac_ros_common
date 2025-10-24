@@ -39,11 +39,23 @@ set(CUDA_MIN_VERSION "11.4")
 find_package(CUDA REQUIRED)
 include_directories("${CUDA_INCLUDE_DIRS}")
 
+# CUDA 13 CCCL migration: ensure host compiler can find <cuda/std/...>, <thrust/...>, <cub/...>
+# Prefer linking the CCCL CMake target when available; otherwise add CTK's cccl include path.
+find_package(CCCL CONFIG QUIET)
+if(TARGET CCCL::CCCL)
+  link_libraries(CCCL::CCCL)
+else()
+  include_directories("${CUDA_INCLUDE_DIRS}/cccl")
+endif()
+
 # Setup cuda architectures
 # Target Ada is CUDA 11.8 or greater
+# Target is blackwell for CUDA 13.0 or greater, and volta is deprecated
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
   if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
-    set(CMAKE_CUDA_ARCHITECTURES "87")
+    set(CMAKE_CUDA_ARCHITECTURES "87;110")
+  elseif(${CUDA_VERSION} GREATER_EQUAL 13.0)
+    set(CMAKE_CUDA_ARCHITECTURES "120;100;89;86;80;75")
   elseif(${CUDA_VERSION} GREATER_EQUAL 11.8)
     set(CMAKE_CUDA_ARCHITECTURES "89;86;80;75;70")
   else()
@@ -52,3 +64,14 @@ if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
 endif()
 message(STATUS "CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")
 
+# Set the DEVICE for cmake
+# This is used to determine the architecture and the library path
+if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64")
+  set(CMAKE_DEVICE "x86_64")
+elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+  # aarch64 deprecated: default to sbsa device layout
+  set(CMAKE_DEVICE "sbsa")
+else()
+  message(FATAL_ERROR "Unsupported CMAKE_SYSTEM_PROCESSOR (${CMAKE_SYSTEM_PROCESSOR}). Supported: x86_64, aarch64")
+endif()
+message(NOTICE "CMAKE_DEVICE: ${CMAKE_DEVICE}")

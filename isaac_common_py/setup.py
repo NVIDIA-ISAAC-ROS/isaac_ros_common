@@ -64,7 +64,11 @@ setup(
     maintainer_email='isaac-ros-maintainers@nvidia.com',
     description='General purpose utilities for python',
     license=LICENSE,
-    tests_require=['pytest'],
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
     cmdclass={
         'build_py': GenerateVersionInfoCommand,
     },

@@ -14,12 +14,13 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-from setuptools import setup
-import sys
 import importlib.util
-from ament_index_python.packages import get_resource
-
 from pathlib import Path
+import sys
+
+from ament_index_python.packages import get_resource
+from setuptools import setup
+
 
 ISAAC_ROS_COMMON_PATH = get_resource(
     'isaac_ros_common_scripts_path',
@@ -63,7 +64,11 @@ setup(
     maintainer_email='isaac-ros-maintainers@nvidia.com',
     description='Helper functions to simplify ROS2 launch files.',
     license=LICENSE,
-    tests_require=[],
+    extras_require={
+        'test': [
+            'pytest'
+        ]
+    },
     entry_points={},
     cmdclass={
         'build_py': GenerateVersionInfoCommand,

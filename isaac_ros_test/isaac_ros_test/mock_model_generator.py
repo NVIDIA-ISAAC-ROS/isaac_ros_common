@@ -101,22 +101,38 @@ class MockModelGenerator:
             for b in input_bindings
         ]
 
-        # Identify dynamic axes across bindings
+        # Create dynamic_axes for ONNX export
         dynamic_axes = {}
         for binding in (*input_bindings, *output_bindings):
             dynamic_axes[binding.name] = {
-                i: f'dynamic_{i}' for i, size in enumerate(binding.shape)
+                i: f'dynamic_{binding.name}_{i}' for i, size in enumerate(binding.shape)
                 if size == -1
             }
 
-        torch.onnx.export(
-            model,
-            tuple(dummy_input),
-            output_onnx_path,
-            input_names=[binding.name for binding in input_bindings],
-            output_names=[binding.name for binding in output_bindings],
-            dynamic_axes=dynamic_axes
-        )
+        # Check if we have any dynamic shapes
+        has_dynamic_shapes = any(len(axes) > 0 for axes in dynamic_axes.values())
+
+        if has_dynamic_shapes:
+            # Use legacy exporter for dynamic shapes to avoid conversion issues
+            torch.onnx.export(
+                model,
+                tuple(dummy_input),
+                output_onnx_path,
+                input_names=[binding.name for binding in input_bindings],
+                output_names=[binding.name for binding in output_bindings],
+                dynamic_axes=dynamic_axes,
+                dynamo=False
+            )
+        else:
+            # Use dynamo exporter for static shapes (no dynamic_axes needed)
+            torch.onnx.export(
+                model,
+                tuple(dummy_input),
+                output_onnx_path,
+                input_names=[binding.name for binding in input_bindings],
+                output_names=[binding.name for binding in output_bindings],
+                dynamo=True
+            )
 
 
 def parse_bindings(bindings_str):

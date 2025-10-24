@@ -16,20 +16,20 @@
 # SPDX-License-Identifier: Apache-2.0
 import argparse
 from enum import Enum
+import os
 import pathlib
 import platform
-import uuid
 from typing import Any, Callable
-import yaml
-import os
+import uuid
 
 from ament_index_python.packages import get_package_share_directory
+import yaml
 
-import isaac_ros_launch_utils.all_types as lut
+from . import all_types as lut
 
 # For backcompatibility we import with *. All new files should not use this and
 # instead use the import statement above.
-from isaac_ros_launch_utils.all_types import *  # noqa: F401, F403
+from .all_types import *  # noqa: F401, F403
 
 
 class NovaRobot(Enum):
@@ -42,7 +42,7 @@ class NovaRobot(Enum):
 
 
 def _add_delay_if_set(action: lut.Action, delay: Any = None) -> lut.Action:
-    """ Automatically a delay to a launch action. """
+    """Automatically a delay to a launch action."""
     if is_valid(delay):
         delay = float(delay) if isinstance(delay, str) else delay
         return lut.TimerAction(period=delay, actions=[action])
@@ -50,7 +50,7 @@ def _add_delay_if_set(action: lut.Action, delay: Any = None) -> lut.Action:
 
 
 def _try_convert_string_to_primitive(value_str: str):
-    """ Try to convert a string to a primitive type. If not possible returns the same string. """
+    """Try to convert a string to a primitive type. If not possible returns the same string."""
     primitives = (bool, str, int, float, list, dict, type(None))
     try:
         value = eval(value_str)  # pylint: disable=eval-used,
@@ -62,8 +62,9 @@ def _try_convert_string_to_primitive(value_str: str):
 
 class ArgumentContainer(argparse.Namespace):
     """
-    A helper class to make it easier to define launch arguments and easier to see what arguments
-    can be used with a launch graph.
+    A helper class to make it easier to define launch arguments.
+
+    Also makes it easier to see what arguments can be used with a launch graph.
     """
 
     def __init__(self):
@@ -78,7 +79,7 @@ class ArgumentContainer(argparse.Namespace):
                 description: str | None = None,
                 choices: list[str] | None = None,
                 cli: bool = False) -> lut.LaunchConfiguration:
-        """ Add an argument to the arg container. """
+        """Add an argument to the arg container."""
         default = str(default) if default is not None else None
         launch_configuration = lut.LaunchConfiguration(name, default=default)
         self._launch_configurations.append(launch_configuration)
@@ -94,7 +95,7 @@ class ArgumentContainer(argparse.Namespace):
         return launch_configuration
 
     def get_launch_actions(self) -> list[lut.Action]:
-        """ Get all launch actions contained in this argument container. """
+        """Get all launch actions contained in this argument container."""
         return self._cli_launch_args + self._opaque_functions
 
     def add_opaque_function(
@@ -102,9 +103,7 @@ class ArgumentContainer(argparse.Namespace):
         function: Callable[['ArgumentContainer'], list[lut.Action] | None],
         condition: lut.Condition = None,
     ) -> lut.OpaqueFunction:
-        """
-        Helper function to add an opaque function that has access to all the evaluated arguments.
-        """
+        """Add an opaque function that has access to all the evaluated arguments."""
 
         def helper_function(context: lut.LaunchContext):
             evaluated_args = argparse.Namespace()
@@ -121,7 +120,7 @@ class ArgumentContainer(argparse.Namespace):
 
 
 def get_path(package: str, path: str) -> pathlib.Path:
-    """ Get the path of an installed share file. """
+    """Get the path of an installed share file."""
     package_dir = pathlib.Path(get_package_share_directory(package))
     launch_path = package_dir / path
     return launch_path
@@ -130,11 +129,13 @@ def get_path(package: str, path: str) -> pathlib.Path:
 def add_robot_description(
         nominals_package: Any = None,
         nominals_file: Any = None,
-        robot_calibration_path: Any = "/etc/nova/calibration/isaac_calibration.urdf",
+        robot_calibration_path: Any = '/etc/nova/calibration/isaac_calibration.urdf',
         override_path: Any = None,
-        condition: lut.Substitution = None) -> lut.Action:
+        condition: lut.Substitution = None,
+        add_subsensor_frames: Any = None) -> lut.Action:
     """
-    Loads an URDF file and adds a robot state publisher node.
+    Load an URDF file and add a robot state publisher node.
+
     We select the first existing URDF file based on the following priorities:
     1) override urdf
     2) calibration urdf
@@ -145,6 +146,12 @@ def add_robot_description(
         nominals_file (Any): URDF nominals path, within nominals_package.
         robot_calibration_path (Any): Path to the URDF calibration file in the robot.
         override_path (Any): Path to the URDF override file.
+        condition (lut.Substitution): Condition on whether to add the robot description.
+        add_subsensor_frames (Any): Add sub-sensor frames.
+
+    Returns
+    -------
+        An opaque function that adds the robot description.
 
     """
 
@@ -153,6 +160,9 @@ def add_robot_description(
         nominals_file_str = perform_context(context, nominals_file)
         robot_calibration_path_str = perform_context(context, robot_calibration_path)
         override_path_str = perform_context(context, override_path)
+        add_subsensor_frames_str = perform_context(context, add_subsensor_frames)
+        if add_subsensor_frames_str is None:
+            add_subsensor_frames_str = 'False'
 
         override_urdf = pathlib.Path(override_path_str or '')
         calibrated_urdf = pathlib.Path(robot_calibration_path_str)
@@ -165,18 +175,19 @@ def add_robot_description(
             if not override_urdf.is_file():
                 raise FileNotFoundError('[add_robot_description]: Path of override URDF ' +
                                         f'{override_path_str} does not exist.')
-            print(f"Using override URDF from: {override_path_str}")
+            print(f'Using override URDF from: {override_path_str}')
             urdf_path = override_urdf
         elif calibrated_urdf.is_file():
-            print(f"Using calibrated URDF from: {robot_calibration_path}")
+            print(f'Using calibrated URDF from: {robot_calibration_path}')
             urdf_path = calibrated_urdf
         elif nominals_urdf.is_file():
-            print("Using nominals URDF")
+            print('Using nominals URDF')
             urdf_path = nominals_urdf
         else:
             raise Exception('No robot description found.')
 
-        robot_description = lut.Command(['xacro ', str(urdf_path)])
+        robot_description = lut.Command(
+            ['xacro ', str(urdf_path), ' add_subsensor_frames:=', add_subsensor_frames_str])
 
         robot_state_publisher = lut.Node(
             package='robot_state_publisher',
@@ -198,7 +209,7 @@ def include(package: str,
             delay: float | None = None,
             scoped: bool = False,
             forwarding: bool = True):
-    """ Include another launch file. """
+    """Include another launch file."""
     launch_path = get_path(package, path)
     if path.endswith('.py'):
         source = lut.PythonLaunchDescriptionSource([str(launch_path)])
@@ -232,9 +243,7 @@ def load_composable_nodes(container_name: str,
                           composable_nodes: list[lut.ComposableNode],
                           log_message: Any = None,
                           condition: lut.Condition = None) -> lut.Action:
-    """"
-    Add a lut.GroupAction that loads composable nodes and a log info depending on a condition.
-    """
+    """Add a lut.GroupAction loading composable nodes and a log info depending on a condition."""
     actions = []
     actions.append(
         lut.LoadComposableNodes(
@@ -263,7 +272,7 @@ def load_composable_nodes(container_name: str,
 
 def get_default_negotiation_time(x86_negotiation_time_s: int = 5,
                                  aarch64_negotiation_time_s: int = 20) -> int:
-    """ Get a default negotiation time depending on the platform (x86/aarch64). """
+    """Get a default negotiation time depending on the platform (x86/aarch64)."""
     arch = platform.machine()
     negotiation_time = None
     if arch == 'x86_64':
@@ -282,7 +291,7 @@ def component_container(container_name: str,
                         prefix=None,
                         condition=None,
                         container_type='multithreaded'):
-    """" Add a component container. """
+    """Add a component container."""
     # NOTE: We expose various component_container types, including the isolated component container
     # with the `use_multi_threaded_executor` argument. The reason is that we saw:
     # - issues with component_container_mt related to https://github.com/ros2/rclcpp/issues/2242.
@@ -297,11 +306,11 @@ def component_container(container_name: str,
         container_executable = 'component_container_isolated'
         arguments.append('--use_multi_threaded_executor')
     else:
-        print(f"Warning: component_container type: {container_type} not recognized."
-              "Using component_container_mt.")
+        print(f'Warning: component_container type: {container_type} not recognized.'
+              'Using component_container_mt.')
         container_executable = 'component_container_mt'
     arguments.extend(['--ros-args', '--log-level', log_level])
-    print(f"Using container type: {container_executable}, with arguments: {arguments}")
+    print(f'Using container type: {container_executable}, with arguments: {arguments}')
     return lut.Node(name=container_name,
                     package='rclcpp_components',
                     executable=container_executable,
@@ -314,10 +323,10 @@ def component_container(container_name: str,
 
 def service_call(
         service: str,
-        type: str,  # pylint: disable=redefined-builtin
+        type: str,  # pylint: disable=redefined-builtin, # noqa: A002
         content: str,
         delay: float | None = None) -> lut.Action:
-    """ Add a service call to a launch graph. """
+    """Add a service call to a launch graph."""
     actions: list[lut.Action] = []
     actions.append(
         lut.ExecuteProcess(
@@ -332,9 +341,7 @@ def service_call(
 
 
 def perform_context(context: lut.LaunchContext, expression: Any) -> Any:
-    """
-    If the expression is a substitution perform its substitution else just return the expression.
-    """
+    """If the expression is a substitution perform its substitution else return the expression."""
     if isinstance(expression, (lut.Substitution)):
         return expression.perform(context)
     else:
@@ -349,7 +356,7 @@ def play_rosbag(bag_path: Any,
                 shutdown_on_exit: bool = False,
                 additional_bag_play_args: Any = None,
                 condition: lut.Substitution = None) -> lut.Action:
-    """ Add a process playing back a ros2bag to the launch graph. """
+    """Add a process playing back a ros2bag to the launch graph."""
 
     def impl(context: lut.LaunchContext) -> lut.Action:
         bag_path_str = perform_context(context, bag_path)
@@ -392,7 +399,7 @@ def record_rosbag(topics: Any = '--all',
                   additional_bag_record_args: Any = None,
                   storage='mcap',
                   condition: lut.Substitution = None) -> lut.Action:
-    """ Add a process recording a ros2bag to the launch graph. """
+    """Add a process recording a ros2bag to the launch graph."""
 
     def impl(context: lut.LaunchContext) -> lut.Action:
         topics_str = perform_context(context, topics)
@@ -413,7 +420,7 @@ def record_rosbag(topics: Any = '--all',
         if is_valid(bag_args_str):
             cmd.extend((bag_args_str).split())
 
-        print("[record_rosbag]: Running the following command:", ' '.join(cmd))
+        print('[record_rosbag]: Running the following command:', ' '.join(cmd))
 
         bag_play_action = lut.ExecuteProcess(cmd=cmd, output='screen')
         return [_add_delay_if_set(bag_play_action, delay_str)]
@@ -444,11 +451,12 @@ def static_transform(parent: str,
         output='screen',
         arguments=translation + orientation + [parent, child],
         condition=condition,
+        on_exit=lut.Shutdown(),
     )
 
 
 def shutdown_if_stderr(action: lut.Action) -> lut.Action:
-    """ Stop the app if the passed actions prints to stderr. """
+    """Stop the app if the passed actions prints to stderr."""
 
     def handler(event) -> lut.Action:
         # pylint: disable=protected-access
@@ -479,7 +487,8 @@ def set_parameter(parameter: str, value: str, namespace='', condition=None):
 
 def has_substring(expression: Any, substring: str) -> bool | lut.Substitution:
     """
-    A condition that's true if the expression contains a substring.
+    Return whether the expression contains a substring.
+
     Returns a substitution if the expression is a substitution else returns a boolean.
     """
     if isinstance(expression, (lut.Substitution)):
@@ -491,6 +500,7 @@ def has_substring(expression: Any, substring: str) -> bool | lut.Substitution:
 def is_not(expression: Any) -> bool | lut.Substitution:
     """
     Inverts and expression.
+
     Returns a substitution if the expression is a substitution else returns a boolean.
     """
     if isinstance(expression, (lut.Substitution)):
@@ -501,7 +511,8 @@ def is_not(expression: Any) -> bool | lut.Substitution:
 
 def is_empty(expression: Any) -> bool | lut.Substitution:
     """
-    Checks if the expression is empty.
+    Check if the expression is empty.
+
     Returns a substitution if the expression is a substitution else returns a boolean.
     """
     if isinstance(expression, (lut.Substitution)):
@@ -512,7 +523,7 @@ def is_empty(expression: Any) -> bool | lut.Substitution:
 
 def is_not_empty(expression: Any) -> bool | lut.Substitution:
     """
-    Deprecated: Use `lut.NotSubstitution(is_empty(...))` instead.
+    Use `lut.NotSubstitution(is_empty(...))` instead (deprecated).
 
     A substitution that's true if the expression is not empty.
     """
@@ -521,7 +532,8 @@ def is_not_empty(expression: Any) -> bool | lut.Substitution:
 
 def is_none_or_null(expression: Any) -> bool | lut.Substitution:
     """
-    Checks if the expression is 'null' or 'none' or 'False'.
+    Check if the expression is 'null' or 'none' or 'False'.
+
     Returns a substitution if the expression is a substitution else returns a boolean.
     """
     if isinstance(expression, (lut.Substitution)):
@@ -534,7 +546,8 @@ def is_none_or_null(expression: Any) -> bool | lut.Substitution:
 
 def is_true(expression: Any) -> bool | lut.Substitution:
     """
-    Checks if the expression is true.
+    Check if the expression is true.
+
     Returns a substitution if the expression is a substitution else returns a boolean.
     """
     if isinstance(expression, (lut.Substitution)):
@@ -547,7 +560,8 @@ def is_true(expression: Any) -> bool | lut.Substitution:
 
 def is_false(expression: Any) -> bool | lut.Substitution:
     """
-    Checks if the expression is false.
+    Check if the expression is false.
+
     Returns a substitution if the expression is a substitution else returns a boolean.
     """
     if isinstance(expression, (lut.Substitution)):
@@ -560,7 +574,8 @@ def is_false(expression: Any) -> bool | lut.Substitution:
 
 def is_valid(expression: Any) -> bool | lut.Substitution:
     """
-    Checks if the expression is valid.
+    Check if the expression is valid.
+
     We define a valid expression as not being empty and not being null or none.
     Returns a substitution if the expression is a substitution else returns a boolean.
     """
@@ -578,9 +593,7 @@ def is_valid(expression: Any) -> bool | lut.Substitution:
 
 
 def is_equal(lhs: Any, rhs: Any) -> bool | lut.Substitution:
-    """
-    Checks if the two expressions are equal.
-    """
+    """Check if the two expressions are equal."""
     if isinstance(lhs, lut.Substitution) or isinstance(rhs, lut.Substitution):
         return lut.PythonExpression(["'", lhs, "' == '", rhs, "'"])
     else:
@@ -588,25 +601,23 @@ def is_equal(lhs: Any, rhs: Any) -> bool | lut.Substitution:
 
 
 def both_false(a: lut.Substitution, b: lut.Substitution) -> lut.Substitution:
-    """ Return substitution which is true if both arguments are false. """
+    """Return substitution which is true if both arguments are false."""
     return lut.AndSubstitution(is_not(a), is_not(b))
 
 
 def to_bool(expression: lut.Substitution) -> bool | lut.Substitution:
-    """ Returns a substitution which is the argument converted to a bool. """
+    """Return a substitution which is the argument converted to a bool."""
     return is_true(expression)
 
 
 def union(a: Any, b: Any) -> lut.Substitution:
-    """
-    Unite the expressions a and b. A and be are expected to contain comma-separated strings.
-    """
+    """Unite the expressions a and b. A and be are expected to contain comma-separated strings."""
     return lut.PythonExpression(["','.join(list(set(('", a, "'+','+'", b, "').split(','))))"])
 
 
 def if_else_substitution(condition: lut.LaunchConfiguration, if_value: Any,
                          else_value: Any) -> Any:
-    """ Return if_value if the condition is true, else it returns else_value. """
+    """Return if_value if the condition is true, else it returns else_value."""
     if isinstance(condition, lut.Substitution):
         return lut.PythonExpression(
             ['"', if_value, '"if "', condition, '".lower() == "true" else"', else_value, '"'])
@@ -615,19 +626,17 @@ def if_else_substitution(condition: lut.LaunchConfiguration, if_value: Any,
 
 
 def get_dict_value(dictionary: Any, key: Any) -> Any:
-    """ Returns the value of the item with the specified key. """
+    """Return the value of the item with the specified key."""
     return lut.PythonExpression(['str(', dictionary, '.get("', key, '"))'])
 
 
 def dict_values_contain_substring(dictionary: Any, substring: str) -> Any:
-    """
-    A substitution that's true if the dictionary holds a value which contains the substring.
-    """
-    return lut.PythonExpression(["'", substring, "' in ','.join(list(", dictionary, ".values()))"])
+    """Return whether the dictionary holds a value which contains the substring."""
+    return lut.PythonExpression(["'", substring, "' in ','.join(list(", dictionary, '.values()))'])
 
 
 def get_keys_with_substring_in_value(dictionary: Any, substring: str) -> Any:
-    """ Return all keys of the items with a value containing the substring. """
+    """Return all keys of the items with a value containing the substring."""
     return lut.PythonExpression([
         "','.join(list(key for key, value in ", dictionary, ".items() if '", substring,
         "' in value))"
@@ -635,15 +644,15 @@ def get_keys_with_substring_in_value(dictionary: Any, substring: str) -> Any:
 
 
 def remove_substring_from_dict_values(dictionary: Any, substring: str) -> Any:
-    """ Return a dict with a substring being removed from all values of an input dict. """
+    """Return a dict with a substring being removed from all values of an input dict."""
     return lut.PythonExpression([
         "{ key: ','.join(filter(lambda x: x != '", substring,
-        "', value.split(','))) for key, value in", dictionary, ".items()}"
+        "', value.split(','))) for key, value in", dictionary, '.items()}'
     ])
 
 
 def remove_substrings_from_dict_values(dictionary: Any, substrings: str) -> Any:
-    """ Return a dict with all substrings being removed from all values of an input dict. """
+    """Return a dict with all substrings being removed from all values of an input dict."""
     for substring in substrings:
         dictionary = remove_substring_from_dict_values(dictionary, substring)
     return dictionary
@@ -651,7 +660,8 @@ def remove_substrings_from_dict_values(dictionary: Any, substrings: str) -> Any:
 
 def assert_path_exists(expression: lut.LaunchConfiguration, condition=None) -> lut.Action:
     """
-    A condition that's true if the expression evalutes to 'False' in Python.
+    Return a condition that's true if the expression evaluates to 'False' in Python.
+
     Note that the default UnlessCondition is only true if the expression is 'false' or '0'. This is
     more generic, ie. it would also return true for a None type or an empty string.
     """
@@ -664,9 +674,7 @@ def assert_path_exists(expression: lut.LaunchConfiguration, condition=None) -> l
 
 
 def assert_condition(assert_message: str, condition: lut.Condition) -> lut.Action:
-    """
-    Asserting the condition and printing the assert message if the condition is false.
-    """
+    """Assert the condition and print the assert message if the condition is false."""
 
     def impl(context: lut.LaunchContext) -> None:
         assert False, assert_message
@@ -675,12 +683,12 @@ def assert_condition(assert_message: str, condition: lut.Condition) -> lut.Actio
 
 
 def log_info(msg, condition=None) -> lut.Action:
-    """ Helper to create a message that is logged from ros launch. """
+    """Create a message that is logged from ros launch."""
     return lut.LogInfo(msg=msg, condition=condition)
 
 
 def get_nova_system_info(path: str = '/etc/nova/systeminfo.yaml') -> dict:
-    """ Get the system info dict created by nova init. """
+    """Get the system info dict created by nova init."""
     pathlib_path = pathlib.Path(path)
     assert pathlib_path.exists(), f'Path {pathlib_path} does not exist.'
     yaml_content = pathlib_path.read_text()
@@ -688,7 +696,7 @@ def get_nova_system_info(path: str = '/etc/nova/systeminfo.yaml') -> dict:
 
 
 def get_nova_robot(path: str = '/etc/nova/manager_selection') -> NovaRobot:
-    """ Get the nova robot name stored in the manager_selection file created by nova init. """
+    """Get the nova robot name stored in the manager_selection file created by nova init."""
     pathlib_path = pathlib.Path(path)
     if not pathlib_path.exists():
         raise FileNotFoundError('[get_nova_robot]: manager selection file ' +
@@ -711,7 +719,7 @@ def get_nova_robot(path: str = '/etc/nova/manager_selection') -> NovaRobot:
 def get_isaac_ros_ws_path() -> str:
     isaac_ros_ws_path = os.environ.get('ISAAC_ROS_WS')
     if isaac_ros_ws_path is None:
-        isaac_ros_ws_path = "/workspaces/isaac_ros-dev"
-        print("Warning: Isaac ROS workspace path requested, but environment variable ISAAC_ROS_WS "
-              f"not set. Returning default path {isaac_ros_ws_path}")
+        isaac_ros_ws_path = '/workspaces/isaac_ros-dev'
+        print('Warning: Isaac ROS workspace path requested, but environment variable ISAAC_ROS_WS '
+              f'not set. Returning default path {isaac_ros_ws_path}')
     return isaac_ros_ws_path

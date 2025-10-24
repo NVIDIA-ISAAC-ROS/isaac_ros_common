@@ -56,7 +56,11 @@ setup(
     maintainer_email='isaac-ros-maintainers@nvidia.com',
     description='Isaac ROS testing utilities',
     license='NVIDIA Isaac ROS Software License',
-    tests_require=['pytest'],
+    extras_require={
+        'test': [
+            'pytest'
+        ]
+    },
     entry_points={
         'console_scripts': [
         ],
