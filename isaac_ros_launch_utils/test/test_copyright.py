@@ -12,16 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ament_pep257.main import main
+from ament_copyright.main import main
 import pytest
 
 
+@pytest.mark.copyright
 @pytest.mark.linter
-@pytest.mark.pep257
-def test_pep257():
-    rc = main(argv=['.', '--exclude', 'external'])
-    assert rc == 0, 'Found code style errors / warnings'
-
-
-if __name__ == '__main__':
-    raise SystemExit(pytest.main([__file__]))
+def test_copyright():
+    rc = main(argv=['.', 'test'])
+    assert rc == 0, 'Found errors'

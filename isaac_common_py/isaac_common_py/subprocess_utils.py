@@ -116,16 +116,19 @@ def run_command(
 ) -> list[str]:
     """ Run a command and log its outputs. """
     assert print_mode in ['all', 'tail', 'none']
-    if timeout:
-        end = datetime.now() + timedelta(seconds=timeout)
-        io_utils.print_blue(
-            f'{mnemonic}: Estimated completion at {end.strftime("%H:%M:%S")}. Running...⏳')
-    else:
-        io_utils.print_blue(f'{mnemonic} Running...⏳')
 
     if not isinstance(command, list):
         command = [command]
     command = [str(c) for c in command]
+    command_str = ' '.join(command)
+
+    if timeout:
+        end = datetime.now() + timedelta(seconds=timeout)
+        io_utils.print_blue(
+            f'{mnemonic}: Estimated completion at {end.strftime("%H:%M:%S")}. '
+            f'Running...⏳, command: {command_str}')
+    else:
+        io_utils.print_blue(f'{mnemonic} Running...⏳, command: {command_str}')
 
     log_file.unlink(missing_ok=True)
 
@@ -163,7 +166,6 @@ def run_command(
             io_utils.print_gray('  ' + '\n  '.join(full_output))
 
     if not success:
-        command_str = ' '.join(command)
         io_utils.print_red(f"Failed to run command '{command_str}'.")
         raise subprocess.CalledProcessError(returncode=process.returncode, cmd=[command_str])
 

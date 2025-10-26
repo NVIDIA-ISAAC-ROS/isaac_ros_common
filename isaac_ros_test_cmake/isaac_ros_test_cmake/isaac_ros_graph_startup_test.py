@@ -15,6 +15,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import os
+import sys
 import time
 from typing import List
 import unittest
@@ -24,6 +26,7 @@ from isaac_ros_launch_utils.all_types import Action
 import launch
 from launch import LaunchDescription
 import launch_testing
+from launch_testing import launch_test
 from launch_testing import post_shutdown_test
 import pytest
 import rclpy
@@ -175,3 +178,18 @@ class TestAfterShutdown(unittest.TestCase):
             for disallowed_phrase in self.disallowed_phrases_in_log:
                 assert disallowed_phrase not in str(
                     proc.text), f'Found disallowed phrase \"{disallowed_phrase}\"'
+
+
+if __name__ == '__main__':
+    command_args = sys.argv[1:]
+    sys.argv = [sys.argv[0], __file__]  # Pass the current script as the test file
+    for arg in command_args:
+        if arg[-2:] == ':=':
+            sys.argv.append(arg + "''")
+        else:
+            sys.argv.append(arg)
+    os.environ['ROS_LOG_DIR'] = '/tmp/ros_logs'  # or any other writable path
+    os.environ['RMW_IMPLEMENTATION'] = 'rmw_fastrtps_cpp'  # Example RMW implementation
+    os.makedirs(os.environ['ROS_LOG_DIR'], exist_ok=True)
+    print(sys.argv)
+    raise SystemExit(launch_test.main())
