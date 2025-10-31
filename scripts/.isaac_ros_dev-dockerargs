@@ -1,0 +1,2 @@
+-v /etc/nova/:/etc/nova/
+-v /opt/nvidia/nova/:/opt/nvidia/nova/
