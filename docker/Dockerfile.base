@@ -143,6 +143,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     python3-opencv=4.5.4+dfsg-9ubuntu4 \
     python3-scipy
 
+
 # Downgrade to setuptools < 70.0.0
 # https://github.com/pypa/setuptools/issues/4483
 RUN python3 -m pip install -U \
@@ -153,6 +154,8 @@ RUN python3 -m pip install -U \
     Cython \
     ninja \
     wheel
+
+RUN python3 -m pip install --upgrade pip setuptools wheel packaging
 
 # Python3 PIP packages
 RUN python3 -m pip install -U \
@@ -448,6 +451,33 @@ RUN wget -nv https://github.com/mikefarah/yq/releases/latest/download/yq_linux_a
 # --------------------------------------------------------------------------------------------------
 
 FROM extended-${PLATFORM} AS base
+
+
+
+
+
+# -------- RTAB-Map 설치 (core + ros2) --------
+WORKDIR /tmp
+
+RUN git clone https://github.com/introlab/rtabmap.git && \
+    cd rtabmap && \
+    git checkout master && \
+    rm -rf build && mkdir build && cd build && \
+    cmake .. \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DWITH_CUDA=ON \
+        -DWITH_OPENMP=ON \
+        -DWITH_G2O=ON \
+        -DWITH_PCL=ON && \
+    make -j$(nproc) && make install && ldconfig && \
+    cd /tmp && rm -rf rtabmap
+
+# rtabmap_ros (ROS 2 Humble용) – ros2 브랜치 사용
+RUN mkdir -p /workspaces/isaac_ros-dev/src && \
+    git clone --depth=1 --branch ros2 https://github.com/introlab/rtabmap_ros.git /workspaces/isaac_ros-dev/src/rtabmap_ros
+
+
+
 
 # Install Ceres
 RUN git clone https://github.com/ceres-solver/ceres-solver.git && \

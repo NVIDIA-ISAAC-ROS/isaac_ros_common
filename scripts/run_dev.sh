@@ -192,6 +192,26 @@ if [ "$(docker ps -a --quiet --filter status=running --filter name=$CONTAINER_NA
     print_info "Attaching to running container: $CONTAINER_NAME"
     ISAAC_ROS_WS=$(docker exec $CONTAINER_NAME printenv ISAAC_ROS_WS)
     print_info "Docker workspace: $ISAAC_ROS_WS"
+
+
+
+
+
+    # ✅ rtabmap_ros 자동 colcon 빌드
+    docker exec -u admin $CONTAINER_NAME bash -c "\
+        source /opt/ros/humble/setup.bash && \
+        if [ -d /workspaces/isaac_ros-dev/src/rtabmap_ros ] && [ ! -d /workspaces/isaac_ros-dev/install/rtabmap_ros ]; then \
+            echo '[INFO] rtabmap_ros detected. Building with colcon...'; \
+            cd /workspaces/isaac_ros-dev && \
+            colcon build --symlink-install --cmake-args -DWITH_CUDA=ON; \
+            echo '[INFO] Build finished.'; \
+        fi"
+
+
+
+
+
+
     docker exec -i -t -u admin --workdir $ISAAC_ROS_WS $CONTAINER_NAME /bin/bash $@
     exit 0
 fi
@@ -240,7 +260,8 @@ if [[ -n $SSH_AUTH_SOCK ]]; then
 fi
 
 if [[ $PLATFORM == "aarch64" ]]; then
-    DOCKER_ARGS+=("-e NVIDIA_VISIBLE_DEVICES=nvidia.com/gpu=all,nvidia.com/pva=all")
+    # DOCKER_ARGS+=("-e NVIDIA_VISIBLE_DEVICES=nvidia.com/gpu=all,nvidia.com/pva=all")
+    DOCKER_ARGS+=("-e NVIDIA_VISIBLE_DEVICES=all")
     DOCKER_ARGS+=("-v /usr/bin/tegrastats:/usr/bin/tegrastats")
     DOCKER_ARGS+=("-v /tmp/:/tmp/")
     DOCKER_ARGS+=("-v /usr/lib/aarch64-linux-gnu/tegra:/usr/lib/aarch64-linux-gnu/tegra")
