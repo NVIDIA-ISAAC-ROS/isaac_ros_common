@@ -55,7 +55,8 @@ fi
 ISAAC_ROS_DEV_DIR="${ISAAC_ROS_WS}"
 SKIP_IMAGE_BUILD=0
 VERBOSE=0
-VALID_ARGS=$(getopt -o hvd:i:ba: --long help,verbose,isaac_ros_dev_dir:,image_key:,skip_image_build,docker_arg: -- "$@")
+DOCKER_BASH_COMMAND="echo 'Docker-bash command is empty. Use it with -c.'"
+VALID_ARGS=$(getopt -o hvd:i:ba:c: --long help,verbose,isaac_ros_dev_dir:,image_key:,skip_image_build,docker_arg:,bash_cmd: -- "$@")
 eval set -- "$VALID_ARGS"
 while [ : ]; do
   case "$1" in
@@ -78,6 +79,10 @@ while [ : ]; do
     -v | --verbose)
         VERBOSE=1
         shift
+        ;;
+    -c | --bash_cmd)
+        DOCKER_BASH_COMMAND="$2"
+        shift 2
         ;;
     -h | --help)
         usage
@@ -288,6 +293,7 @@ fi
 
 # Run container from image
 print_info "Running $CONTAINER_NAME"
+print_info "User-Bash command: $DOCKER_BASH_COMMAND"
 if [[ $VERBOSE -eq 1 ]]; then
     set -x
 fi
@@ -303,4 +309,4 @@ docker run -it --rm \
     --entrypoint /usr/local/bin/scripts/workspace-entrypoint.sh \
     --workdir /workspaces/isaac_ros-dev \
     $BASE_NAME \
-    /bin/bash
+    /bin/bash -c "${DOCKER_BASH_COMMAND}; exec bash"
