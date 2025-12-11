@@ -50,8 +50,11 @@ function(install_isaac_ros_asset TARGET_NAME)
 
   # Register the install script as an ament resource such that it can
   # be retrieved by other packages.
-  message(STATUS "Registering ament resource: ${INSTALL_SCRIPT} as ${TARGET_NAME}")
-  ament_index_register_resource("${TARGET_NAME}" CONTENT "${INSTALL_SCRIPT}")
+  # Use the path where the script will live in the installed layout so that
+  # consumers on the target system can discover and execute it.
+  set(INSTALL_SCRIPT_INSTALLED "${CMAKE_INSTALL_PREFIX}/lib/${PROJECT_NAME}/${TARGET_NAME}.sh")
+  message(STATUS "Registering ament resource: ${INSTALL_SCRIPT_INSTALLED} as ${TARGET_NAME}")
+  ament_index_register_resource("${TARGET_NAME}" CONTENT "${INSTALL_SCRIPT_INSTALLED}")
 
 endfunction()
 
