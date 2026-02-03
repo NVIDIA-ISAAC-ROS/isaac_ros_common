@@ -51,9 +51,10 @@ endif()
 # Setup cuda architectures
 # Target Ada is CUDA 11.8 or greater
 # Target is blackwell for CUDA 13.0 or greater, and volta is deprecated
+# SM_120 added for DGX Spark and future Blackwell-based aarch64 platforms
 if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
   if(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
-    set(CMAKE_CUDA_ARCHITECTURES "87;110")
+    set(CMAKE_CUDA_ARCHITECTURES "87;110;120")
   elseif(${CUDA_VERSION} GREATER_EQUAL 13.0)
     set(CMAKE_CUDA_ARCHITECTURES "120;100;89;86;80;75")
   elseif(${CUDA_VERSION} GREATER_EQUAL 11.8)
