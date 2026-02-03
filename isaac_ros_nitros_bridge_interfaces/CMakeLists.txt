@@ -35,7 +35,8 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   msg/NitrosBridgeImage.msg
   msg/NitrosBridgeTensorList.msg
-  DEPENDENCIES std_msgs isaac_ros_tensor_list_interfaces
+  msg/NitrosBridgePointCloud.msg
+  DEPENDENCIES std_msgs isaac_ros_tensor_list_interfaces sensor_msgs
 )
 ament_export_dependencies(rosidl_default_runtime)
 

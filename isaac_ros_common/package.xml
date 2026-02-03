@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-Copyright (c) 2021, NVIDIA CORPORATION.  All rights reserved.
+Copyright (c) 2021-2025, NVIDIA CORPORATION.  All rights reserved.
 
 NVIDIA CORPORATION and its licensors retain all intellectual property
 and proprietary rights in and to this software, related documentation
@@ -13,7 +13,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>isaac_ros_common</name>
-  <version>4.0.1</version>
+  <version>4.1.0</version>
   <description>Utilities for performing common functions in Isaac ROS packages</description>
 
   <maintainer email="isaac-ros-maintainers@nvidia.com">Isaac ROS Maintainers</maintainer>
@@ -24,6 +24,12 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
   <depend>rclcpp</depend>
+
+  <depend>cuda-toolkit</depend>
+  <depend>libnvvpi4</depend>
+
+  <build_depend>vpi4-dev</build_depend>
+  <build_export_depend>git</build_export_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

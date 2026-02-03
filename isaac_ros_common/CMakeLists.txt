@@ -44,7 +44,6 @@ endif()
 # vpi utilities
 ament_auto_add_library(${PROJECT_NAME} SHARED
   src/cuda_stream.cpp
-  src/vpi_utilities.cpp
   src/qos.cpp
 )
 target_link_libraries(${PROJECT_NAME} vpi CUDA::cudart)

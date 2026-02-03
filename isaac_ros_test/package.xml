@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
-Copyright (c) 2021-2022, NVIDIA CORPORATION.  All rights reserved.
+Copyright (c) 2021-2025, NVIDIA CORPORATION.  All rights reserved.
 
 NVIDIA CORPORATION and its licensors retain all intellectual property
 and proprietary rights in and to this software, related documentation
@@ -13,7 +13,7 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>isaac_ros_test</name>
-  <version>4.0.0</version>
+  <version>4.1.0</version>
   <description>Isaac ROS testing utilities</description>
 
   <maintainer email="isaac-ros-maintainers@nvidia.com">Isaac ROS Maintainers</maintainer>
@@ -25,7 +25,12 @@ license agreement from NVIDIA CORPORATION is strictly prohibited.
   <build_depend>isaac_ros_common</build_depend>
 
   <depend>cv_bridge</depend>
+  <depend>python3-scipy</depend>
+  <depend>python3-torch-pip-shim</depend>
+  <depend>python3-onnx-pip-shim</depend>
+  <depend>python3-onnxscript-pip-shim</depend>
 
+  <test_depend>demo_nodes_cpp</test_depend>
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
