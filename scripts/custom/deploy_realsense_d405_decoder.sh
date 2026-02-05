@@ -12,7 +12,7 @@ else
 fi
 
 # Set default absolute path for the config file
-default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/intel_realsense_d405_0"
+default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_09/intel_realsense_d405_0"
 
 # Use the first argument as the config path, or the specified default path
 config_path="${1:-$default_config_path}"
@@ -35,4 +35,4 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/admin/cyclone_profile.xml \
     -v /dev/input:/dev/input \
     -v "$config_path":/intel_realsense_d405_ros_config.yaml \
-    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense_d405_decoder
+    girf/orx-middleware-isaac-ros-"$PLATFORM_NAME"-realsense_d405_decoder 

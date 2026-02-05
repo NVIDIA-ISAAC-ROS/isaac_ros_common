@@ -18,6 +18,5 @@ RUN apt-get update && apt-get install -y \
     ros-humble-isaac-ros-nitros\
     ros-humble-isaac-ros-nitros-image-type\
     ros-humble-isaac-ros-nitros-compressed-image-type\
-    ros-humble-magic-enum
-
-# ros-humble-isaac-ros-h264-decoder
+    ros-humble-magic-enum\
+    ros-humble-isaac-ros-h264-decoder

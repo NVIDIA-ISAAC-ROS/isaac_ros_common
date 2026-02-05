@@ -1,0 +1,8 @@
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-humble-rosbag2-to-video \
+    python3-yaml \
+    ffmpeg \
+  && rm -rf /var/lib/apt/lists/*

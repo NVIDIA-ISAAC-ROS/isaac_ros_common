@@ -12,7 +12,7 @@ else
 fi
 
 # Set default absolute path for the config file
-default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_01/intel_realsense_d405_0"
+default_config_path="/home/$USER/dev/orx/data/experiment_config/datahub_09/intel_realsense_d405_0"
 
 # Use the first argument as the config path, or the specified default path
 config_path="${1:-$default_config_path}"
@@ -24,7 +24,7 @@ if [ ! -f "$config_path" ]; then
 fi
 
 docker_name=$(basename ${config_path})
-
+echo $docker_name
 docker run --rm -it --gpus all --runtime=nvidia \
     --name $docker_name \
     --privileged \
