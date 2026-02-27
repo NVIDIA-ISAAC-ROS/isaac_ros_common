@@ -4,11 +4,11 @@ CONFIG_DOCKER_SEARCH_DIRS=/home/${USER}/dev/orx/orx_middleware/isaac_ros_common/
 BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/isaac/ros")
 ISAAC_ROS_WS=/home/${USER}/dev/orx/orx_middleware/ros2_ws
 
-# docker_deply.sh config
+# docker_deploy.sh config
 # BASE_IMAGE_KEY=aarch64.ros2_humble.user
 # BASE_IMAGE_KEY=x86_64.ros2_humble.dgx_user.orx_data_processing
-BASE_IMAGE_KEY=aarch64.ros2_humble.user.hdmi_input.decoder
-DEPLOY_IMAGE_NAME=girf/orx-middleware-isaac-ros-jetson-hdmi_input_decoder_resizer
+BASE_IMAGE_KEY=aarch64.ros2_humble.user.orx_data_processing
+DEPLOY_IMAGE_NAME=girf/orx-middleware-isaac-ros-jetson-bag_data_extractor
 ROS_WS=/home/${USER}/dev/orx/orx_middleware/ros2_ws
-LAUNCH_PACKAGE=nitros_resize
-LAUNCH_FILE=orx_hdmi_input_decoder_resizer.launch.py
+LAUNCH_PACKAGE=orx_data_processing
+LAUNCH_FILE=bag_data_extractor.launch.py

@@ -37,8 +37,9 @@ docker run --rm -it --gpus all --runtime=nvidia \
     -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
     -e CYCLONEDDS_URI=/home/"$DOCKER_USER"/cyclone_profile.xml \
     -v /home/"$USER"/dev/orx/cyclone_profile.xml:/home/"$DOCKER_USER"/cyclone_profile.xml \
-    -v /home/"$USER"/dev/orx/orx_experiment_landing:/home/"$DOCKER_USER"/orx_experiment_landing \
-    -v /home/"$USER"/dev/orx/bag_data_extraction_config:/home/"$DOCKER_USER"/config \
+    -v /home/${USER}/dev/orx/data/experiment_config/rosbag_recorder_config:/home/admin/config \
+    -v /home/${USER}/dev/orx/data/rosbag_recordings:/home/admin/data/rosbag_recordings \
     --user $DOCKER_USER \
     --workdir /home/"$DOCKER_USER" \
     $DOCKER_IMAGE_NAME
+    #-v /home/"$USER"/dev/orx/orx_experiment_landing:/home/"$DOCKER_USER"/orx_experiment_landing \
