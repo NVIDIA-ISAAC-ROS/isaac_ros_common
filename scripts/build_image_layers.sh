@@ -30,6 +30,7 @@ BASE_DOCKER_REGISTRY_NAMES=("nvcr.io/nvidia/isaac/ros")
 # Read and parse config file if exists
 #
 # CONFIG_DOCKER_SEARCH_DIRS (array, can be empty)
+# CONFIG_BASE_DOCKER_REGISTRY_NAMES (array, can be empty)
 
 if [[ -f "${ROOT}/.isaac_ros_common-config" ]]; then
     . "${ROOT}/.isaac_ros_common-config"
@@ -52,6 +53,11 @@ if [ ${#CONFIG_DOCKER_SEARCH_DIRS[@]} -gt 0 ]; then
 
     CONFIG_DOCKER_SEARCH_DIRS+=(${DOCKER_SEARCH_DIRS[@]})
     DOCKER_SEARCH_DIRS=(${CONFIG_DOCKER_SEARCH_DIRS[@]})
+fi
+
+# Override default registry search list when configured
+if [[ ${#CONFIG_BASE_DOCKER_REGISTRY_NAMES[@]} -gt 0 ]]; then
+    BASE_DOCKER_REGISTRY_NAMES=(${CONFIG_BASE_DOCKER_REGISTRY_NAMES[@]})
 fi
 
 # Parse command-line args
