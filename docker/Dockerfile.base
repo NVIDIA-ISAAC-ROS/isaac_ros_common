@@ -209,7 +209,7 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
 
 # Install CuPy and HDBSCAN
 RUN python3 -m pip install -U \
-    cupy-cuda12x \
+    "cupy-cuda12x<14" \
     hdbscan
 
 # Setup Jetson debian repositories
