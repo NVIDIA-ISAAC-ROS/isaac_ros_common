@@ -27,7 +27,8 @@ class GenerateVersionInfoCommand(build_py):
         print(f'Project path for {project_name}: {project_path}')
 
         # Call generate_version_info with the correct project_path
-        output_path, install_destination = generate_version_info(project_name, project_path)
+        output_path, install_destination = generate_version_info(
+            project_name, project_path, build_dir=self.build_lib)
 
         # Add the generated file to the package data
         if self.distribution.data_files is None:
@@ -38,7 +39,7 @@ class GenerateVersionInfoCommand(build_py):
         super().run()
 
 
-def generate_version_info(project_name, source_dir):
+def generate_version_info(project_name, source_dir, build_dir=None):
     from ament_index_python.packages import get_resource
 
     # Determine the script path
@@ -64,7 +65,8 @@ def generate_version_info(project_name, source_dir):
             sys.exit(1)
 
     # Output path for the version_info.yaml file
-    build_dir = os.path.join(os.getcwd(), 'build')
+    if build_dir is None:
+        build_dir = os.path.join(os.getcwd(), 'build')
     os.makedirs(build_dir, exist_ok=True)
     output_path = os.path.join(build_dir, 'version_info.yaml')
 
