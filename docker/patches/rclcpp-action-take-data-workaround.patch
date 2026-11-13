@@ -1,0 +1,92 @@
+# Backport of iron's take_data() null-return workaround (ros2/rclcpp#2531) to
+# Humble's rclcpp_action, applied to the ros2-gbp/rclcpp-release checkout in
+# Dockerfile.ros2_humble (same mechanism as the rclcpp #2109 backport above it).
+#
+# With rclcpp#2109 cherry-picked, a MultiThreadedExecutor can dispatch an action
+# server/client whose event was already taken; Humble's rclcpp_action throws
+# ("Taking data from action server but no ready event") and the process aborts.
+# Iron avoids this by having take_data() return nullptr and execute() ignore null
+# (ros2/rclcpp#2531). This patch ports that behaviour to Humble, with a throttled
+# warning (iron logs nothing) so the spurious call stays visible.
+# See NVIDIA-ISAAC-ROS/isaac_ros_common#245. Suggested diff by the issue reporter
+# (@butt2rflow), paths adjusted to the release-checkout layout.
+#
+diff --git a/src/client.cpp b/src/client.cpp
+--- a/src/client.cpp
++++ b/src/client.cpp
+@@ -23,6 +23,8 @@
+ 
+ #include "rcl_action/action_client.h"
+ #include "rcl_action/wait.h"
++#include "rclcpp/clock.hpp"
++#include "rclcpp/logging.hpp"
+ #include "rclcpp/node_interfaces/node_base_interface.hpp"
+ #include "rclcpp/node_interfaces/node_logging_interface.hpp"
+ 
+@@ -652,7 +654,15 @@ ClientBase::take_data()
+   size_t next_ready_event = pimpl_->next_ready_event.exchange(ClientBaseImpl::NO_EVENT_READY);
+ 
+   if (next_ready_event == ClientBaseImpl::NO_EVENT_READY) {
+-    throw std::runtime_error("Taking data from action client but no ready event");
++    // On humble a MultiThreadedExecutor has been observed to call take_data() with no event
++    // pending. Throwing there terminates the process, so log it and return nullptr;
++    // execute() ignores it. Iron does the same without logging (#2531).
++    // A steady clock keeps the warning visible under use_sim_time.
++    static rclcpp::Clock steady_clock(RCL_STEADY_TIME);
++    RCLCPP_WARN_THROTTLE(
++      get_logger(), steady_clock, 5000,
++      "Taking data from action client but no ready event; ignoring");
++    return nullptr;
+   }
+ 
+   return take_data_by_entity_id(next_ready_event);
+@@ -753,7 +763,8 @@ void
+ ClientBase::execute(std::shared_ptr<void> & data_in)
+ {
+   if (!data_in) {
+-    throw std::runtime_error("Executing action client but 'data' is empty");
++    // take_data() returned nullptr (no ready event); nothing to execute.
++    return;
+   }
+ 
+   std::shared_ptr<ClientBaseData> data_ptr = std::static_pointer_cast<ClientBaseData>(data_in);
+diff --git a/src/server.cpp b/src/server.cpp
+--- a/src/server.cpp
++++ b/src/server.cpp
+@@ -28,7 +28,9 @@
+ 
+ #include "action_msgs/msg/goal_status_array.hpp"
+ #include "action_msgs/srv/cancel_goal.hpp"
++#include "rclcpp/clock.hpp"
+ #include "rclcpp/exceptions.hpp"
++#include "rclcpp/logging.hpp"
+ #include "rclcpp_action/server.hpp"
+ 
+ using rclcpp_action::ServerBase;
+@@ -275,7 +277,15 @@ ServerBase::take_data()
+   size_t next_ready_event = pimpl_->next_ready_event.exchange(ServerBaseImpl::NO_EVENT_READY);
+ 
+   if (next_ready_event == ServerBaseImpl::NO_EVENT_READY) {
+-    throw std::runtime_error("Taking data from action server but no ready event");
++    // On humble a MultiThreadedExecutor has been observed to call take_data() with no event
++    // pending. Throwing there terminates the process, so log it and return nullptr;
++    // execute() ignores it. Iron does the same without logging (#2531).
++    // A steady clock keeps the warning visible under use_sim_time.
++    static rclcpp::Clock steady_clock(RCL_STEADY_TIME);
++    RCLCPP_WARN_THROTTLE(
++      pimpl_->logger_, steady_clock, 5000,
++      "Taking data from action server but no ready event; ignoring");
++    return nullptr;
+   }
+ 
+   return take_data_by_entity_id(next_ready_event);
+@@ -364,7 +374,8 @@ void
+ ServerBase::execute(std::shared_ptr<void> & data_in)
+ {
+   if (!data_in) {
+-    throw std::runtime_error("Executing action server but 'data' is empty");
++    // take_data() returned nullptr (no ready event); nothing to execute.
++    return;
+   }
+ 
+   std::shared_ptr<ServerBaseData> data_ptr = std::static_pointer_cast<ServerBaseData>(data_in);
