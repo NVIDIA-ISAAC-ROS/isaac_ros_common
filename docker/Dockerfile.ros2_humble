@@ -185,6 +185,27 @@ RUN --mount=type=cache,target=/var/cache/apt \
     && echo "rclcpp https://github.com/ros2/rclcpp/commit/232262c02a1265830c7785b7547bd51e1124fcd8" >> ${ROS_ROOT}/VERSION \
     && cd ../ && rm -Rf src build log
 
+# Install patched rclcpp_action package with iron's take_data() null-return workaround
+# (ros2/rclcpp#2531 behaviour backported to Humble). With the #2109 cherry-pick above,
+# a MultiThreadedExecutor can dispatch an action server/client whose event was already
+# taken, and Humble's rclcpp_action throws ("Taking data from action server but no ready
+# event"), aborting the process. Iron returns nullptr from take_data() and ignores it
+# in execute() instead. See https://github.com/NVIDIA-ISAAC-ROS/isaac_ros_common/issues/245
+COPY patches/rclcpp-action-take-data-workaround.patch /tmp/
+RUN --mount=type=cache,target=/var/cache/apt \
+    mkdir -p ${ROS_ROOT}/src && cd ${ROS_ROOT}/src \
+    && export RCLCPP_ACTION_VERSION="release/humble/rclcpp_action/$(apt-cache madison ros-humble-rclcpp-action | grep -m1 -oP 'ros-humble-rclcpp-action \| \K[^j]+(?=jammy)')" \
+    && echo ${RCLCPP_ACTION_VERSION} \
+    && git clone https://github.com/ros2-gbp/rclcpp-release.git && cd rclcpp-release && git checkout ${RCLCPP_ACTION_VERSION} \
+    && patch -i /tmp/rclcpp-action-take-data-workaround.patch \
+    && unset RCLCPP_ACTION_VERSION \
+    && source ${ROS_ROOT}/setup.bash \
+    && cd ../ && rosdep install -i -r --from-paths rclcpp-release/ --rosdistro humble -y \
+    && cd rclcpp-release && bloom-generate rosdebian && fakeroot debian/rules binary \
+    && cd ../ && apt-get install -y --allow-downgrades ./*.deb \
+    && echo "rclcpp_action patched with take_data() null-return workaround (ros2/rclcpp#2531 behaviour; NVIDIA-ISAAC-ROS/isaac_ros_common#245)" >> ${ROS_ROOT}/VERSION \
+    && cd ../ && rm -Rf src build log
+
 # Install Moveit 2 ROS packages
 RUN --mount=type=cache,target=/var/cache/apt \
 apt-get update && apt-get install -y \
