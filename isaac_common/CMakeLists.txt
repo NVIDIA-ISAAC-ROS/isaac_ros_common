@@ -16,10 +16,17 @@
 # SPDX-License-Identifier: Apache-2.0
 
 cmake_minimum_required(VERSION 3.22.1)
-project(isaac_common)
+project(isaac_common LANGUAGES C CXX)
+
+enable_language(CUDA)
 
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
+
+find_package(CUDAToolkit)
+
+# NVTX
+option(USE_NVTX "Enable NVTX markers for improved profiling (if available)" ON)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -36,6 +43,16 @@ if(BUILD_TESTING)
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
   )
+
+  ament_add_gtest(${PROJECT_NAME}_test_nvtx_scope test/test_nvtx_scope.cpp)
+  target_include_directories(${PROJECT_NAME}_test_nvtx_scope PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+  if(USE_NVTX)
+    target_compile_definitions(${PROJECT_NAME}_test_nvtx_scope PUBLIC USE_NVTX)
+    target_link_libraries(${PROJECT_NAME}_test_nvtx_scope CUDA::nvtx3)
+  endif()
 endif()
 
 

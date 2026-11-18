@@ -17,11 +17,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import atexit
 import os
 import time
 import unittest
 
-from isaac_ros_gpu_partitioning.gpu_partitioning import GpuPartition
+from isaac_ros_gpu_partitioning.gpu_partitioning import GpuPartition, stop_cuda_mps_daemon
 import launch
 from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
@@ -37,6 +38,8 @@ def generate_test_description():
     """Generate a launch description for the gpu partition test node."""
     current_dir = os.path.dirname(os.path.abspath(__file__))
     config_file = os.path.join(current_dir, 'config/cuda_mps.yaml')
+    # Safety net for runs that never reach the post-shutdown cleanup.
+    atexit.register(stop_cuda_mps_daemon)
     global gpu_partition
     gpu_partition = GpuPartition(
         config_file=config_file, clear_partitions=True, start_server=True)
@@ -85,6 +88,7 @@ class TestAction(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        """Shut down rclpy; TestCudaMpsCleanup stops the MPS daemon afterwards."""
         rclpy.shutdown()
 
     def setUp(self) -> None:
@@ -138,8 +142,9 @@ class TestAction(unittest.TestCase):
 
 
 @launch_testing.post_shutdown_test()
-class TestCleanup(unittest.TestCase):
-    """Clean up CUDA MPS after all launch processes have exited."""
+class TestCudaMpsCleanup(unittest.TestCase):
+    """Stop the CUDA MPS daemon once the launched containers have exited."""
 
-    def test_stop_cuda_mps_server(self):
-        gpu_partition.stop_cuda_mps_server()
+    def test_cuda_mps_daemon_stopped(self):
+        """Quit the MPS daemon now that the launched processes have exited."""
+        stop_cuda_mps_daemon()

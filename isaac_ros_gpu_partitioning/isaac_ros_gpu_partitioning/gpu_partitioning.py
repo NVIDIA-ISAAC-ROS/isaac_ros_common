@@ -21,6 +21,7 @@ import os
 from pathlib import Path
 import pwd
 import subprocess
+import time
 
 from launch.actions import SetEnvironmentVariable
 from pynvml import nvmlDeviceGetHandleByIndex, nvmlDeviceGetUUID, nvmlInit, nvmlShutdown
@@ -29,14 +30,14 @@ import yaml
 
 
 @dataclass
-class GpuPartitionConfig:
+class gpuPartitionConfig:
     name: str
     device: str
     chunks: int
 
 
 @dataclass
-class GpuPartitionInfo:
+class gpuPartition:
     name: str
     device: str
     chunks: int
@@ -44,7 +45,7 @@ class GpuPartitionInfo:
     partition_id: int
 
 
-class GpuServerState(Enum):
+class gpuServerState(Enum):
     RUNNING = 'RUNNING'
     STOPPED = 'STOPPED'
     ERROR = 'ERROR'
@@ -53,6 +54,77 @@ class GpuServerState(Enum):
 
 CUDA_MPS_DIRECTORY = '/tmp/nvidia-mps'
 GPU_PARTITION_FILE = CUDA_MPS_DIRECTORY + '/gpu_partitions.yaml'
+
+
+def _mps_pipe_directory(pid):
+    """Return the CUDA MPS pipe directory of process pid, or None if it cannot be read."""
+    try:
+        with open(f'/proc/{int(pid)}/environ', 'rb') as environ:
+            variables = environ.read().split(b'\0')
+    except OSError:
+        return None
+    for variable in variables:
+        name, _, value = variable.partition(b'=')
+        if name == b'CUDA_MPS_PIPE_DIRECTORY':
+            return os.path.normpath(value.decode(errors='replace'))
+    # CUDA MPS also puts its pipe in CUDA_MPS_DIRECTORY when the variable is unset.
+    return CUDA_MPS_DIRECTORY
+
+
+def _running_mps_processes():
+    """Return the command lines of the CUDA MPS daemon and servers on CUDA_MPS_DIRECTORY."""
+    result = subprocess.run(['ps', '-eo', 'pid=,args='], capture_output=True, text=True,
+                            check=False)
+    processes = []
+    for line in result.stdout.splitlines():
+        fields = line.split(None, 1)
+        if len(fields) < 2 or not fields[0].isdigit():
+            continue
+        pid, command = int(fields[0]), fields[1]
+        args = command.split()
+        name = os.path.basename(args[0])
+        is_mps = name == 'nvidia-cuda-mps-server' or (
+            name == 'nvidia-cuda-mps-control' and '-d' in args)
+        # A daemon on another pipe belongs to another workload. quit through
+        # CUDA_MPS_DIRECTORY cannot reach it, so it is neither stopped nor waited for.
+        # One whose environment cannot be read, such as a server started for another
+        # user, still counts: skipping it could leave a leaked daemon running.
+        if is_mps and _mps_pipe_directory(pid) in (CUDA_MPS_DIRECTORY, None):
+            processes.append(command.strip())
+    return processes
+
+
+def stop_cuda_mps_daemon(timeout_sec=60.0):
+    """
+    Quit the CUDA MPS control daemon on CUDA_MPS_DIRECTORY and wait for it to exit.
+
+    Unlike GpuPartition.stop_cuda_mps_server(), this also quits a daemon that has
+    partitions configured. quit waits for every connected MPS client to finish, so
+    call this only after the processes launched into a partition have exited.
+    MPS daemons on other pipe directories are left alone.
+    """
+    if not _running_mps_processes():
+        return
+    env = dict(os.environ,
+               CUDA_MPS_PIPE_DIRECTORY=CUDA_MPS_DIRECTORY,
+               CUDA_MPS_LOG_DIRECTORY=CUDA_MPS_DIRECTORY)
+    try:
+        subprocess.run(['nvidia-cuda-mps-control'], input='quit\n', env=env,
+                       capture_output=True, text=True, timeout=timeout_sec, check=False)
+    except subprocess.TimeoutExpired as error:
+        raise RuntimeError(
+            f'CUDA MPS control daemon did not quit within {timeout_sec}s; '
+            'an MPS client is probably still running.') from error
+    # The wait for the exit gets its own budget, so a slow quit cannot use it up.
+    deadline = time.monotonic() + timeout_sec
+    while _running_mps_processes():
+        if time.monotonic() > deadline:
+            raise RuntimeError(
+                f'CUDA MPS processes still running {timeout_sec}s after quit: '
+                f'{_running_mps_processes()}')
+        time.sleep(0.5)
+    if os.path.exists(GPU_PARTITION_FILE):
+        os.remove(GPU_PARTITION_FILE)
 
 
 class GpuPartition:
@@ -88,7 +160,7 @@ class GpuPartition:
             # Check MPS server running state
             state = self.get_gpu_server_state()
 
-            if isinstance(state, GpuServerState) and state is GpuServerState.CONFIGURED:
+            if isinstance(state, gpuServerState) and state is gpuServerState.CONFIGURED:
                 # Populate the GPU partitions from an internal file
                 if clear_partitions:
                     self.clear_gpu_partitions()
@@ -112,13 +184,13 @@ class GpuPartition:
         # start the CUDA MPS server
         if start_server:
             state = self.get_gpu_server_state()
-            if state is GpuServerState.STOPPED:
+            if state is gpuServerState.STOPPED:
                 if not self.start_cuda_mps_server(uid=uid):
                     raise ValueError('Failed to start the CUDA MPS server.')
 
         print('Configuring CUDA MPS static partition...')
         state = self.get_gpu_server_state()
-        if state is GpuServerState.RUNNING or state is GpuServerState.CONFIGURED:
+        if state is gpuServerState.RUNNING or state is gpuServerState.CONFIGURED:
             self.create_gpu_partition()
             self._is_initialized = True
         else:
@@ -172,10 +244,10 @@ class GpuPartition:
                 chunks = int(item['chunks'])
                 partition_id = str(item['partition_id'])
                 sm_count = int(str(item['sm_count']))
-                self._gpu_partitions.append(GpuPartitionInfo(name=str(item['name']),
-                                                             device=str(item['device']),
-                                                             chunks=chunks, sm_count=sm_count,
-                                                             partition_id=partition_id))
+                self._gpu_partitions.append(gpuPartition(name=str(item['name']),
+                                                         device=str(item['device']),
+                                                         chunks=chunks, sm_count=sm_count,
+                                                         partition_id=partition_id))
 
     def read_partition_configuration(self, config_file):
         """Read the CUDA MPS partition."""
@@ -186,8 +258,7 @@ class GpuPartition:
         gpu_partitions = []
         for item in data:
             chunks = int(item['chunks'])
-            gpu_partitions.append(
-                GpuPartitionInfo(**item, partition_id=index, sm_count=chunks * 4))
+            gpu_partitions.append(gpuPartition(**item, partition_id=index, sm_count=chunks * 4))
             index += 1
         return gpu_partitions
 
@@ -203,7 +274,7 @@ class GpuPartition:
             print(f'Error:\n {stderr}')
         return stdout, stderr
 
-    def get_gpu_server_state(self) -> GpuServerState:
+    def get_gpu_server_state(self) -> gpuServerState:
         """Get the GPU server state."""
         result, stderr = self.shell_command('nvidia-cuda-mps-control lspart')
         # Handle case that 'lspart' has no output at all
@@ -215,13 +286,13 @@ class GpuPartition:
                 if 'nvidia-cuda-mps-control -d -s' in line:
                     daemon_running = True
             if not daemon_running:
-                return GpuServerState.STOPPED
+                return gpuServerState.STOPPED
         # MPS server is running, check if configured
         lines = result.split('\n')
         if len(lines) > 3 and lines[3].startswith('GPU-'):
-            return GpuServerState.CONFIGURED
+            return gpuServerState.CONFIGURED
         else:
-            return GpuServerState.RUNNING
+            return gpuServerState.RUNNING
 
     def start_cuda_mps_server(self, uid=0):
         """Start the CUDA MPS server."""
@@ -246,11 +317,13 @@ class GpuPartition:
         if version_number < 13010:
             raise ValueError('Please update to version 13010 or higher to use GPU partitioning.')
 
-        cmd = 'nvidia-cuda-mps-control -d -s -q'
-        _, stderr = self.shell_command(cmd)
-        if stderr:
-            print(f'Error starting MPS control daemon:\n {stderr}')
-            return False
+        try:
+            cmd = 'nvidia-cuda-mps-control -d -s -q'
+            stdout, stderr = self.shell_command(cmd)
+            if stderr:
+                print(f'Error:\n {stderr}')
+        except FileNotFoundError as error:
+            print(f'Command not found: {error}')
 
         # Start sever explicitly
         print(f'Starting server with UID: {uid}')
@@ -277,8 +350,7 @@ class GpuPartition:
             print('CUDA MPS server is not initialized. Skipping stop.')
             return
 
-        state = self.get_gpu_server_state()
-        if state not in (GpuServerState.RUNNING, GpuServerState.CONFIGURED):
+        if self.get_gpu_server_state() is not gpuServerState.RUNNING:
             print('CUDA MPS server is not running. Skipping stop.')
             return
 
@@ -396,6 +468,7 @@ class GpuPartition:
                 f.write(f'    chunks: {partition.chunks}\n')
                 f.write(f'    sm_count: {partition.sm_count}\n')
                 f.write(f'    partition_id: {partition.partition_id}\n')
+            f.close()
 
     def get_partition_id(self, name):
         """Get the partition ID for a given partition name."""

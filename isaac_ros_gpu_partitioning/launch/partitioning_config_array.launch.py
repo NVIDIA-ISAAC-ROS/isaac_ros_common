@@ -17,7 +17,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from isaac_ros_gpu_partitioning.gpu_partitioning import GpuPartition, GpuPartitionConfig
+from isaac_ros_gpu_partitioning.gpu_partitioning import GpuPartition, gpuPartitionConfig
 
 from launch import LaunchDescription
 from launch.actions import OpaqueFunction, RegisterEventHandler
@@ -27,9 +27,9 @@ from launch_ros.descriptions import ComposableNode
 
 
 gpu_partition_config = [
-    GpuPartitionConfig(name='node_1', device='0', chunks=3),
-    GpuPartitionConfig(name='node_2', device='0', chunks=4),
-    GpuPartitionConfig(name='default', device='0', chunks=0),
+    gpuPartitionConfig(name='node_1', device='0', chunks=3),
+    gpuPartitionConfig(name='node_2', device='0', chunks=4),
+    gpuPartitionConfig(name='default', device='0', chunks=0),
 ]
 
 

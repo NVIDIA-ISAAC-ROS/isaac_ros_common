@@ -17,10 +17,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import atexit
 import time
 import unittest
 
-from isaac_ros_gpu_partitioning.gpu_partitioning import GpuPartition, GpuPartitionConfig
+from isaac_ros_gpu_partitioning.gpu_partitioning import (
+    GpuPartition, gpuPartitionConfig, stop_cuda_mps_daemon)
 import launch
 from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
@@ -31,15 +33,17 @@ from rclpy.qos import DurabilityPolicy, QoSProfile
 from std_msgs.msg import Int32MultiArray
 
 gpu_partition_config = [
-    GpuPartitionConfig(name='node_1', device='0', chunks=3),
-    GpuPartitionConfig(name='node_2', device='0', chunks=4),
-    GpuPartitionConfig(name='default', device='0', chunks=0),
+    gpuPartitionConfig(name='node_1', device='0', chunks=3),
+    gpuPartitionConfig(name='node_2', device='0', chunks=4),
+    gpuPartitionConfig(name='default', device='0', chunks=0),
 ]
 
 
 @pytest.mark.launch_test
 def generate_test_description():
     """Generate a launch description for the gpu partition test node."""
+    # Safety net for runs that never reach the post-shutdown cleanup.
+    atexit.register(stop_cuda_mps_daemon)
     global gpu_partition
     gpu_partition = GpuPartition(
         gpu_partitions=gpu_partition_config, clear_partitions=True, start_server=True)
@@ -89,6 +93,7 @@ class TestConfigArray(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        """Shut down rclpy; TestCudaMpsCleanup stops the MPS daemon afterwards."""
         rclpy.shutdown()
 
     def setUp(self) -> None:
@@ -138,8 +143,9 @@ class TestConfigArray(unittest.TestCase):
 
 
 @launch_testing.post_shutdown_test()
-class TestCleanup(unittest.TestCase):
-    """Clean up CUDA MPS after all launch processes have exited."""
+class TestCudaMpsCleanup(unittest.TestCase):
+    """Stop the CUDA MPS daemon once the launched containers have exited."""
 
-    def test_stop_cuda_mps_server(self):
-        gpu_partition.stop_cuda_mps_server()
+    def test_cuda_mps_daemon_stopped(self):
+        """Quit the MPS daemon now that the launched processes have exited."""
+        stop_cuda_mps_daemon()
